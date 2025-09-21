@@ -1,18 +1,34 @@
 <?php
-require '_assets/includes/autoloeader.php';
+// Démarrage de la session
+session_start();
 
-try {
-    if (filter_input(INPUT_GET, 'action')) {
-        if ($_GET['action'] === 'post') {
-            if (filter_input(INPUT_GET, 'id') && $_GET['id'] > 0 ) {
-                (new \Blog\Controllers\Post\Post())->execute($_GET['id']);
-            }
-            throw new ControllerExeption('Aucun identifiant de billet envoyé');
+// Chargement des configurations
+require_once './config/database.php';
+$routes = require_once './config/routes.php';
+
+// Récupération de l'URL et de la méthode HTTP
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$path = trim($path, '/');
+$method = $_SERVER['REQUEST_METHOD'];
+
+// Routage
+foreach ($routes as $route => $controllerAction) {
+    if ($path === $route) {
+        [$controllerName, $action] = $controllerAction;
+
+        // Chargement du contrôleur
+        require_once './controllers/' . $controllerName . '.php';
+        $controller = new $controllerName($pdo);
+
+        // Appel de la méthode
+        if (method_exists($controller, $action)) {
+            $controller->$action();
+            exit;
         }
-        throw new ControllerException('La page que vous recherchez n\'existe pas');
-
     }
-    (new \Blog\Controllers\Homepage\Homepage())->execute();
-} catch (ControllerException $e) {
-    (new \Blog\Views\Error($e->getMessage()))->show();
 }
+
+// Route non trouvée
+http_response_code(404);
+require_once './views/errors/404.php';
+?>
