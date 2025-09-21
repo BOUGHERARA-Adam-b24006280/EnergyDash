@@ -56,7 +56,7 @@
                     </div>
                     <div class="card-footer text-center p-3">
                         <span class="fw-regular text-secondary">Pas de comptes ? </span> <a
-                            class="fw-bold link-underline link-underline-opacity-0" href="./signup.html">S'inscrire</a>
+                            class="fw-bold link-underline link-underline-opacity-0" href="/register">S'inscrire</a>
                     </div>
                 </div>
 
