@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <title><?php echo $title; ?></title>
 
     <style>
@@ -27,6 +27,11 @@
 </head>
 
 <body>
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger" role="alert">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
     <div class="container">
 
         <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
@@ -64,7 +69,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
