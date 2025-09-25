@@ -27,11 +27,6 @@
 </head>
 
 <body>
-      <?php if (isset($error)): ?>
-        <div class="alert alert-danger position-absolute container-fluid top-0 start-50 translate-middle-x z-1" role="alert">
-            <?php echo $error; ?>
-        </div>
-    <?php endif; ?>
     <div class="container">
 
         <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
@@ -68,16 +63,7 @@
         </div>
     </div>
 
-    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        // Afficher un spinner lors de la soumission du formulaire
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const btn = document.querySelector('.form-button');
-            btn.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
-            btn.disabled = true;
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
