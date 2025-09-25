@@ -24,8 +24,11 @@ class AuthController {
                 } else {
                     $user = $this->userModel->login($email, $password);
                     if ($user) {
-                        $_SESSION['user'] = $user;
-                        //header('Location: /dashboard');
+                        $_SESSION['user'] = [
+                            'id' => $user['id'],
+                            'email' => $user['email'],
+                        ];
+                        header('Location: /dashboard');
                         exit;
                     } else {
                         $error = "Email ou mot de passe incorrect.";

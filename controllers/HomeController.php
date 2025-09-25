@@ -11,6 +11,9 @@ class HomeController {
         if (!isset($_SESSION['user'])) {
             header('Location: /login');
             exit;
+        }else {
+            $title = "Tableau de bord";
+            include __DIR__ . '/../views/dashboard/dashboard.php';
         }
     }
 }

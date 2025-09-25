@@ -3,6 +3,7 @@ return [
     // Format : 'chemin' => ['Contrôleur', 'méthode']
     '' => ['HomeController', 'index'],          // Page d'accueil (/)
     'login' => ['AuthController', 'login'],      // /login
-    'register' => ['AuthController', 'register'], // /register
+    'register' => ['AuthController', 'register'], // /register*
+    'dashboard' => ['HomeController', 'dashboard'], // /dashboard
 ];
 ?>
