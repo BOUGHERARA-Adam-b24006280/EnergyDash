@@ -12,7 +12,7 @@ class Layout
 <head>
     <meta charset="UTF-8"/>
     <title><?= $this->title;?></title>
-    <link href="style.css" rel="stylesheet"/>
+    <link href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body>
 <?= $this->content; ?>

@@ -2,12 +2,24 @@
 // Démarrage de la session
 session_start();
 
-// Chargement des configurations
-require_once './config/database.php';
-$routes = require_once './config/routes.php';
 
-// Récupération de l'URL et de la méthode HTTP
+// BASE_URL : préfixe d'URL du projet
+
+define('BASE_URL', rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'])), '/'));
+
+// Chargement des configurations
+require_once __DIR__ . '/config/database.php';
+$routes = require_once __DIR__ . '/config/routes.php';
+
+// Récupération du chemin demandé
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Enlever le préfixe BASE_URL si présent (ex: "/EnergyDash")
+if (BASE_URL !== '' && strpos($path, BASE_URL) === 0) {
+    $path = substr($path, strlen(BASE_URL));
+}
+
+// Normaliser (retirer les / de début et fin)
 $path = trim($path, '/');
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -17,7 +29,7 @@ foreach ($routes as $route => $controllerAction) {
         [$controllerName, $action] = $controllerAction;
 
         // Chargement du contrôleur
-        require_once './controllers/' . $controllerName . '.php';
+        require_once __DIR__ . '/controllers/' . $controllerName . '.php';
         $controller = new $controllerName($pdo);
 
         // Appel de la méthode
@@ -30,5 +42,4 @@ foreach ($routes as $route => $controllerAction) {
 
 // Route non trouvée
 http_response_code(404);
-require_once './views/errors/404.php';
-?>
+require_once __DIR__ . '/views/errors/404.php';

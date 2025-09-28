@@ -9,7 +9,7 @@ class Homepage {
                 <h3><?= htmlspecialchars($post->getTitle()); ?><em>: <?= $post->getDate(); ?></em></h3>
                 <p>
                     <?= nl2br(htmlspecialchars($post->getContent())); ?><br>
-                    <em><a href="index.php?action=post&id=<?= urlencode($post->getId()) ?>">+</a></em>
+                    <em><a href="<?= BASE_URL ?>/index.php?action=post&id=<?= urlencode($post->getId()) ?>">+</a></em>
                 </p>
             </div>
             <?php
