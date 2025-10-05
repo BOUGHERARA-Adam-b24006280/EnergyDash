@@ -2,7 +2,10 @@
 class HomeController {
     public function index() {
         $title = "Accueil";
-        include __DIR__ . '/../views/home/index.php';
+        $body = __DIR__ . '/../views/home/index.php';
+        $navbar = __DIR__ . '/../views/shared/navbar.php';
+        $footer = __DIR__ . '/../views/shared/footer.php';
+        include __DIR__ . '/../views/shared/layout.php';
     }
 
     public function dashboard() {
