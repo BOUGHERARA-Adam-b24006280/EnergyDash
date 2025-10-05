@@ -28,20 +28,24 @@
 
                             <div class="ps-5 pe-5 mt-3">
                                 <label for="first_name" class="form-label">Prénom *</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="John">
+                                <input type="text" class="form-control" id="first_name" name="first_name" value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>" placeholder="John" required>
                             </div>
                             <div class="ps-5 pe-5 mt-3">
                                 <label for="last_name" class="form-label">Nom *</label>
-                                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Doe">
+                                <input type="text" class="form-control" id="last_name" name="last_name" value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>" placeholder="Doe" requied>
                             </div>
                             <div class="ps-5 pe-5 mt-3">
                                 <label for="email" class="form-label">Adresse mail *</label>
-                                <input type="email" class="form-control" id="email" name="email" placeholder="john.doe@gmail.com">
+                                <input type="email" class="form-control" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" placeholder="john.doe@gmail.com" required>
                             </div>
                             <div class="ps-5 pe-5 mt-3">
                                 <label for="password" class="form-label">Mot de passe *</label>
-                                <input type="password" id="password" class="form-control" name="password" placeholder="Mot de passe">
-                                <div class="form-text">Le mot de passe doit contenir au moins X caractères</div>
+                                <input type="password" id="password" class="form-control" name="password" placeholder="Mot de passe" required minlenght="8">
+                                <div class="form-text">Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</div>
+                            </div>
+                            <div class="text-center mb-3">
+                                <span class="text-secondary">Déjà inscrit ? </span>
+                                <a href="<?= BASE_URL ?>/login" class="fw-bold link-underline link-underline-opacity-0">Se connecter</a>
                             </div>
                             <div class="ps-5 pe-5 mt-3 mb-4">
                                 <button type="submit" class="btn btn-primary w-100 p-3 fw-semibold form-button">

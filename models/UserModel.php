@@ -13,7 +13,7 @@ class UserModel {
         $stmt->execute([$email]);
         return $stmt->fetchColumn() > 0;
     }
-
+        // Enregiste un nouvel utilisateur
     public function register($first_name,$last_name, $email, $password) {
         $hashedPassword = md5($password);
         $sql = "INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
