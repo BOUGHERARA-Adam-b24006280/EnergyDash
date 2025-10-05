@@ -8,7 +8,8 @@
         body { background-color: #F8F4F1; }
         button { background-color: #7749f8 !important; border: 0 !important; }
         .card { background-color: #F8F4F1; }
-        .a { color: #701CBA !important; }
+        .purple { color: #9945E3 !important; }
+        
     </style>
 </head>
 <body>
@@ -47,7 +48,7 @@
                     </div>
                     <div class="card-footer text-center p-3">
                         <span class="fw-regular text-secondary">Pas de compte ? </span>
-                        <a class="fw-bold link-underline link-underline-opacity-0" href="<?= BASE_URL ?>/register">S'inscrire</a>
+                        <a class="fw-bold link-underline link-underline-opacity-0 purple" href="<?= BASE_URL ?>/register">S'inscrire</a>
                     </div>
                 </div>
             </div>

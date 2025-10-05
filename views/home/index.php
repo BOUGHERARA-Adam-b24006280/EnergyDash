@@ -1,20 +1,19 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title><?= htmlspecialchars($title ?? 'Accueil') ?></title>
-  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($title ?? 'Accueil') ?></title>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css">
+    <style>
+        body { background-color: #F8F4F1; }
+        button { background-color: #7749f8 !important; border: 0 !important; }
+        .card { background-color: #F8F4F1; }
+        .purple { color: #9945E3 !important; }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
-
-<?php
-// définir la couleur utilisée
-$violet = '#9945E3';
-?>
-
-<main class="flex-fill">
-  <div class="container py-5">
+<body class="container-fluid">
+    <?php include __DIR__ . '/../shared/navbar.php'; ?>
     <h1>Page d'accueil</h1>
     <p class="text-muted">Bienvenue sur EnergyDash !</p>
   </div>

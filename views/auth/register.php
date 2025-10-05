@@ -8,6 +8,7 @@
         body { background-color: #F8F4F1; }
         button { background-color: #7749f8 !important; border: 0 !important; }
         .card { background-color: #F8F4F1; }
+        .purple { color: #9945E3 !important; }
     </style>
 </head>
 <body>
