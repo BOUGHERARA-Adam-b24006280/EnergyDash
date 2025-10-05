@@ -10,7 +10,7 @@
 
 <?php
 // définir la couleur utilisée
-$violet = '#701CBA';
+$violet = '#9945E3';
 ?>
 
 <nav class="navbar" style="background:transparent;">
@@ -27,19 +27,21 @@ $violet = '#701CBA';
     </div>
 
     <!-- droite (boutons) -->
-    <div class="d-inline-flex align-items-center ms-auto" style="min-width:160px; justify-content:flex-end;">
+    <div class="d-inline-flex align-items-center ms-auto" style="min-width:160px; justify-content:flex-end; gap:8px;">
       <!-- Outline -->
-      <a class="btn btn-sm"
-         href="<?= BASE_URL ?>/login"
-         style="background: transparent; border: 1.5px solid <?= $violet ?>; color: <?= $violet ?>; border-radius:8px;">
-         Se connecter
+      <a class="btn btn-sm text-center"
+        href="<?= BASE_URL ?>/login"
+        style="background: transparent; border: 1.5px solid <?= $violet ?>; color: <?= $violet ?>;
+                border-radius:8px; min-width:130px; padding:8px 18px; font-weight:500;">
+        Se connecter
       </a>
 
       <!-- Filled -->
-      <a class="btn btn-sm ms-2"
-         href="<?= BASE_URL ?>/register"
-         style="background: <?= $violet ?>; border: 1px solid <?= $violet ?>; color: #fff; border-radius:8px;">
-         S'inscrire
+      <a class="btn btn-sm text-center"
+        href="<?= BASE_URL ?>/register"
+        style="background: <?= $violet ?>; border: 1.5px solid <?= $violet ?>; color: #fff;
+                border-radius:8px; min-width:130px; padding:8px 18px; font-weight:500;">
+        S'inscrire
       </a>
     </div>
 
@@ -53,7 +55,7 @@ $violet = '#701CBA';
   </div>
 </main>
 
-<footer class="py-2 mt-auto mx-3 mx-md-4 mb-2" style="background:#701CBA; border-radius:12px;">
+<footer class="py-2 mt-auto mx-3 mx-md-4 mb-2" style="background: <?= $violet ?>; border-radius:12px;">
   <div class="container-fluid px-2 px-md-3">
     <nav aria-label="Footer" class="mb-2">
       <ul class="nav justify-content-center border-bottom pb-2 mb-2">
