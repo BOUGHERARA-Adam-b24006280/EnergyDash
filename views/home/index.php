@@ -6,37 +6,29 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css">
     <style>
         body { background-color: #F8F4F1; }
+        .btn-primary { background-color: #9945E3 !important; border-color: #9945E3 !important; }
+        .btn-outline-primary { color: #9945E3 !important; border: 1px solid #9945E3 !important; }
+        .btn-outline-primary:hover { background-color: #9945E3 !important; color: white !important; }
+        .btn-primary:hover { background-color: #9945E3 !important; }
         button { background-color: #7749f8 !important; border: 0 !important; }
         .card { background-color: #F8F4F1; }
         .purple { color: #9945E3 !important; }
     </style>
 </head>
 <body class="container-fluid">
-    <?php include __DIR__ . '/../shared/navbar.php'; ?>
-    <h1>Page d'accueil</h1>
-    <p class="text-muted">Bienvenue sur EnergyDash !</p>
-    <a class="btn btn-primary" href="<?= BASE_URL ?>/login">Connexion</a>
-    <a class="btn btn-secondary" href="<?= BASE_URL ?>/register">Inscription</a>
 
-    
-    <footer class="py-3 my-4">
-    <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-        <li class="nav-item">
-            <a class="pe-3" href="<?= BASE_URL ?>/index" class="">Accueil</a>
-        </li>
-        <li class="nav-item">
-            <a class="pe-3" href="<?= BASE_URL ?>/login" class="">Connexion</a>
-        </li>
-        <li class="nav-item">
-            <a class="pe-3" href="<?= BASE_URL ?>/register" class="">Inscription</a>
-        </li>
-        <li class="nav-item">
-            <a class="pe-3" href="<?= BASE_URL ?>/dashboard" class="">Dashboard</a>
-        </li>
-    </ul>
-    <p class="text-center text-body-secondary">© 2025 Company, Inc</p>
-</footer>
+    <header class="col">
+        <?php include __DIR__ . '/../shared/navbar.php'; ?>
+    </header>
+
+    <main class="d-flex justify-content-center align-items-start" style="min-height:70vh;">
+        <div class="text-center">
+            <h1 class="display-1 fw-bold lh-1">Bienvenue dans<br>votre tableau de bord</h1>
+        </div>
+    </main>
 
     <script src="<?= BASE_URL ?>/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>
+
 </html>
