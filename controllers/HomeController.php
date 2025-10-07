@@ -9,12 +9,31 @@ class HomeController {
     }
 
     public function dashboard() {
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         if (!isset($_SESSION['user'])) {
             header('Location: ' . BASE_URL . '/login');
             exit;
-        } else {
-            $title = "Tableau de bord";
-            include __DIR__ . '/../views/dashboard/dashboard.php';
         }
+        
+        $title = "Tableau de bord";
+        include __DIR__ . '/../views/dashboard/dashboard.php';
+    }
+
+    public function logout() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $_SESSION = [];
+
+        session_destroy();
+
+        header('Location: ' . BASE_URL . '/login');
+        exit;
     }
 }
+?>

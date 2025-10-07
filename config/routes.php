@@ -5,5 +5,6 @@ return [
     'login' => ['AuthController', 'login'],      // /login
     'register' => ['AuthController', 'register'], // /register*
     'dashboard' => ['HomeController', 'dashboard'], // /dashboard
+    'logout' => ['HomeController', 'logout'],
 ];
 ?>
