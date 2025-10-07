@@ -5,7 +5,7 @@ session_start();
 
 // BASE_URL : préfixe d'URL du projet
 
-define('BASE_URL', rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'])), '/'));
+define('BASE_URL', dirname($_SERVER['SCRIPT_NAME']) !== '/' ? rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') : '');
 
 // Chargement des configurations
 require_once __DIR__ . '/config/database.php';
