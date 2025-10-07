@@ -42,11 +42,12 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
+            $confirm_password = $_POST['confirm_password'] ?? '';
             $first_name = $_POST['first_name'] ?? '';
             $last_name = $_POST['last_name'] ?? '';
 
             // Vérification des champs vides
-            if (empty($email) || empty($password) || empty($first_name) || empty($last_name)) {
+            if (empty($email) || empty($password) || empty($confirm_password) || empty($first_name) || empty($last_name)) {
                 $error = "Tous les champs doivent être remplis.";
 
             } 
@@ -57,6 +58,10 @@ class AuthController {
             // Vérification de la compléxité du mot de passe (OWASP)
             elseif (!$this->isPasswordStrong($password)) {
                 $error = "Le mot de passe doit contenir au minimum 8 caractères, une majuscule, une minuscule, un chiffre et un symbol spécial";
+            }
+            // Vérification de la correspondance des mots de passe
+            elseif ($password !== $confirm_password) {
+                $error = "Les mots de passe ne correspondent pas.";
             }
             // Vérification de l'unicité de l'email
             elseif ($this->userModel->emailExists($email)) {

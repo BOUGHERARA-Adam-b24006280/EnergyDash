@@ -41,18 +41,23 @@
                             <div class="ps-5 pe-5 mt-3">
                                 <label for="password" class="form-label">Mot de passe *</label>
                                 <input type="password" id="password" class="form-control" name="password" placeholder="Mot de passe" required minlenght="8">
-                                <div class="form-text">Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</div>
                             </div>
-                            <div class="text-center mb-3">
-                                <span class="text-secondary">Déjà inscrit ? </span>
-                                <a href="<?= BASE_URL ?>/login" class="fw-bold link-underline link-underline-opacity-0 purple">Se connecter</a>
+                            <div class="ps-5 pe-5 mt-3">
+                                <label for="confirm_password">Confirmer le mot de passe *</label>
+                                <input type="password" id="confirm_password" class="form-control" name="confirm_password" required minlenght="8">
+                                <div class="form-text">Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</div>
                             </div>
                             <div class="ps-5 pe-5 mt-3 mb-4">
                                 <button type="submit" class="btn btn-primary w-100 p-3 fw-semibold form-button">
                                     S'inscrire
                                 </button>
                             </div>
+                            
                         </form>
+                    </div>
+                    <div class="card-footer text-center p-3">
+                        <span class="fw-regular text-secondary">déjà inscrit ? </span>
+                        <a class="fw-bold link-underline link-underline-opacity-0 purple" href="<?= BASE_URL ?>/login">Se connecter</a>
                     </div>
                 </div>
             </div>
