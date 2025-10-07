@@ -45,7 +45,7 @@
                             </div>
                             <div class="text-center mb-3">
                                 <span class="text-secondary">Déjà inscrit ? </span>
-                                <a href="<?= BASE_URL ?>/login" class="fw-bold link-underline link-underline-opacity-0">Se connecter</a>
+                                <a href="<?= BASE_URL ?>/login" class="fw-bold link-underline link-underline-opacity-0 purple">Se connecter</a>
                             </div>
                             <div class="ps-5 pe-5 mt-3 mb-4">
                                 <button type="submit" class="btn btn-primary w-100 p-3 fw-semibold form-button">
