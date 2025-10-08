@@ -7,5 +7,7 @@ return [
     'dashboard' => ['HomeController', 'dashboard'], // /dashboard
     'logout' => ['HomeController', 'logout'],
     'mentions-legales' => ['HomeController', 'mentionsLegales'],
+    'forgot-password' => ['AuthController', 'forgotPassword'],
+    'reset-password'  => ['AuthController', 'resetPassword'],
 ];
 ?>

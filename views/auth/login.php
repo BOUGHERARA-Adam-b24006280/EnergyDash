@@ -18,6 +18,13 @@
     </style>
 </head>
 <body>
+    <?php if (isset($_SESSION['flash'])): ?>
+        <div class="alert alert-success position-absolute container-fluid top-0 start-50 translate-middle-x z-1 text-center" role="alert">
+            <?= htmlspecialchars($_SESSION['flash']) ?>
+        </div>
+        <?php unset($_SESSION['flash']); ?>
+    <?php endif; ?>
+
     <section>
         <?php if (isset($error)): ?>
             <div class="alert alert-danger position-absolute container-fluid top-0 start-50 translate-middle-x z-1" role="alert">
@@ -49,6 +56,13 @@
                                     Se connecter
                                 </button>
                             </div>
+                            
+                            <div class="text-center mt-3">
+                                <a href="<?= BASE_URL ?>/forgot-password" class="text-decoration-none purple fw-semibold">
+                                    Mot de passe oublié ?
+                                </a>
+                            </div>
+
                         </form>
                     </div>
                     <div class="card-footer text-center p-3">

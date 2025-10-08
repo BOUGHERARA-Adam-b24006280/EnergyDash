@@ -1,0 +1,15 @@
+# Fichiers sensibles
+config/mail.php
+
+# Fichiers temporaires / logs
+*.log
+*.tmp
+
+# Composer vendor
+/vendor/
+
+/.env
+
+# Fichiers système
+.DS_Store
+Thumbs.db
