@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../vendor/autoload.php'; // pour charger PHPMailer avec Composer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class AuthController {
     private $pdo;
@@ -144,11 +147,47 @@ class AuthController {
                     $userModel = $this->userModel ?? new UserModel($this->pdo);
                     $userModel->storeResetToken((int)$user['id'], $token);
 
-                    // Construis lien - pour tests on affiche le lien (production => envoi SMTP)
-                    $resetLink = rtrim(BASE_URL, '/') . '/reset-password?token=' . urlencode($token);
+                    // Génère le lien complet
+                    $host = $_SERVER['HTTP_HOST'];
+                    $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+                    $resetLink = "{$scheme}://{$host}" . BASE_URL . "/reset-password?token=" . urlencode($token);
 
-                    // Si tu n'as pas de SMTP, tu peux afficher le lien (debug). Sinon envoie un mail.
-                    $success = "Un lien de réinitialisation a été généré. <a href=\"$resetLink\">$resetLink</a>";
+                    // Charge la config SMTP
+                    $mailConfig = require __DIR__ . '/../config/mail.php';
+
+                    $mail = new PHPMailer(true);
+                    try {
+                        $mail->isSMTP();
+                        $mail->Host       = $mailConfig['host'];
+                        $mail->SMTPAuth   = true;
+                        $mail->Username   = $mailConfig['username'];
+                        $mail->Password   = $mailConfig['password'];
+                        $mail->SMTPSecure = 'tls'; // ou 'ssl' selon ton fournisseur
+                        $mail->Port       = $mailConfig['port'];
+
+                        $mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
+                        $mail->addAddress($email);
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Réinitialisation de votre mot de passe - EnergyDash';
+                        $mail->Body = "
+                            <p>Bonjour,</p>
+                            <p>Vous avez demandé la réinitialisation de votre mot de passe EnergyDash.</p>
+                            <p>Cliquez sur le lien ci-dessous pour définir un nouveau mot de passe :</p>
+                            <p><a href='{$resetLink}'>Réinitialiser mon mot de passe</a></p>
+                            <p>Ce lien expirera dans 30 minutes.</p>
+                            <p>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement ce message.</p>
+                            <p><em>L'équipe EnergyDash</em></p>
+                        ";
+
+                        $mail->send();
+                        $success = "Si cet e-mail est enregistré, vous allez recevoir un lien de réinitialisation.";
+                    } catch (Exception $e) {
+                        // Ne pas afficher les détails d’erreur à l’utilisateur (pour la sécurité)
+                        error_log("Erreur envoi mail : " . $mail->ErrorInfo);
+                        $success = "Si cet e-mail est enregistré, vous allez recevoir un lien de réinitialisation.";
+                    }
+
                 }
             }
         }
