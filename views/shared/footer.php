@@ -1,4 +1,4 @@
-<footer class="py-2 mt-auto mx-3 mx-md-4 mb-2" style="background: #7118BF; border-radius:12px;">
+<footer class="py-2 mt-auto mx-3 mx-md-4 mb-2" style="background: #7749f8; border-radius:12px;">
   <div class="container-fluid px-2 px-md-3">
     <nav aria-label="Footer" class="mb-2">
       <ul class="nav justify-content-center border-bottom pb-2 mb-2">
