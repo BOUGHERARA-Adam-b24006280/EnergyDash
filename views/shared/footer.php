@@ -6,6 +6,7 @@
         <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/login">Connexion</a></li>
         <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/register">Inscription</a></li>
         <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/dashboard">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/mentions-legales">Mentions légales</a></li>
       </ul>
     </nav>
 

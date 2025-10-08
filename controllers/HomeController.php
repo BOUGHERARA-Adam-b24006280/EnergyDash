@@ -35,5 +35,14 @@ class HomeController {
         header('Location: ' . BASE_URL . '/login');
         exit;
     }
+
+    public function mentionsLegales() {
+        $title  = "Mentions légales";
+        $body   = __DIR__ . '/../views/legal/mentions.php';
+        $navbar = __DIR__ . '/../views/shared/navbar.php';
+        $footer = __DIR__ . '/../views/shared/footer.php';
+        include __DIR__ . '/../views/shared/layout.php';
+    }
+
 }
 ?>
