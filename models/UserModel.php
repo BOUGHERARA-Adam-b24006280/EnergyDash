@@ -32,5 +32,38 @@ class UserModel {
         }
         return false;
     }
+
+        // Stocke un token pour l'utilisateur (supprime d'abord les anciens)
+    public function storeResetToken(int $userId, string $token): bool {
+        $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE user_id = ?");
+        $stmt->execute([$userId]);
+
+        $stmt = $this->pdo->prepare("INSERT INTO password_resets (user_id, token, created_at) VALUES (?, ?, NOW())");
+        return $stmt->execute([$userId, $token]);
+    }
+
+        // Récupère la ligne password_resets si token valide
+    public function findResetByToken(string $token, int $minutesValid = 30) {
+        $stmt = $this->pdo->prepare(
+            "SELECT pr.*, u.email FROM password_resets pr
+            JOIN users u ON u.id = pr.user_id
+            WHERE pr.token = ? AND pr.created_at >= (NOW() - INTERVAL ? MINUTE) LIMIT 1"
+        );
+        $stmt->execute([$token, $minutesValid]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+        // Supprime les tokens d'un utilisateur
+    public function deleteResetTokens(int $userId): bool {
+        $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE user_id = ?");
+        return $stmt->execute([$userId]);
+    }
+
+        // Met à jour le mot de passe d'un user
+    public function updatePassword(int $userId, string $hashedPassword): bool {
+        $stmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+        return $stmt->execute([$hashedPassword, $userId]);
+    }
+
 }
 ?>
