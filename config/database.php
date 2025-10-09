@@ -13,10 +13,10 @@ if (file_exists(__DIR__ . '/../.env')) {
 }
 
 // Configuration de la base de données avec les variables d'environnement
-$host = getenv('DB_HOST') ;
-$dbname = getenv('DB_NAME');
-$username = getenv('DB_USER');
-$password = getenv('DB_PASS');
+$host = getenv('DATABASE_HOST');
+$dbname = getenv('DATABASE_NAME');
+$username = getenv('DATABASE_USERNAME');
+$password = getenv('DATABASE_PASSWORD');
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
