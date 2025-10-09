@@ -12,10 +12,7 @@ class DashboardController {
         }
         
         $title = "Tableau de bord";
-        include __DIR__ . '/../views/dashboard/dashboard.php';
-
-        $title = "Accueil";
-        $body = __DIR__ . '/../views/home/index.php';
+        $body = __DIR__ . '/../views/dashboard/dashboard.php';
         $navbar = __DIR__ . '/../views/shared/navbar.php';
         $footer = __DIR__ . '/../views/shared/footer.php';
         include __DIR__ . '/../views/shared/layout.php';

@@ -14,7 +14,7 @@
         button { background-color: #7749f8 !important; border: 0 !important; }
         .card { background-color: #F8F4F1; }
         .purple { color: #9945E3 !important; }
-        
+        .accent { color: #9740E2 !important}
     </style>
 </head>
 <body>
@@ -58,7 +58,7 @@
                             </div>
                             
                             <div class="text-center mt-3">
-                                <a href="<?= BASE_URL ?>/forgot-password" class="text-decoration-none purple fw-semibold">
+                                <a href="<?= BASE_URL ?>/forgot-password" class="text-decoration-none fw-semibold accent">
                                     Mot de passe oublié ?
                                 </a>
                             </div>
