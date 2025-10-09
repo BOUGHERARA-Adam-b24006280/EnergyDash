@@ -21,7 +21,7 @@
         .purple { color: #9945E3 !important; }
     </style>
 </head>
-<body class="container-fluid">
+<body class="container-fluid d-flex flex-column min-vh-100">
 <?php
 include $navbar;
 include $body;
