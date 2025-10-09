@@ -7,6 +7,7 @@
         <li class="nav-item"><a class="nav-link text-white px-2" href="/register">Inscription</a></li>
         <li class="nav-item"><a class="nav-link text-white px-2" href="/dashboard">Dashboard</a></li>
         <li class="nav-item"><a class="nav-link text-white px-2" href="/mentions-legales">Mentions légales</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="/siteMap">Plan du Site</a></li>
       </ul>
     </nav>
 

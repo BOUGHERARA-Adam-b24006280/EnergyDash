@@ -9,5 +9,6 @@ return [
     'mentions-legales' => ['HomeController', 'mentionsLegales'],
     'forgot-password' => ['AuthController', 'forgotPassword'],
     'reset-password'  => ['AuthController', 'resetPassword'],
+    'siteMap' => ['HomeController', 'siteMap'],
 ];
 ?>

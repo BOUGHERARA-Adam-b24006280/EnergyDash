@@ -44,5 +44,13 @@ class HomeController {
         include __DIR__ . '/../views/shared/layout.php';
     }
 
+    public function siteMap() {
+        //header('Content-Type: application/xml; charset=utf-8');
+        $title  = "Plan du Site";
+        $body   = __DIR__ . '/../views/home/siteMaps.php';
+        $navbar = __DIR__ . '/../views/shared/navbar.php';
+        $footer = __DIR__ . '/../views/shared/footer.php';
+        include __DIR__ . '/../views/shared/layout.php';
+    }
 }
 ?>
