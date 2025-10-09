@@ -76,7 +76,6 @@ APP_DEBUG=true
 
 ### 4. Configuration de la base de données
 - Créez une base de données MySQL/MariaDB
-- Importez le schéma de base de données (si disponible)
 - Vérifiez les paramètres dans le fichier `.env`
 
 ### 5. Lancement de l'application
