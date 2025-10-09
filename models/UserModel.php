@@ -56,10 +56,6 @@ class UserModel {
         }
     }
 
-
-    
-
-
         // Récupère la ligne password_resets si token valide
     public function findResetByToken(string $token, int $minutesValid = 30) {
         $tokenHash = hash_hmac('sha256', $token, 'ENERGYDASH_SECRET');
