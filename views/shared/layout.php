@@ -23,10 +23,17 @@
     </style>
 </head>
 <body class="container-fluid">
-<?php
-include $navbar;
-include $body;
-include $footer;
-?>
+  <header>
+    <?php include $navbar; ?>
+  </header>
+
+  <main class="flex-grow-1 container py-5 min-vh-200 p-5">
+    <?php include $body; ?>
+  </main>
+
+  <footer class="py-2 mt-auto mx-3 mx-md-4 text-white rounded-3"
+          style="background-color:#7749f8;">
+    <?php include $footer; ?>
+  </footer>
 </body>
 </html>

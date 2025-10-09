@@ -10,10 +10,11 @@
     <link rel="shortcut icon" href="<?= BASE_URL ?>/assets/images/favicon/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css">
 </head>
-<body class="container py-5">
+<body class="d-flex flex-column">
     <h1>Tableau de bord</h1>
-    <p class="text-success">Bienvenue, vous êtes connecté !</p>
+    <p class="text-success ">Bienvenue, vous êtes connecté !</p>
     <a class="btn btn-danger" href="<?= BASE_URL ?>/logout">Déconnexion</a>
+
 
     <script src="<?= BASE_URL ?>/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
