@@ -33,11 +33,69 @@ EnergyDash/
 
 ---
 
-## 🚀 Collaborer
+## � Prérequis
 
-1. Clonez le dépôt
-2. Configurez la base de données dans `config/database.php`
-3. Lancez le serveur local et accédez à `http://localhost`
+- PHP 7.4 ou supérieur
+- Composer
+- Serveur web (Apache, Nginx) ou XAMPP/WAMP
+- Base de données MySQL/MariaDB
+
+---
+
+## 🚀 Installation
+
+### 1. Cloner le dépôt
+```bash
+git clone https://github.com/BOUGHERARA-Adam-b24006280/EnergyDash.git
+cd EnergyDash
+```
+
+### 2. Installer les dépendances
+```bash
+composer install
+```
+
+### 3. Configuration de l'environnement
+Copiez le fichier d'exemple des variables d'environnement :
+```bash
+cp .env.example .env
+```
+
+Puis modifiez le fichier `.env` avec vos paramètres :
+```bash
+# Base de données
+DATABASE_HOST=localhost
+DATABASE_NAME=energy_dash
+DATABASE_USERNAME=votre_nom_utilisateur
+DATABASE_PASSWORD=votre_mot_de_passe
+
+# Environnement de l'application
+APP_ENV=local
+APP_DEBUG=true
+```
+
+### 4. Configuration de la base de données
+- Créez une base de données MySQL/MariaDB
+- Importez le schéma de base de données (si disponible)
+- Vérifiez les paramètres dans le fichier `.env`
+
+### 5. Lancement de l'application
+- Démarrez votre serveur web (Apache/Nginx) ou XAMPP
+- Accédez à `http://localhost/EnergyDash` dans votre navigateur
+
+---
+
+## 🛠️ Développement
+
+### Structure des dépendances
+Le projet utilise Composer pour la gestion des dépendances PHP :
+- **PHPMailer** : Envoi d'emails sécurisé
+
+### Variables d'environnement
+Le fichier `.env` contient les configurations sensibles :
+- Paramètres de connexion à la base de données
+- Configuration de l'environnement (debug, mode)
+- Autres variables spécifiques au projet
 
 ---
 
@@ -48,5 +106,3 @@ EnergyDash/
 - HADDAH	Mohammed-Amine
 - LEPAPE	Lucas
 - MAILHE	Gustin
-
-
