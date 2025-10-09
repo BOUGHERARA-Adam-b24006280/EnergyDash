@@ -2,7 +2,7 @@
     <h1 class="text-center mb-5 fw-bold">Mentions légales</h1>
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Éditeur du site</h2>
+        <h2 class="h4 text-primary accent">Éditeur du site</h2>
         <p>
             <strong>Noms :</strong> Bougherara Adam, Clot-Godard Kenji, Haddad Mohamed-Amine, Lepape Lucas, Mailhe Gustin<br>
             <strong>Adresse :</strong> 413 Av. Gaston Berger, 13100 Aix-en-Provence<br>
@@ -11,12 +11,12 @@
     </section>
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Directeur de la publication</h2>
+        <h2 class="h4 text-primary accent">Directeur de la publication</h2>
         <p>Bougherara Adam — Étudiant responsable du projet EnergyDash</p>
     </section>
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Hébergement</h2>
+        <h2 class="h4 text-primary accent">Hébergement</h2>
         <p>
             Hébergeur : <strong>alwaysdata</strong><br>
             Forme juridique : SARL au capital de 5 000 €<br>
@@ -34,7 +34,7 @@
     </section>
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Objet du site</h2>
+        <h2 class="h4 text-primary accent">Objet du site</h2>
         <p>
             EnergyDash est un tableau de bord web permettant la visualisation et la gestion
             de données énergétiques. Ce site a été développé à des fins pédagogiques dans le cadre
@@ -44,7 +44,7 @@
 
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Propriété intellectuelle</h2>
+        <h2 class="h4 text-primary accent">Propriété intellectuelle</h2>
         <p>
             Le code source, les textes et images de ce site sont protégés par le droit d’auteur.
             Toute reproduction ou réutilisation est interdite sans autorisation des auteurs.
@@ -52,7 +52,7 @@
     </section>
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Données personnelles</h2>
+        <h2 class="h4 text-primary accent">Données personnelles</h2>
         <p>
             Les données collectées (nom, prénom, email) servent uniquement à la gestion des comptes utilisateurs.
             Aucune information n’est transmise à des tiers.  
@@ -61,7 +61,7 @@
     </section>
 
     <section class="mb-5">
-        <h2 class="h4 text-primary">Crédits</h2>
+        <h2 class="h4 text-primary accent">Crédits</h2>
         <p>
             Site développé avec <strong>PHP 8 / Bootstrap 5</strong> dans le cadre du projet universitaire
             <em>EnergyDash</em>.  
