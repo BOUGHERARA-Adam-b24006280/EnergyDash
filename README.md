@@ -102,6 +102,6 @@ Le fichier `.env` contient les configurations sensibles :
 
 - BOUGHERARA	Adam
 - CLOT-GODARD	Kenji
-- HADDAH	Mohammed-Amine
+- HADDAD	Mohamed-Amine
 - LEPAPE	Lucas
 - MAILHE	Gustin
