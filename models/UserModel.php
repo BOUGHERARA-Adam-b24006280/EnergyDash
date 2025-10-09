@@ -36,36 +36,28 @@ class UserModel {
         // Stocke un token pour l'utilisateur (supprime d'abord les anciens)
     public function storeResetToken(int $userId, string $token): bool {
         try {
-            // Supprimer les anciens tokens
+            // Supprimer les anciens tokens de l'utilisateur
             $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE user_id = ?");
             $stmt->execute([$userId]);
 
-            // Créer un hash du token
+            // Créer un hash sécurisé du token
             $tokenHash = hash_hmac('sha256', $token, 'ENERGYDASH_SECRET');
 
-            // Insertion du nouveau token
+            // Insérer le nouveau token
             $stmt = $this->pdo->prepare(
                 "INSERT INTO password_resets (user_id, token, created_at) VALUES (?, ?, NOW())"
             );
 
-            $ok = $stmt->execute([$userId, $tokenHash]);
-
-            if (!$ok) {
-                $err = $stmt->errorInfo();
-                error_log("[storeResetToken] INSERT échoué : " . implode(' | ', $err));
-            } else {
-                error_log("[storeResetToken] Token ajouté pour user_id={$userId}");
-            }
-
-            return $ok;
+            return $stmt->execute([$userId, $tokenHash]);
         } catch (PDOException $e) {
-            error_log("storeResetToken] Exception PDO : " . $e->getMessage());
+            // En prod, on ne montre pas d'erreur à l'utilisateur
+            error_log("Erreur storeResetToken : " . $e->getMessage());
             return false;
         }
     }
 
 
-
+    
 
 
         // Récupère la ligne password_resets si token valide
