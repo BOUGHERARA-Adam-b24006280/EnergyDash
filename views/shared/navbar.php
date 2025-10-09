@@ -1,3 +1,5 @@
+<?php
+?>
 <nav class="navbar navbar-expand-md">
   <div class="container-fluid">
     <a class="navbar-brand fw-semibold text-body-secondary" href="<?= BASE_URL ?>/">EnergyDash</a>
