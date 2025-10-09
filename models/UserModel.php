@@ -58,15 +58,27 @@ class UserModel {
 
         // Récupère la ligne password_resets si token valide
     public function findResetByToken(string $token, int $minutesValid = 30) {
+        // Le token stocké en base est déjà hashé au moment du store
+        // On re-hash le token brut reçu du lien pour comparer
         $tokenHash = hash_hmac('sha256', $token, 'ENERGYDASH_SECRET');
-        $stmt = $this->pdo->prepare(
-            "SELECT pr.*, u.email FROM password_resets pr
+        
+        $stmt = $this->pdo->prepare("
+            SELECT pr.*, u.email
+            FROM password_resets pr
             JOIN users u ON u.id = pr.user_id
-            WHERE pr.token = ? AND pr.created_at >= (NOW() - INTERVAL ? MINUTE) LIMIT 1"
-        );
-        $stmt->execute([$tokenHash, $minutesValid]);
+            WHERE pr.token = :token
+            AND pr.created_at >= (NOW() - INTERVAL :mins MINUTE)
+            LIMIT 1
+        ");
+        
+        $stmt->execute([
+            ':token' => $tokenHash,
+            ':mins' => $minutesValid
+        ]);
+        
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
 
 
         // Supprime les tokens d'un utilisateur
