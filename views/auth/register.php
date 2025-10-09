@@ -3,11 +3,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="EnergyDash - votre tableau de bord intelligent pour gérer vos données énergétiques.">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= BASE_URL ?>/assets/images/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="<?= BASE_URL ?>/assets/images/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="<?= BASE_URL ?>/assets/images/favicon/favicon-16x16.png">
-    <link rel="shortcut icon" href="<?= BASE_URL ?>/assets/images/favicon/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
+    <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
     <title><?= htmlspecialchars($title ?? 'Inscription') ?></title>
     <style>
         body { background-color: #F8F4F1; }
@@ -29,7 +29,7 @@
             <div class="col-10 col-xl-5 col-sm-8 col-lg-6">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <form action="<?= BASE_URL ?>/register" method="post">
+                        <form action="/register" method="post">
                             <h2 class="text-center fw-bold p-3">Inscription</h2>
 
                             <div class="ps-5 pe-5 mt-3">
@@ -63,14 +63,14 @@
                     </div>
                     <div class="card-footer text-center p-3">
                         <span class="fw-regular text-secondary">déjà inscrit ? </span>
-                        <a class="fw-bold link-underline link-underline-opacity-0 purple" href="<?= BASE_URL ?>/login">Se connecter</a>
+                        <a class="fw-bold link-underline link-underline-opacity-0 purple" href="/login">Se connecter</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="<?= BASE_URL ?>/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script>
     document.querySelector('form').addEventListener('submit', function() {
         const btn = document.querySelector('.form-button');

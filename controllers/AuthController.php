@@ -28,7 +28,7 @@ class AuthController {
                         'id' => $user['id'],
                         'email' => $user['email'],
                     ];
-                    header('Location: ' . BASE_URL . '/dashboard');
+                    header('Location: /dashboard');
                     exit;
                 } else {
                     $error = "Email ou mot de passe incorrect.";
@@ -73,7 +73,7 @@ class AuthController {
             // Tout est OK -> enregistrement
             else {
                 if ($this->userModel->register($first_name, $last_name, $email, $password)) {
-                    header('Location: ' . BASE_URL . '/login');
+                    header('Location: /login');
                     exit;
                 } else {
                     $error = "Erreur lors de l'inscription.";
@@ -87,7 +87,7 @@ class AuthController {
 
     public function logout() {
         session_destroy();
-        header('Location: ' . BASE_URL . '/login');
+        header('Location: /login');
         exit;
     }
 
@@ -230,7 +230,7 @@ class AuthController {
 
                     // flash + redirect to login
                     $_SESSION['flash'] = "Votre mot de passe a été réinitialisé avec succès.";
-                    header('Location: ' . BASE_URL . '/login');
+                    header('Location: /login');
                     exit;
                 }
             }

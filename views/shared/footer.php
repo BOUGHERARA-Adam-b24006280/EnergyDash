@@ -2,11 +2,11 @@
   <div class="container-fluid px-2 px-md-3">
     <nav aria-label="Footer" class="mb-2">
       <ul class="nav justify-content-center border-bottom pb-2 mb-2">
-        <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/">Accueil</a></li>
-        <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/login">Connexion</a></li>
-        <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/register">Inscription</a></li>
-        <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/dashboard">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link text-white px-2" href="<?= BASE_URL ?>/mentions-legales">Mentions légales</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="/">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="/login">Connexion</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="/register">Inscription</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="/dashboard">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link text-white px-2" href="/mentions-legales">Mentions légales</a></li>
       </ul>
     </nav>
 

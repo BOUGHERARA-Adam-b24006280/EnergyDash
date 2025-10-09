@@ -15,7 +15,7 @@ class HomeController {
         }
         
         if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASE_URL . '/login');
+            header('Location: /login');
             exit;
         }
         
@@ -32,7 +32,7 @@ class HomeController {
 
         session_destroy();
 
-        header('Location: ' . BASE_URL . '/login');
+        header('Location: /login');
         exit;
     }
 

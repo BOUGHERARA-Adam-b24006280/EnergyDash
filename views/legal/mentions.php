@@ -70,6 +70,6 @@
     </section>
 
     <div class="text-center mt-5">
-        <a href="<?= BASE_URL ?>/" class="btn btn-outline-primary">Retour à l’accueil</a>
+        <a href="/" class="btn btn-outline-primary">Retour à l’accueil</a>
     </div>
 </main>

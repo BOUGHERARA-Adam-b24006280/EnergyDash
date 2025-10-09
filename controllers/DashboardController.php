@@ -7,7 +7,7 @@ class DashboardController {
         }
         
         if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASE_URL . '/login');
+            header('Location: /login');
             exit;
         }
         
