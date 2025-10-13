@@ -85,7 +85,12 @@ class AuthController {
         }
 
         $title = "Inscription";
-        include __DIR__ . '/../views/auth/register.php';
+
+        $body = __DIR__ . '/../views/auth/register.php';
+        $navbar = __DIR__ . '/../views/shared/navbar.php';
+        $footer = __DIR__ . '/../views/shared/footer.php';
+        include __DIR__ . '/../views/shared/layout.php';
+        
     }
 
     public function logout() {
