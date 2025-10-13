@@ -37,7 +37,10 @@ class AuthController {
         }
 
         $title = "Connexion";
-        include __DIR__ . '/../views/auth/login.php';
+        $body = __DIR__ . '/../views/auth/login.php';
+        $navbar = __DIR__ . '/../views/shared/navbar.php';
+        $footer = __DIR__ . '/../views/shared/footer.php';
+        include __DIR__ . '/../views/shared/layout.php';
     }
 
     // Afficher / traiter le formulaire d'inscription
