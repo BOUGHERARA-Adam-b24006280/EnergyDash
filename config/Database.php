@@ -5,9 +5,6 @@
  * Auteur : Lucas LEPAPE
  */
 
-use PDO;
-use PDOException;
-
 /**
  * Classe Database qui gère la connexion avec la BDD.
  */
