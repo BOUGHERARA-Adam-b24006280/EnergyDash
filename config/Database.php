@@ -19,9 +19,16 @@ use PDOException;
 class Database {
 
     /**
-     * @var ?PDO $pdo Instance unique connexion PDO
+     * @var $pdo Instance unique connexion PDO
+     * @var $db lien de connexion avec la BDD
+     * @var $dbuser nom d'utiliseur de la BDD
+     * @var $dbpass mot de passe de la BDD
      */
-    private static ?PDO $pdo = null;
+    private static $pdo = null;
+    private $host = getenv('DATABASE_HOST');
+    private $dbname = getenv('DATABASE_NAME');
+    private $dbuser = getenv('DATABASE_USER');
+    private $dbpass = getenv('DATABASE_PASSWORD');
 
     /**
      * Retourne la connexion PDO à la BDD
@@ -34,8 +41,7 @@ class Database {
     public static function getConnection(): PDO {
         if (self::$pdo === null) {
             try {
-                self::$pdo = new PDO(adresse + BDD, 'root', '');
-
+                self::$pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
                 self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
                 die('Erreur de connexion à la BDD :' . $e->getMessage());
