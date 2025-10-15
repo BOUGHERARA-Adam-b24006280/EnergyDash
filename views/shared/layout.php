@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
     <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/bootstrap/css/bootstrap.min.css">
     <style>
         body { background-color: #F8F4F1; }
         .btn-primary { background-color: #7749f8 !important; border-color: #7749f8 !important; }
@@ -19,7 +19,6 @@
         button { background-color: #7749f8 !important; border: 0 !important; }
         .card { background-color: #F8F4F1; }
         .purple { color: #9945E3 !important; }
-        .accent { color: #9740E2 !important}
     </style>
 </head>
 <body class="container-fluid">
