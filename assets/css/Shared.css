@@ -1,0 +1,44 @@
+:root {
+    --header-bg : yellow;
+    --footer-bg : yellow;
+}
+
+html, body, main {
+    height: 100vh;
+    width: 100vw;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+main {
+    margin-top: 10vh;
+    height: 80vh;
+}
+
+header, footer {
+    position: fixed;
+
+    width: 100vw;
+
+    background-color: var(--header-bg);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-direction: row;
+}
+
+header {
+    height: 10vh;
+
+}
+
+footer {
+    margin-top: 90vh;
+    height: 10vh;
+}
