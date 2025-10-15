@@ -59,3 +59,8 @@ footer {
 path { /* pour changer la couleur de remplissage du toggle */
     fill: var(--bs-light-text-emphasis);
 }
+
+#theme-toggle {
+    background: none;
+    border: none;
+}
