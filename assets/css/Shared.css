@@ -1,11 +1,9 @@
-:root {
-    --header-bg : yellow;
-    --footer-bg : yellow;
-}
-
 html, body, main {
     height: 100vh;
     width: 100vw;
+
+    color: var(--bs-black);
+    background-color: var(--bs-gray-200);
 
     margin: 0;
     padding: 0;
@@ -16,29 +14,47 @@ html, body, main {
 }
 
 main {
-    margin-top: 10vh;
+    margin-top: 12vh;
     height: 80vh;
 }
 
 header, footer {
     position: fixed;
 
-    width: 100vw;
+    width: 98vw;
+    margin: 1vh 1vw;
+    padding: 1vh 1vw;
+    border-radius: 15px;
 
-    background-color: var(--header-bg);
+    background-color: var(--bs-indigo);
 
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
     flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
 header {
-    height: 10vh;
+    height: 5vh;
 
+    background: none;
+}
+header.nav-link {
+    color: var(--bs-gray-800);
 }
 
 footer {
-    margin-top: 90vh;
+    margin-top: 89vh;
     height: 10vh;
+
+    flex-direction: column;
+    justify-content: space-around;
 }
+
+.nav-link {
+    color: var(--bs-gray-200);
+}
+.nav-link:hover {
+    color: #0aafca;
+}
+
