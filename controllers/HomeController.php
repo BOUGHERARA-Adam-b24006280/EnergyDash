@@ -1,9 +1,16 @@
 <?php
+// HomeController.php
+class HomeController {
+    public function index() {
+        require __DIR__ . '/../views/home/index.php';
+    }
+}
 
-namespace controllers;
-
-class HomeController
-{
+// DashboardController.php
+class DashboardController {
+    public function index() {
+        require __DIR__ . '/../views/dashboard/index.php';
+    }
 
     public function switchTheme()
     {
