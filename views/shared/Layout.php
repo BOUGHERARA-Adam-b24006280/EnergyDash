@@ -1,9 +1,5 @@
-<?php
-    $theme = "light";
-?>
-
 <!doctype html>
-<html lang="fr" data-bs-theme="<?= $theme ?>">
+<html lang="fr" data-bs-theme="<?= $_COOKIE['theme'] ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

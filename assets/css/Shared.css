@@ -2,8 +2,8 @@ html, body, main {
     height: 100vh;
     width: 100vw;
 
-    color: var(--bs-black);
-    background-color: var(--bs-gray-200);
+    color: var(--bs-light-text-emphasis);
+    background-color: var(--bs-body-bg);
 
     margin: 0;
     padding: 0;
@@ -14,8 +14,9 @@ html, body, main {
 }
 
 main {
-    margin: 12vh 1vw 0 1vw;
+    margin: 6vh 1vw 0 1vw;
     height: 80vh;
+
 }
 
 header, footer {
@@ -26,7 +27,7 @@ header, footer {
     padding: 1vh 1vw;
     border-radius: 15px;
 
-    background-color: var(--bs-indigo);
+    background-color: var(--bs-secondary);
 
     display: flex;
     flex-direction: row;
@@ -41,7 +42,7 @@ header {
 }
 a {
     text-decoration: none;
-    color: var(--bs-gray-800);
+    color: var(--bs-light-text-emphasis);
 }
 a:hover {
     color: var(--bs-link-hover-color);
@@ -55,10 +56,6 @@ footer {
     justify-content: space-around;
 }
 
-.nav-link {
-    color: var(--bs-gray-200);
+path { /* pour changer la couleur de remplissage du toggle */
+    fill: var(--bs-light-text-emphasis);
 }
-.nav-link:hover {
-    color: var(--bs-link-hover-color);
-}
-

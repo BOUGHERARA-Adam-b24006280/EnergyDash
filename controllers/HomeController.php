@@ -2,30 +2,20 @@
 // HomeController.php
 class HomeController {
     public function index() {
-        require __DIR__ . '/../views/home/index.php';
-    }
-}
-
-// DashboardController.php
-class DashboardController {
-    public function index() {
-        require __DIR__ . '/../views/dashboard/index.php';
+        setcookie("theme", "light", 0, "/");
+        setcookie("toggleTheme", "assets/images/Moon.svg", 0, "/");
+        include 'views/shared/Layout.php';
     }
 
     public function switchTheme()
     {
-        if (!isset($theme)){
-            $theme = "light";
-            $toggle = "assets/img/Moon.svg";
-        }
-        elseif ($theme == "dark"){
-            $theme = "light";
-            $toggle = "assets/img/Moon.svg";
+        if ($_COOKIE['theme'] == "dark"){
+            setcookie("theme", "light", 0, "/");
+            setcookie("toggleTheme", "assets/images/Moon.svg", 0, "/");
         }
         else {
-            $theme = "dark";
-            $toggle = "assets/img/Sun.svg";
+            setcookie("theme", "dark", 0, "/");
+            setcookie("toggleTheme", "assets/images/Sun.svg", 0, "/");
         }
-        return $theme;
     }
 }

@@ -1,8 +1,10 @@
 <a href="/">EnergyDash</a>
 
-<button onclick="<?= \controllers\HomeController::class->switchTheme() ?>">
-du texte
-</button>
+<div>
+
+    <?php require $_COOKIE['toggleTheme']; ?>
+
+</div>
 
 <div class="d-flex align-items-center">
     <a class="btn btn-outline-primary pe-3 ps-3 fw-bold me-3" href="/login">Se connecter</a>
