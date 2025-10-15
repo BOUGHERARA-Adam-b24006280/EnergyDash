@@ -13,3 +13,6 @@ Old/config/mail.php
 # Fichiers système
 .DS_Store
 Thumbs.db
+
+# Ancienne version du projet
+Old/
