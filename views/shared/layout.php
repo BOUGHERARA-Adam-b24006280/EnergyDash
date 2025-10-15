@@ -31,8 +31,7 @@
     <?php include $body; ?>
   </main>
 
-  <footer class="py-2 mt-auto mx-3 mx-md-4 text-white rounded-3"
-          style="background-color:#7749f8;">
+  <footer class="py-2 mt-auto mx-3 mx-md-4 mb-2" style="background: #7749f8; border-radius:12px;">
     <?php include $footer; ?>
   </footer>
 </body>
