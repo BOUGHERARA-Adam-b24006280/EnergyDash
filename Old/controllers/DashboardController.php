@@ -1,16 +1,20 @@
 <?php
-class DashboardController {
-    public function dashboard() {
-        
+namespace controllers;
+
+class DashboardController
+{
+    public function dashboard()
+    {
+
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
+
         if (!isset($_SESSION['user'])) {
             header('Location: /login');
             exit;
         }
-        
+
         $title = "Tableau de bord";
         $body = __DIR__ . '/../views/dashboard/dashboard.php';
         $navbar = __DIR__ . '/../views/shared/navbar.php';
@@ -20,4 +24,5 @@ class DashboardController {
     }
 
 }
+
 ?>

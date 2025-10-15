@@ -1,20 +1,26 @@
 <?php
+
+namespace controllers;
 require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../vendor/autoload.php'; // pour charger PHPMailer avec Composer
+use models\UserModel;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-class AuthController {
+class AuthController
+{
     private $pdo;
     private $userModel;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->pdo = $pdo;
         $this->userModel = new UserModel($pdo);
     }
 
     // Afficher / traiter le formulaire de connexion
-    public function login() {
+    public function login()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
@@ -44,7 +50,8 @@ class AuthController {
     }
 
     // Afficher / traiter le formulaire d'inscription
-    public function register() {
+    public function register()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
@@ -56,24 +63,19 @@ class AuthController {
             if (empty($email) || empty($password) || empty($confirm_password) || empty($first_name) || empty($last_name)) {
                 $error = "Tous les champs doivent être remplis.";
 
-            } 
-            // Vérification du format d'email
+            } // Vérification du format d'email
             elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = "L'adresse e-mail est invalide. Exemple : nom@domaine.com";
-            }
-            // Vérification de la compléxité du mot de passe (OWASP)
+            } // Vérification de la compléxité du mot de passe (OWASP)
             elseif (!$this->isPasswordStrong($password)) {
                 $error = "Le mot de passe doit contenir au minimum 8 caractères, une majuscule, une minuscule, un chiffre et un symbol spécial";
-            }
-            // Vérification de la correspondance des mots de passe
+            } // Vérification de la correspondance des mots de passe
             elseif ($password !== $confirm_password) {
                 $error = "Les mots de passe ne correspondent pas.";
-            }
-            // Vérification de l'unicité de l'email
+            } // Vérification de l'unicité de l'email
             elseif ($this->userModel->emailExists($email)) {
                 $error = "L'email est déjà utilisé.";
-            } 
-            // Tout est OK -> enregistrement
+            } // Tout est OK -> enregistrement
             else {
                 if ($this->userModel->register($first_name, $last_name, $email, $password)) {
                     header('Location: /login');
@@ -90,17 +92,19 @@ class AuthController {
         $navbar = __DIR__ . '/../views/shared/navbar.php';
         $footer = __DIR__ . '/../views/shared/footer.php';
         include __DIR__ . '/../views/shared/layout.php';
-        
+
     }
 
-    public function logout() {
+    public function logout()
+    {
         session_destroy();
         header('Location: /login');
         exit;
     }
 
     // Fonction mot de passe oublié
-    private function isPasswordStrong($password) {
+    private function isPasswordStrong($password)
+    {
         if (strlen($password) < 8) {
             return false;
         }
@@ -128,7 +132,8 @@ class AuthController {
         return true;
     }
 
-    public function forgotPassword() {
+    public function forgotPassword()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
         $error = $success = null;
@@ -166,12 +171,12 @@ class AuthController {
                     $mail = new PHPMailer(true);
                     try {
                         $mail->isSMTP();
-                        $mail->Host       = $mailConfig['host'];
-                        $mail->SMTPAuth   = true;
-                        $mail->Username   = $mailConfig['username'];
-                        $mail->Password   = $mailConfig['password'];
+                        $mail->Host = $mailConfig['host'];
+                        $mail->SMTPAuth = true;
+                        $mail->Username = $mailConfig['username'];
+                        $mail->Password = $mailConfig['password'];
                         $mail->SMTPSecure = 'tls'; // ou 'ssl' selon ton fournisseur
-                        $mail->Port       = $mailConfig['port'];
+                        $mail->Port = $mailConfig['port'];
 
                         $mail->setFrom($mailConfig['from_email'], $mailConfig['from_name']);
                         $mail->addAddress($email);
@@ -207,7 +212,8 @@ class AuthController {
         include __DIR__ . '/../views/shared/layout.php';
     }
 
-    public function resetPassword() {
+    public function resetPassword()
+    {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
         $error = $success = null;
@@ -216,7 +222,7 @@ class AuthController {
         // si POST -> essayer d'appliquer le changement
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $password = $_POST['password'] ?? '';
-            $confirm  = $_POST['confirm_password'] ?? '';
+            $confirm = $_POST['confirm_password'] ?? '';
 
             if (empty($token)) {
                 $error = "Lien invalide.";

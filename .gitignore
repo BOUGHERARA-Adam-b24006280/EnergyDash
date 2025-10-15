@@ -1,5 +1,5 @@
 # Fichiers sensibles
-config/mail.php
+Old/config/mail.php
 
 # Fichiers temporaires / logs
 *.log

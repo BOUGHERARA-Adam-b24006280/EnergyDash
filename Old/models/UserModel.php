@@ -1,13 +1,18 @@
 <?php
-class UserModel {
+namespace models;
+
+class UserModel
+{
     private $pdo;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->pdo = $pdo;
     }
 
     // Vérifier si un email existe déjà
-    public function emailExists($email) {
+    public function emailExists($email)
+    {
         $sql = "SELECT COUNT(*) FROM users WHERE email = ? LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$email]);
@@ -15,14 +20,16 @@ class UserModel {
     }
 
     // Enregistre un nouvel utilisateur
-    public function register($first_name, $last_name, $email, $password) {
+    public function register($first_name, $last_name, $email, $password)
+    {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $sql = "INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([$first_name, $last_name, $email, $hashedPassword]);
     }
 
-    public function login($email, $password) {
+    public function login($email, $password)
+    {
         $sql = "SELECT * FROM users WHERE email = ? LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$email]);
@@ -35,7 +42,8 @@ class UserModel {
     }
 
     // Stocke un token pour l'utilisateur (supprime d'abord les anciens)
-    public function storeResetToken(int $userId, string $token): bool {
+    public function storeResetToken(int $userId, string $token): bool
+    {
         try {
             // Supprimer les anciens tokens de l'utilisateur
             $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE user_id = ?");
@@ -54,7 +62,8 @@ class UserModel {
     }
 
     // Récupère la ligne password_resets si token valide
-    public function findResetByToken(string $token, int $minutesValid = 30) {
+    public function findResetByToken(string $token, int $minutesValid = 30)
+    {
         // On cherche le token brut (non haché)
         $stmt = $this->pdo->prepare(
             "SELECT pr.*, u.email FROM password_resets pr
@@ -68,15 +77,18 @@ class UserModel {
     }
 
     // Supprime les tokens d'un utilisateur
-    public function deleteResetTokens(int $userId): bool {
+    public function deleteResetTokens(int $userId): bool
+    {
         $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE user_id = ?");
         return $stmt->execute([$userId]);
     }
 
     // Met à jour le mot de passe d'un user
-    public function updatePassword(int $userId, string $hashedPassword): bool {
+    public function updatePassword(int $userId, string $hashedPassword): bool
+    {
         $stmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
         return $stmt->execute([$hashedPassword, $userId]);
     }
 }
+
 ?>
