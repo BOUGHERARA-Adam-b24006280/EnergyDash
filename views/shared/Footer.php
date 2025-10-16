@@ -1,11 +1,11 @@
 <nav aria-label="Footer" class="mb-2">
     <ul class="nav justify-content-center border-bottom pb-2 mb-2">
-        <li class="nav-item"><a class="nav-link px-2" href="/EnergyDash/Index.php">Accueil</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/login">Connexion</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/register">Inscription</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/dashboard">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/mentions-legales">Mentions légales</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/EnergyDash/SiteMap.php">Plan du Site</a></li>
+        <li class="nav-item"><a href="/EnergyDash/Index.php">Accueil</a></li>
+        <li class="nav-item"><a href="/login">Connexion</a></li>
+        <li class="nav-item"><a href="/register">Inscription</a></li>
+        <li class="nav-item"><a href="/dashboard">Dashboard</a></li>
+        <li class="nav-item"><a href="/mentions-legales">Mentions légales</a></li>
+        <li class="nav-item"><a href="/EnergyDash/SiteMap.php">Plan du Site</a></li>
     </ul>
 </nav>
 

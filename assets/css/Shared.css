@@ -2,8 +2,8 @@ html, body, main {
     height: 100vh;
     width: 100vw;
 
-    color: var(--bs-light-text-emphasis);
-    background-color: var(--bs-body-bg);
+    color: var(--text-light);
+    background-color: var(--main);
 
     margin: 0;
     padding: 0;
@@ -15,8 +15,13 @@ html, body, main {
 }
 
 main {
-    margin: 6vh 1vw 0 1vw;
+    margin: 7vh 1vw 0 1vw;
     height: 80vh;
+    width: 98vw;
+
+    border-radius: 15px;
+
+    background-color: var(--background);
 
     justify-content: right;
     flex-direction: column;
@@ -30,7 +35,7 @@ header, footer {
     padding: 1vh 1vw;
     border-radius: 15px;
 
-    background-color: var(--bs-secondary);
+    background-color: var(--secondary);
 
     display: flex;
     flex-direction: row;
@@ -43,13 +48,6 @@ header {
 
     background: none;
 }
-a {
-    text-decoration: none;
-    color: var(--bs-light-text-emphasis);
-}
-a:hover {
-    color: var(--bs-link-hover-color);
-}
 
 footer {
     margin-top: 89vh;
@@ -59,8 +57,24 @@ footer {
     justify-content: space-around;
 }
 
+
+
+
+a {
+    text-decoration: none;
+    color: var(--text-light);
+
+    padding: 5px;
+
+    display: flex;
+    justify-content: center;
+}
+a:hover {
+    color: var(--accent);
+}
+
 path { /* pour changer la couleur de remplissage du toggle */
-    fill: var(--bs-light-text-emphasis);
+    fill: var(--text);
 }
 
 #theme-toggle {

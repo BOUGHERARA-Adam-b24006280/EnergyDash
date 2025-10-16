@@ -6,6 +6,7 @@
     <meta name="description" content="EnergyDash - votre tableau de bord intelligent pour gérer vos données énergétiques.">
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/Shared.css">
+    <link rel="stylesheet" href="assets/css/VarColors.css">
     <script href="assets/js/Toggle.js"></script>
 </head>
 <body>

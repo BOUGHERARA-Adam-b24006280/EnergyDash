@@ -1,0 +1,26 @@
+:root,
+[data-bs-theme=light]{
+    /* Ici les varaibles du site en theme claire */
+
+    /* deux varaibles de couleurs pour s'ajuster en fonction des fonds*/
+    --text-light: #171311;
+    --text-dark: #EEEAE8;
+
+    --background: #FBFBFE;
+    --accent: #7118BF;
+    --main: #9945E3;
+    --secondary: #B793D7;
+}
+
+[data-bs-theme=dark] {
+    /* Ici les variables du site en theme sombre */
+
+    /* deux varaibles de couleurs pour s'ajuster en fonction des fonds*/
+    --text-light: #EEEAE8;
+    --text-dark: #171311;
+
+    --background: #010104;
+    --accent: #9940E7;
+    --main: #701CBA;
+    --secondary: #4C286C;
+}
