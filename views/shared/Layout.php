@@ -16,7 +16,7 @@
 
 <!-- Contenu principal (variable selon la page) -->
 <main>
-    <?php include "views/home/BodyTeste.php"; ?>
+    <?php include "views/home/EmptyBody.php"; ?>
 </main>
 
 <!-- Footer -->
