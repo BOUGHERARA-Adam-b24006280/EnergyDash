@@ -1,6 +1,7 @@
 <?php
 
 $initRooter = "Index.php";
+$body = "views/home/EmptyBody.php";
 
 require_once "controllers/HomeController.php";
 $controller = new HomeController();

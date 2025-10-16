@@ -14,9 +14,17 @@
     <?php include "views/shared/Header.php"; ?>
 </header>
 
-<!-- Contenu principal (variable selon la page) -->
+<!-- Contenu principal (variable selon la page) affiche une page d'erreur si la page n'est pas trouvé-->
 <main>
-    <?php include "views/home/EmptyBody.php"; ?>
+    <?php
+        if (isset($body)) {
+            include $body;
+        }
+        else {
+            include "views/home/SiteMap.xsl.php";
+            //include "views/error/Error404.php";
+        }
+    ?>
 </main>
 
 <!-- Footer -->
