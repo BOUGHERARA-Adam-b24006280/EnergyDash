@@ -1,30 +1,42 @@
 <?php
 /**
  * Fichier : UserModel.php
- * Rôle : gérer les interactions avec la tables "users" dans la BDD
- * Auteur : Lucas L
+ * Rôle : Contient les fonctions liées aux utilisateurs.
+ * Auteur : Lucas LEPAPE
  */
 
-Use config\Database;
-Use PDO;
+require_once __DIR__ . '/../config/Database.php';
 
-/**
- * Classe UserModel
- * 
- * Ce modèle s'occupe des opérations liées aux utilisateurs, soit :
- * - Recherche de tous les utilisateurs
- * - Recherche par email
- * - Création d'un nouvell utilisateur
- */
-Class UserModel {
-    /**
-     * Récupère tous les utilisateur de la BDD
-     * 
-     * @return array contenant tous les utilisateurs
-     */
-    Public static function getAllUsers(): array {
-        $pdo = Database::getConnection();
+class UserModel {
+    /** @var PDO Connexion à la BDD */
+    private PDO $pdo;
 
+    public function __construct() {
+        $this->pdo = (new Database()) -> getConnection();
     }
 
+    /**
+     * Enregiste un nouvel utilisateur dans la BDD
+     * 
+     * @param string $email
+     * @param string $password
+     * @return bull Retourne true si réussit, false sinon.
+     */
+    public function register(string $email, string $password): bool {
+        if ($this->getByEmail($email) !== null){
+            return false;
+        }
+    }
+
+    $hashPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    try {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO users (email, password) 
+            VALUES ($email, $password)
+        ");
+    } catch (PDOException $e) {
+        error_log("Erreur lors de l'inscription : " . $e->getMessage());
+        return false;
+    }
 }
