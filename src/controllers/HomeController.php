@@ -4,7 +4,7 @@ class HomeController {
     public function index() {
         setcookie("theme", "light", 0, "/");
         setcookie("toggleTheme", "assets/images/Moon.svg", 0, "/");
-        include 'views/shared/Layout.php';
+        include __DIR__ . '/../../Views/shared/layout.php';
     }
 
     public function switchTheme()

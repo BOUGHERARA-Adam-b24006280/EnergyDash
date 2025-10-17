@@ -30,7 +30,7 @@
 
 <!-- Footer -->
 <footer>
-    <?php include "views/shared/Footer.php"; ?>
+    <?php include "views/shared/footer.php"; ?>
 </footer>
 </body>
 </html>

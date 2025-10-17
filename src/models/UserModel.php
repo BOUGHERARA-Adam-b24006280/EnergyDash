@@ -5,8 +5,8 @@
  * Auteur : Lucas L
  */
 
-Use config\Database;
-Use PDO;
+use App\Core\Database;
+use PDO;
 
 /**
  * Classe UserModel

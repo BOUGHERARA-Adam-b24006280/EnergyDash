@@ -1,13 +1,12 @@
 <?php
 
-$initRooter = "Index.php";
-$body = "views/home/EmptyBody.php";
+require_once __DIR__ . '/../vendor/autoload.php';
 
-require_once "controllers/HomeController.php";
-$controller = new HomeController();
-$controller->index();
+use App\Core\Router;
 
-require_once "controllers/RequestController.php";
-$requestController = new RequestController();
-$requestController->TreatRequest();
+// Charge les routes
+$routes = require __DIR__ . '/../src/Config/routes.php';
 
+// Démarre le routeur
+$router = new Router($routes);
+$router->dispatch($_GET['url'] ?? '');
