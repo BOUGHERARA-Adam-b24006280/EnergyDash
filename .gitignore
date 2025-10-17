@@ -1,6 +1,3 @@
-# Fichiers sensibles
-Old/config/mail.php
-
 # Fichiers temporaires / logs
 *.log
 *.tmp
