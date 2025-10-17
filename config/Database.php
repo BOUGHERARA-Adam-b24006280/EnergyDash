@@ -24,10 +24,10 @@ class Database {
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement.
      */
     public function __construct() {
-        $this->host = getenv('DATABASE_HOST') ?? 'localhost';
-        $this->dbname = getenv('DATABASE_NAME') ?? 'energy_dash';
-        $this->username = getenv('DATABASE_USER') ?? 'root';
-        $this->password = getenv('DATABASE_PASSWORD') ?? '';
+        $this->host = getenv('DATABASE_HOST') ?: 'mysql-energydash.alwaysdata.net';
+        $this->dbname = getenv('DATABASE_NAME') ?: 'energydash_db';
+        $this->username = getenv('DATABASE_USER') ?: '434284';
+        $this->password = getenv('DATABASE_PASSWORD') ?: 'HechekUserDeLaBD_69La%$$)Trik';
     }
 
     /**
