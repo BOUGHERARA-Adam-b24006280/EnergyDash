@@ -1,4 +1,8 @@
-<a href="/">EnergyDash</a>
+<a href="/" style="
+font-size: large;
+padding: 0.3em;
+background-color: var(--text-dark);
+border-radius: 10px;">EnergyDash</a>
 
 
 

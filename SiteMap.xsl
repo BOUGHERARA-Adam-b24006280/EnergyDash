@@ -10,12 +10,12 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
                 <title>Plan du site - EnergyDash</title>
                 <link rel="stylesheet" href="assets/css/SiteMap.css"/>
+                <link rel="stylesheet" href="assets/css/VarColors.css"/>
             </head>
             <body>
                 <div class="container">
                     <header>
                         <h1>
-                            <span style="font-size: 3rem;">🗺️</span>
                             Plan du site
                         </h1>
                         <p class="subtitle">EnergyDash - Toutes les pages disponibles</p>

@@ -1,5 +1,5 @@
 <nav aria-label="Footer" class="mb-2">
-    <ul class="nav justify-content-center border-bottom pb-2 mb-2">
+    <ul class="nav justify-content-center border-bottom pb-2 mb-2" id="footer-links">
         <li class="nav-item"><a href="/EnergyDash/Index.php">Accueil</a></li>
         <li class="nav-item"><a href="/login">Connexion</a></li>
         <li class="nav-item"><a href="/register">Inscription</a></li>
