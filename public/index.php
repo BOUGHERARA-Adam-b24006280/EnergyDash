@@ -1,11 +1,18 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
-
 use App\Core\Router;
 
-// Charge la table des routes
-$routes = require __DIR__ . '/../src/Config/routes.php';
+require('../vendor/autoload.php');
 
-// Démarre le routeur
-$router = new Router($routes);
-$router->dispatch($_GET['url'] ?? '');
+$router = new Router();
+
+require('../src/Config/routes.php');
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = rtrim($uri, '/');
+if ($uri === '') {
+    $uri = '/';
+}
+
+$router->dispatch($uri, $method);

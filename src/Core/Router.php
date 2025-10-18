@@ -1,41 +1,38 @@
 <?php
+
 namespace App\Core;
 
-class Router
-{
-    private array $routes;
+class Router {
+    private array $routes = [];
 
-    public function __construct(array $routes)
-    {
-        $this->routes = $routes;
+    public function add(string $method, string $path, array $action): void {
+        $this->routes[] = [
+            'method' => strtoupper($method),
+            'path'   => rtrim($path, '/') ?: '/',
+            'action' => $action,
+        ];
     }
 
-    public function dispatch(string $url): void
-    {
-        $url = trim($url, '/');
+    public function dispatch(string $uri, string $method): void {
+        foreach ($this->routes as $route) {
+            if ($route['method'] === $method && $route['path'] === $uri) {
+                [$controller, $action] = $route['action'];
 
-        if (isset($this->routes[$url])) {
-            [$controllerName, $method] = $this->routes[$url];
-        } else {
-            [$controllerName, $method] = $this->routes['404'];
+                if (!class_exists($controller)) {
+                    throw new \Exception("Contrôleur $controller introuvable");
+                }
+
+                if (!method_exists($controller, $action)) {
+                    throw new \Exception("Méthode $action absente dans $controller");
+                }
+
+                $controllerInstance = new $controller();
+                $controllerInstance->$action();
+                return;
+            }
         }
 
-        $controllerClass = "App\\Controllers\\$controllerName";
-
-        if (!class_exists($controllerClass)) {
-            http_response_code(404);
-            echo "Contrôleur introuvable : $controllerClass";
-            exit;
-        }
-
-        $controller = new $controllerClass();
-
-        if (!method_exists($controller, $method)) {
-            http_response_code(404);
-            echo "Méthode introuvable : $method";
-            exit;
-        }
-
-        $controller->$method();
+        http_response_code(404);
+        require __DIR__ . '/../Views/error/404.php';
     }
 }
