@@ -45,9 +45,22 @@ header, footer {
 
 header {
     height: 5vh;
-
     background: none;
 }
+
+#loginBox {
+    background-color: var(--text-dark);
+    border-radius: 15px;
+
+    padding: 0.5em;
+
+    display: flex;
+    align-items: center;
+}
+
+
+
+
 
 footer {
     margin-top: 89vh;
@@ -71,13 +84,17 @@ a {
 }
 a:hover {
     color: var(--accent);
+    transform: scale(1.1);
 }
 
 path { /* pour changer la couleur de remplissage du toggle */
-    fill: var(--text);
+    fill: var(--text-light);
 }
 
 #theme-toggle {
     background: none;
     border: none;
+}
+#theme-toggle:hover {
+    transform: scale(1.1);
 }
