@@ -5,6 +5,11 @@
  * Auteur : Lucas LEPAPE
  */
 
+namespace App\Core;
+
+use PDO;
+use PDOException;
+
 /**
  * Classe Database qui gère la connexion avec la BDD.
  */
@@ -25,19 +30,20 @@ class Database {
      */
     public function __construct() {
         $this->host = getenv('DATABASE_HOST') ?: 'mysql-energydash.alwaysdata.net';
-        $this->dbname = getenv('DATABASE_NAME') ?: 'energydash_db';
+        $this->dbname = getenv('DATABASE_NAME') ?: 'energydash_db_test';
         $this->username = getenv('DATABASE_USER') ?: '434284';
         $this->password = getenv('DATABASE_PASSWORD') ?: 'HechekUserDeLaBD_69La%$$)Trik';
     }
 
     /**
-     * @return PDO Object de la connexion à la BDD.
+     * @return PDO Objet de la connexion à la BDD.
      * @throws PDOException En cas d'erreur de connexion.
      */
     public function getConnection(): PDO {
         if ($this->pdo === null) {
             try {
-                $this->pdo = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->dbname . ";charset=utf8mb4", $this->username, $this->password);
+                $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
+                $this->pdo = new PDO($dsn, $this->username, $this->password);
                 $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
                 error_log('Erreur de connexion à la BDD :' . $e->getMessage());

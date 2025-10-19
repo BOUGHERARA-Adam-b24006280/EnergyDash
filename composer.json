@@ -1,9 +1,28 @@
 {
+    "name": "energydash/app",
+    "description": "Application MVC orientée objet PHP",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
     "require": {
         "phpmailer/phpmailer": "^6.11"
     },
     "require-dev": {
         "phpunit/phpunit": "^11.5",
         "phpstan/phpstan": "*"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "composer dump-autoload -o"
+        ],
+        "post-update-cmd": [
+            "composer dump-autoload -o"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }
