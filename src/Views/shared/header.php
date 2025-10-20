@@ -16,29 +16,21 @@ class Header {
 
     public function render(): void {
         ?>
-        <nav class="navbar navbar-expand-md bg-body-tertiary border-bottom">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-semibold text-body-secondary" href="/">
-                    <?= htmlspecialchars($this->title) ?>
-                </a>
-                <?php if (!isset($_SESSION['user'])): ?>
-                    <div class="d-flex align-items-center">
-                        <a class="btn btn-outline-primary pe-3 ps-3 fw-bold me-3" href="/login">
-                            Se connecter
-                        </a>
-                        <a class="btn btn-primary pe-4 ps-4 fw-bold" href="/register">
-                            S'inscrire
-                        </a>
-                    </div>
-                <?php else: ?>
-                    <div class="d-flex align-items-center">
-                        <a class="btn btn-outline-danger pe-4 ps-4 fw-bold" href="/logout">
-                            Déconnexion
-                        </a>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </nav>
+        <header>
+          <a href="/">EnergyDash</a>
+
+
+
+          <form method="POST" action="" style="display: inline;"> <!-- Appel via une requete post -->
+              <input type="hidden" name="action" value="switchTheme"> <!-- défini l'action à "switchTheme" -->
+              <button type="submit" id="theme-toggle"><?php require $_COOKIE['toggleTheme'];?></button> <!-- confirme l'envoie de la requete -->
+          </form>
+
+          <div class="d-flex align-items-center">
+              <a class="btn btn-outline-primary pe-3 ps-3 fw-bold me-3" href="/login">Se connecter</a>
+              <a class="btn btn-primary pe-4 ps-4 fw-bold" href="/register">S'inscrire</a>
+          </div>
+        </header>
         <?php
     }
 }

@@ -1,12 +1,3 @@
-<?php
-/**
- * Fichier : Layout.php
- * Rôle : Gère la configuration HTML des pages.
- * Auteur : Lucas LEPAPE,
- */
-
-namespace App\Views\Shared;
-
 class Layout {
     private Header $header;
     private Footer $footer;
@@ -19,13 +10,14 @@ class Layout {
     public function render(string $viewPath, ?string $title = "EnergyDash"): void {
         ?>
         <!DOCTYPE html>
-        <html lang="fr">
+        <html lang="fr" data-bs-theme="<?= $_COOKIE['theme'] ?>">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title><?= htmlspecialchars(($title ? "$title — EnergyDash" : "EnergyDash")) ?></title>
             <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
-            <link rel="stylesheet" href="/assets/css/VarColors.css">
+            <link rel="stylesheet" href="assets/css/Shared.css">
+            <link rel="stylesheet" href="assets/css/VarColors.css">
         </head>
         <body class="bg-dark text-light">
             <?php $this->header->render(); ?>
