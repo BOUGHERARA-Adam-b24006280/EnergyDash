@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-bs-theme="<?= $_COOKIE['theme'] ?>">
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($title ?? 'EnergyDash') ?></title>
