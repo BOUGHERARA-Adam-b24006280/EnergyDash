@@ -1,0 +1,37 @@
+name: PHPStan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --level=max --no-progress --error-format=github > phpstan-results.json
+
+      - name: Reviewdog
+        uses: reviewdog/action@v1
+        with:
+          tool_name: phpstan
+          reporter: github-pr-review
+          fail_on_error: true
+          filter_mode: added
+          level: error
+          input_file: phpstan-results.json
