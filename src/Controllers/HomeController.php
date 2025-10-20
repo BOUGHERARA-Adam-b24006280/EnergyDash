@@ -6,9 +6,10 @@ use App\Core\Controller;
 
 class HomeController extends Controller {
     public function index() {
-        $this->render('home/index', [
+        $this->render('shared/layout', [
             'title'   => 'Accueil',
-            'message' => 'Hello depuis HomeController'
+            'message' => 'Hello depuis HomeController',
+            'content' => 'home/index'
         ]);
     }
 }
