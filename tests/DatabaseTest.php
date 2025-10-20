@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Fichier : DatabaseTest.php
  * Rôle : Tests Unitaires PHPUnit de Database.php.
@@ -7,10 +6,11 @@
  */
 
 use PHPUnit\Framework\TestCase;
-require_once __DIR__ . '/../config/Database.php';
+use App\Core\Database;
+use PDO;
 
 /**
- * Classe DatabaseTest qui test Database.php.
+ * Classe DatabaseTest qui teste Database.php.
  * Hérite de PHPUnit\Framework\TestCase pour utiliser les asserts.
  */
 class DatabaseTest extends TestCase
@@ -34,7 +34,7 @@ class DatabaseTest extends TestCase
     }    
 
     /**
-     * Vérifie que la connexion PDO est unique, en renvoyant donc deux mêmes objects
+     * Vérifie que la connexion PDO est unique.
      */
     public function testGetConnectionIsUnique()
     {
