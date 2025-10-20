@@ -28,5 +28,5 @@ jobs:
         uses: super-linter/super-linter@v8.2.1 
         env:
           VALIDATE_PHP_PHPSTAN	: true
-          PHP_CONFIG_FILE : src/Config/php.ini
+          PHP_CONFIG_FILE : php/php.ini
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
