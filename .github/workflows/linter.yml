@@ -27,6 +27,7 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter@v8.2.1 
         env:
-          VALIDATE_PHP_PHPSTAN	: true
-          PHP_CONFIG_FILE : php/php.ini
+          VALIDATE_PHP_PHPSTAN: true
+          PHPSTAN_CONFIG_FILE: phpstan.neon 
+          DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
