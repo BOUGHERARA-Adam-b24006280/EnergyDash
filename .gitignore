@@ -1,0 +1,15 @@
+# Fichiers temporaires / logs
+*.log
+*.tmp
+
+# Composer vendor
+/vendor/
+
+/.env
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Ancienne version du projet
+Old/
