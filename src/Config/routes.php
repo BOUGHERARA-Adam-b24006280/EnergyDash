@@ -5,3 +5,4 @@ use App\Controllers\AuthController;
 
 $router->add('GET', '/', [HomeController::class, 'index']);
 $router->add('GET', '/login', [AuthController::class, 'login']);
+$router->add('GET', '/register', [AuthController::class, 'register']);
