@@ -1,4 +1,5 @@
 <?php
+
 use App\Core\Router;
 
 require('../vendor/autoload.php');
@@ -16,4 +17,9 @@ if ($uri === '') {
     $uri = '/';
 }
 
-$router->dispatch($uri, $method);
+try {
+    $router->dispatch($uri, $method);
+}catch(Exception $e) {
+    http_response_code(500);
+    echo "<h1>Erreur serveur</h1><p>{$e->getMessage()}</p>";
+}
