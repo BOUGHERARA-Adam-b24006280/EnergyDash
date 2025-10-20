@@ -2,15 +2,23 @@
 
 namespace App\Controllers;
 
+namespace App\Controllers;
+
 use App\Core\Controller;
+use App\Views\Shared\Header;
+use App\Views\Shared\Footer;
+use App\Views\Shared\Layout;
 
 class HomeController extends Controller {
     public function index() {
-        $this->render('shared/layout', [
-            'title'   => 'Accueil',
-            'message' => 'Hello depuis HomeController',
-            'content' => 'home/index'
-        ]);
+        $header = new Header("EnergyDash");
+        $footer = new Footer();
+
+        $layout = new Layout($header, $footer);
+
+        $viewPath = __DIR__ . "/../views/home/index.php";
+
+        $layout->render($viewPath, "Accueil");
     }
 
     public function switchTheme(): void

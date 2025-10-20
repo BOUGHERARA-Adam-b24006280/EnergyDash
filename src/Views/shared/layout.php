@@ -1,3 +1,10 @@
+<?php
+
+namespace App\Views\Shared;
+
+use App\Views\Shared\Header;
+use App\Views\Shared\Footer;
+
 class Layout {
     private Header $header;
     private Footer $footer;
