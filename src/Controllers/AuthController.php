@@ -12,7 +12,7 @@ use App\Views\Shared\Header;
 use App\Views\Shared\Footer;
 use App\Views\Shared\Layout;
 
-require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../Models/UserModel.php';
 
 class AuthController extends Controller {
     public function login() {
@@ -21,7 +21,7 @@ class AuthController extends Controller {
 
         $layout = new Layout($header, $footer);
 
-        $viewPath = __DIR__ . "/../views/auth/login.php";
+        $viewPath = __DIR__ . "/../Views/auth/login.php";
 
         $layout->render($viewPath, "Connexion");
     }
@@ -31,7 +31,7 @@ class AuthController extends Controller {
         $footer = new Footer();
         $layout = new Layout($header, $footer);
 
-        $viewPath = __DIR__ . "/../views/auth/register.php";
+        $viewPath = __DIR__ . "/../Views/auth/register.php";
         $layout->render($viewPath, "Inscription");
     }
 
