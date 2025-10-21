@@ -50,7 +50,7 @@ class Router
     public function dispatch(string $uri, string $method): void
     {
         foreach ($this->routes as $route) {
-            if ($route['method'] === strtoupper($method) && $route['path'] === rtrim($uri, '/') ?: '/') {
+            if ($route['method'] === strtoupper($method) && $route['path'] === (rtrim($uri, '/') ?: '/')) {
                 [$controller, $action] = $route['action'];
 
                 if (!class_exists($controller)) {

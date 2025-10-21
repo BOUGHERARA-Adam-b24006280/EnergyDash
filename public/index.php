@@ -2,11 +2,14 @@
 
 use App\Core\Router;
 
-require('/vendor/autoload.php');
+require __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
 
 $router = new Router();
 
-require('/src/Config/routes.php');
+require __DIR__ . '/../src/Config/routes.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
