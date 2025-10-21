@@ -16,15 +16,7 @@ use PDO;
 require_once __DIR__ . '/../Models/UserModel.php';
 
 class AuthController extends Controller {
-    private PDO $db;
-
-    public function __construct(PDO $db) {
-        $this->db = $db;
-    }
-
-    public function login() {
-        session_start();
-
+    public function login(): void {
         $header = new Header("EnergyDash");
         $footer = new Footer();
 
@@ -35,7 +27,7 @@ class AuthController extends Controller {
         $layout->render($viewPath, "Connexion");
     }
 
-    public function register() {
+    public function register(): void {
         $header = new Header("EnergyDash");
         $footer = new Footer();
         $layout = new Layout($header, $footer);
@@ -44,7 +36,7 @@ class AuthController extends Controller {
         $layout->render($viewPath, "Inscription");
     }
 
-    public function logout() {
+    public function logout(): void {
         session_start();
         session_destroy();
         header('Location: /login');

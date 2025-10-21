@@ -2,20 +2,19 @@
 
 namespace App\Controllers;
 
-
 use App\Core\Controller;
 use App\Views\shared\Header;
 use App\Views\shared\Footer;
 use App\Views\shared\Layout;
 
 class HomeController extends Controller {
-    public function index() {
+    public function index(): void {
         $header = new Header("EnergyDash");
         $footer = new Footer();
 
         $layout = new Layout($header, $footer);
 
-        $viewPath = __DIR__ . "/../views/home/index.php";
+        $viewPath = __DIR__ . "/../Views/home/index.php";
 
         $layout->render($viewPath, "Accueil");
     }
@@ -34,13 +33,13 @@ class HomeController extends Controller {
             $newIcon = 'assets/images/Sun.svg';
         }
 
-        // Sauvegarder les cookies (30 jours)
+        // Sauvegarder les cookies pour 30 jours
         $expire = time() + (30 * 24 * 60 * 60);
         setcookie('theme', $newTheme, $expire, '/');
         setcookie('toggleTheme', $newIcon, $expire, '/');
 
-        // ✅ IMPORTANT : Rediriger vers la page précédente
-        $referer = $_SERVER['HTTP_REFERER'] ?? 'index.php';
+        // Rediriger vers la page précédente
+        $referer = strval($_SERVER['HTTP_REFERER'] ?? 'index.php');
         header('Location: ' . $referer);
         exit; // Toujours exit après un header redirect
     }

@@ -1,7 +1,10 @@
 <?php
 
+use App\Core\Router;
 use App\Controllers\HomeController;
 use App\Controllers\AuthController;
+
+$router = new Router();
 
 $router->add('GET', '/', [HomeController::class, 'index']);
 $router->add('POST', '/', [HomeController::class, 'switchTheme']);
