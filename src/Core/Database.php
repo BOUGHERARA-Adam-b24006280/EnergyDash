@@ -29,10 +29,10 @@ class Database {
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement.
      */
     public function __construct() {
-        $this->host = getenv('DATABASE_HOST');
-        $this->dbname = getenv('DATABASE_NAME');
-        $this->username = getenv('DATABASE_USER');
-        $this->password = getenv('DATABASE_PASSWORD');
+        $this->host = getenv('DATABASE_HOST') ?: throw new \RuntimeException('DATABASE_HOST non défini');
+        $this->dbname = getenv('DATABASE_NAME') ?: throw new \RuntimeException('DATABASE_NAME non défini');
+        $this->username = getenv('DATABASE_USER') ?: throw new \RuntimeException('DATABASE_USER non défini');
+        $this->password = getenv('DATABASE_PASSWORD') ?: throw new \RuntimeException('DATABASE_PASSWORD non défini');
     }
 
     /**
