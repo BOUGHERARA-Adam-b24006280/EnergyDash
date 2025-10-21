@@ -3,9 +3,9 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Views\shared\Header;
-use App\Views\shared\Footer;
-use App\Views\shared\Layout;
+use App\Views\Shared\Header;
+use App\Views\Shared\Footer;
+use App\Views\Shared\Layout;
 
 class HomeController extends Controller {
     public function index(): void {

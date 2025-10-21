@@ -5,7 +5,7 @@
  * Auteur : Lucas LEPAPE, Gustin MAILHÉ
  */
 
-namespace App\Views\shared;
+namespace App\Views\Shared;
 
 class Footer {
     public function render(): void {

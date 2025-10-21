@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Views\shared;
+namespace App\Views\Shared;
 
 class Layout {
     private Header $header;
