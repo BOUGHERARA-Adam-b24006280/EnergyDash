@@ -17,7 +17,7 @@ use Dotenv\Dotenv;
 class Database {
     /** @var PDO|null Instance de la connexion PDO, ou null si non init */
     private ?PDO $pdo = null;
-    /** @var string  Nom d'hôte du serveur de la BDD */
+    /** @var string Nom d'hôte du serveur de la BDD */
     private string $host;
     /** @var string Nom de la BDD */
     private string $dbname;
