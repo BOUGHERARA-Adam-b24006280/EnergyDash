@@ -1,9 +1,6 @@
 <?php
 
-namespace App\Views\Shared;
-
-use App\Views\Shared\Header;
-use App\Views\Shared\Footer;
+namespace App\Views\shared;
 
 class Layout {
     private Header $header;
@@ -26,10 +23,10 @@ class Layout {
             <link rel="stylesheet" href="assets/css/Shared.css">
             <link rel="stylesheet" href="assets/css/VarColors.css">
         </head>
-        <body class="bg-dark text-light">
+        <body>
             <?php $this->header->render(); ?>
 
-            <main class="container mt-4 mb-5">
+            <main>
                 <?php require $viewPath; ?>
             </main>
 
@@ -38,6 +35,6 @@ class Layout {
             <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
         </body>
         </html>
-        <?php
+    <?php
     }
 }

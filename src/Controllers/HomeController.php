@@ -2,12 +2,11 @@
 
 namespace App\Controllers;
 
-namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Views\Shared\Header;
-use App\Views\Shared\Footer;
-use App\Views\Shared\Layout;
+use App\Views\shared\Header;
+use App\Views\shared\Footer;
+use App\Views\shared\Layout;
 
 class HomeController extends Controller {
     public function index() {

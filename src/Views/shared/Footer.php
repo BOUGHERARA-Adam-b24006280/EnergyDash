@@ -2,10 +2,10 @@
 /**
  * Fichier : Footer.php
  * Rôle : Gère le footer des pages.
- * Auteur : Lucas LEPAPE,
+ * Auteur : Lucas LEPAPE, Gustin MAILHÉ
  */
 
-namespace App\Views\Shared;
+namespace App\Views\shared;
 
 class Footer {
     public function render(): void {
