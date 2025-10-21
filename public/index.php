@@ -1,23 +1,25 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
 
-use Dotenv\Dotenv;
 use App\Core\Router;
-use App\Controllers\AuthController;
-use App\Controllers\HomeController;
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
-$path = __DIR__ . '/../.env';
+require('../vendor/autoload.php');
 
 $router = new Router();
 
-$router->add('GET', '', [HomeController::class, 'index']);
-$router->add('GET', '/', [HomeController::class, 'index']);
-$router->add('GET', '/login', [AuthController::class, 'login']);
-$router->add('POST', '/login', [AuthController::class, 'login']);
-$router->add('GET', '/register', [AuthController::class, 'register']);
-$router->add('POST', '/register', [AuthController::class, 'register']);
-$router->add('GET', '/logout', [AuthController::class, 'logout']);
+require('../src/Config/routes.php');
 
-$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+$method = $_SERVER['REQUEST_METHOD'];
+
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = rtrim($uri, '/');
+$uri = preg_replace('#/+#', '/', $uri);
+if ($uri === '') {
+    $uri = '/';
+}
+
+try {
+    $router->dispatch($uri, $method);
+}catch(Exception $e) {
+    http_response_code(500);
+    echo "<h1>Erreur serveur</h1><p>{$e->getMessage()}</p>";
+}
