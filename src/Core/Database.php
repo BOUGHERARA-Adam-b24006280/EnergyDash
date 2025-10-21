@@ -9,6 +9,7 @@ namespace App\Core;
 
 use PDO;
 use PDOException;
+use Dotenv\Dotenv;
 
 /**
  * Classe Database qui gère la connexion avec la BDD.
@@ -16,7 +17,7 @@ use PDOException;
 class Database {
     /** @var PDO|null Instance de la connexion PDO, ou null si non init */
     private ?PDO $pdo = null;
-    /** @var string  Nom d'hôte du serveur de la BDD */
+    /** @var string Nom d'hôte du serveur de la BDD */
     private string $host;
     /** @var string Nom de la BDD */
     private string $dbname;
@@ -29,10 +30,10 @@ class Database {
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement.
      */
     public function __construct() {
-        $this->host = getenv('DATABASE_HOST') ?: 'mysql-energydash.alwaysdata.net';
-        $this->dbname = getenv('DATABASE_NAME') ?: 'energydash_db_test';
-        $this->username = getenv('DATABASE_USER') ?: '434284';
-        $this->password = getenv('DATABASE_PASSWORD') ?: 'HechekUserDeLaBD_69La%$$)Trik';
+        $this->host = $_ENV['DATABASE_HOST'];
+        $this->dbname = $_ENV['DATABASE_NAME'];
+        $this->username = $_ENV['DATABASE_USER'];
+        $this->password = $_ENV['DATABASE_PASSWORD'];
     }
 
     /**

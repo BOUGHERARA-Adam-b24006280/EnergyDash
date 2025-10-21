@@ -2,8 +2,16 @@
 
 namespace App\Core;
 
+use App\Core\Database;
+
 class Router {
     private array $routes = [];
+    private \PDO $db;
+
+    public function __construct() {
+        $database = new Database();
+        $this->db = $database->getConnection();
+    }
 
     public function add(string $method, string $path, array $action): void {
         $this->routes[] = [
@@ -26,7 +34,7 @@ class Router {
                     throw new \Exception("Méthode $action absente dans $controller");
                 }
 
-                $controllerInstance = new $controller();
+                $controllerInstance = new $controller($this->db);
                 $controllerInstance->$action();
                 return;
             }
