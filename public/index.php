@@ -2,11 +2,11 @@
 
 use App\Core\Router;
 
-require('../vendor/autoload.php');
+require('/vendor/autoload.php');
 
 $router = new Router();
 
-require('../src/Config/routes.php');
+require('/src/Config/routes.php');
 
 $method = $_SERVER['REQUEST_METHOD'];
 
