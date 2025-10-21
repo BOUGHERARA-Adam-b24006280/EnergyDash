@@ -15,22 +15,47 @@ abstract class Model
         $this->db = $database->getConnection();
     }
 
+    /**
+     * Récupère toutes les lignes de la table.
+     *
+     * @return array<int, array<string, mixed>> Liste des lignes sous forme de tableaux associatifs.
+     */
     public function findAll(): array
     {
         $sql = "SELECT * FROM {$this->table}";
         $stmt = $this->db->query($sql);
+
+        if ($stmt === false) {
+            return [];
+        }
+
+        /** @var array<int, array<string, mixed>> */
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Récupère une ligne par son identifiant.
+     *
+     * @param int $id
+     * @return array<string, mixed>|null
+     */
     public function findById(int $id): ?array
     {
         $sql = "SELECT * FROM {$this->table} WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
+
+        /** @var array<string, mixed>|false $row */
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $row ?: null;
     }
 
+    /**
+     * Crée une nouvelle ligne dans la table.
+     *
+     * @param array<string, mixed> $data
+     */
     public function create(array $data): bool
     {
         if (empty($data)) {
@@ -57,6 +82,11 @@ abstract class Model
         }
     }
 
+    /**
+     * Met à jour une ligne par ID.
+     *
+     * @param array<string, mixed> $data
+     */
     public function update(int $id, array $data): bool
     {
         if (empty($data)) {
