@@ -1,25 +1,32 @@
-name: Deploy to Alwaysdata
+name: Deploy to AlwaysData
 
 on:
   push:
-    branches:
-      - main   # déploiement auto quand push sur main
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.ALWAYSDATA_SSH_KEY }}" | base64 -d > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ssh-energydash.alwaysdata.net >> ~/.ssh/known_hosts
-
-      - name: Deploy with rsync
-        run: |
-          rsync -avz --delete ./ energydash@ssh-energydash.alwaysdata.net:/home/energydash/www/
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.ALWAYSDATA_HOST }}
+        username: ${{ secrets.ALWAYSDATA_USERNAME }}
+        password : ${{ secrets.ALWAYSDATA_PASSWORD }}
+        port: 22
+        script: |
+          # Récupère les derniers changements de la branche main
+          git pull origin main
+          
+          # Installe/met à jour les dépendances Composer
+          composer install --no-dev --optimize-autoloader --no-interaction
+          
+          # Vide le cache si applicable
+          if [ -d "storage/cache" ]; then
+          rm -rf storage/cache/*
+          fi
+          
+          echo "Déploiement terminé avec succès !"
