@@ -17,7 +17,7 @@ require_once __DIR__ . '/../Models/UserModel.php';
 
 class AuthController extends Controller {
     public function login(): void {
-        $header = new Header("EnergyDash");
+        $header = new Header();
         $footer = new Footer();
 
         $layout = new Layout($header, $footer);
@@ -28,7 +28,7 @@ class AuthController extends Controller {
     }
 
     public function register(): void {
-        $header = new Header("EnergyDash");
+        $header = new Header();
         $footer = new Footer();
         $layout = new Layout($header, $footer);
 

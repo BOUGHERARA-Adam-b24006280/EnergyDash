@@ -9,7 +9,7 @@ use App\Views\Shared\Layout;
 
 class HomeController extends Controller {
     public function index(): void {
-        $header = new Header("EnergyDash");
+        $header = new Header();
         $footer = new Footer();
 
         $layout = new Layout($header, $footer);
@@ -39,7 +39,13 @@ class HomeController extends Controller {
         setcookie('toggleTheme', $newIcon, $expire, '/');
 
         // Rediriger vers la page précédente
-        $referer = strval($_SERVER['HTTP_REFERER'] ?? 'index.php');
+        if (isset($_SERVER['HTTP_REFERER']) && is_string($_SERVER['HTTP_REFERER'])) {
+            // Si oui, on la met dans $referer
+            $referer = $_SERVER['HTTP_REFERER'];
+        } else {
+            // Sinon, on redirige par défaut vers la page d'accueil
+            $referer = 'index.php';
+        }
         header('Location: ' . $referer);
         exit; // Toujours exit après un header redirect
     }

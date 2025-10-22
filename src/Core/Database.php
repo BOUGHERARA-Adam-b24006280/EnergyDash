@@ -29,12 +29,25 @@ class Database {
     /**
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement.
      */
-    public function __construct() {
-        $this->host = $_ENV['DATABASE_HOST'];
-        $this->dbname = $_ENV['DATABASE_NAME'];
-        $this->username = $_ENV['DATABASE_USER'];
-        $this->password = $_ENV['DATABASE_PASSWORD'];
+    public function __construct()
+    {
+        // Récupération sécurisée des variables d'environnement
+        $host = $_ENV['DATABASE_HOST'] ?? NULL;
+        $dbname = $_ENV['DATABASE_NAME'] ?? NULL;
+        $username = $_ENV['DATABASE_USER'] ?? NULL;
+        $password = $_ENV['DATABASE_PASSWORD'] ?? NULL;
+
+        // Vérification que tout est bien une chaîne
+        if (!is_string($host) || !is_string($dbname) || !is_string($username) || !is_string($password)) {
+            throw new \RuntimeException('Les variables d’environnement de la base de données sont invalides ou manquantes.');
+        }
+
+        $this->host = $host;
+        $this->dbname = $dbname;
+        $this->username = $username;
+        $this->password = $password;
     }
+
 
     /**
      * @return PDO Objet de la connexion à la BDD.
