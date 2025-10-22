@@ -23,7 +23,7 @@ class Header {
 
           <form method="POST" action="" style="display: inline;"> <!-- Appel via une requete post -->
               <input type="hidden" name="action" value="switchTheme"> <!-- défini l'action à "switchTheme" -->
-              <button type="submit" id="theme-toggle"><?php require $_COOKIE['toggleTheme'];?></button> <!-- confirme l'envoie de la requete -->
+              <button type="submit" id="theme-toggle"><?php echo $_COOKIE['toggleTheme'];?></button> <!-- confirme l'envoie de la requete -->
           </form>
 
           <div class="d-flex align-items-center">
