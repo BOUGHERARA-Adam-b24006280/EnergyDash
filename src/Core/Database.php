@@ -1,7 +1,7 @@
 <?php
 /**
  * Fichier : Database.php
- * Rôle : Fournit une connexion unique à la BDD avec PDO.
+ * Rôle : Fournit une connexion unique à la BDD avec PDO
  * Auteur : Lucas LEPAPE
  */
 
@@ -12,7 +12,7 @@ use PDOException;
 use Dotenv\Dotenv;
 
 /**
- * Classe Database qui gère la connexion avec la BDD.
+ * Classe Database qui gère la connexion avec la BDD
  */
 class Database {
     /** @var PDO|null Instance de la connexion PDO, ou null si non init */
@@ -27,7 +27,7 @@ class Database {
     private string $password;
 
     /**
-     * Constructeur qui initialise les informations de connexion à partir des variables d'environnement.
+     * Constructeur qui initialise les informations de connexion à partir des variables d'environnement
      */
     public function __construct()
     {
@@ -50,8 +50,8 @@ class Database {
 
 
     /**
-     * @return PDO Objet de la connexion à la BDD.
-     * @throws PDOException En cas d'erreur de connexion.
+     * @return PDO Objet de la connexion à la BDD
+     * @throws PDOException En cas d'erreur de connexion
      */
     public function getConnection(): PDO {
         if ($this->pdo === null) {
