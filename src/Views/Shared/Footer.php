@@ -1,7 +1,7 @@
 <?php
 /**
  * Fichier : Footer.php
- * Rôle : Gère le footer des pages
+ * Rôle : Gère le footer des pages.
  * Auteur : Lucas LEPAPE, Gustin MAILHÉ
  */
 ?>
