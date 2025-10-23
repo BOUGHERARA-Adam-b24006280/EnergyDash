@@ -18,6 +18,7 @@ jobs:
         password : ${{ secrets.ALWAYSDATA_PASSWORD }}
         port: 22
         script: |
+          cd www
           # Récupère les derniers changements de la branche main
           git pull origin main
           
