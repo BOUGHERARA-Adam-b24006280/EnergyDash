@@ -1,4 +1,9 @@
 <?php
+/**
+ * Fichier : Router.php
+ * Rôle : Gère la logique de routage des requêtes HTTP
+ * Auteur : Mohamed-Amine HADDAH
+ */
 
 namespace App\Core;
 
