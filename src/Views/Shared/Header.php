@@ -8,22 +8,16 @@
 namespace App\Views\Shared;
 
 class Header {
-    private string $title;
-
-    public function __construct(string $title = "EnergyDash") {
-        $this->title = $title;
-    }
+    private string $title = "EnergyDash";
 
     public function render(): void {
         ?>
         <header>
-          <a href="/">EnergyDash</a>
+          <a href="/"><?php echo $this->title ?></a>
 
-
-
-          <form method="POST" action="" style="display: inline;"> <!-- Appel via une requete post -->
-              <input type="hidden" name="action" value="switchTheme"> <!-- défini l'action à "switchTheme" -->
-              <button type="submit" id="theme-toggle"><?php echo $_COOKIE['toggleTheme'];?></button> <!-- confirme l'envoie de la requete -->
+          <form method="POST" action="" style="display: inline;">
+              <input type="hidden" name="action" value="switchTheme">
+              <button type="submit" id="theme-toggle"><?php echo $_COOKIE['toggleTheme'];?></button>
           </form>
 
           <div class="d-flex align-items-center">
