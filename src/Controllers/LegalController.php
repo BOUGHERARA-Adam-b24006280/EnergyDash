@@ -2,14 +2,13 @@
 declare(strict_types=1);
 
 namespace App\Controllers;
-
-use App\Views\Shared\{Header, Footer, Layout};
+use App\Core\Layout;
 
 final class LegalController
 {
     public function mentions(): void
     {
-        (new Layout(new Header(), new Footer()))
-            ->render(__DIR__ . '/../Views/Legal/Mentions.php', 'Mentions légales');
+        $layout = new Layout(__DIR__ . '/../Views/Legal/Mentions.php', 'Mentions Légales');
+        $layout->render();
     }
 }
