@@ -25,19 +25,19 @@
     <link rel="stylesheet" href="<?= BASE_URL; ?>/assets/css/style.css">
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="<?= BASE_URL; ?>/">EnergyDash</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL; ?>/">Accueil</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL; ?>/login">Connexion</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL; ?>/register">Inscription</a></li>
-                <li class="nav-item"><a class="nav-link" href="<?= BASE_URL; ?>/dashboard">Dashboard</a></li>
-            </ul>
+<nav class="navbar navbar-expand bg-transparent position-absolute w-100 top-0 start-0">
+    <div class="container d-flex justify-content-between align-items-center">
+        <!-- Logo -->
+        <a class="navbar-brand fw-bold text-dark" href="<?= BASE_URL; ?>/">EnergyDash</a>
+
+        <!-- Boutons -->
+        <div class="d-flex align-items-center">
+            <!-- Visible sur mobile uniquement -->
+            <a class="btn btn-primary fw-bold d-inline-block d-lg-none" href="/login">Se connecter</a>
+
+            <!-- Visible sur PC uniquement -->
+            <a class="btn btn-outline-primary pe-3 ps-3 fw-bold me-3 d-none d-lg-inline-block" href="/login">Se connecter</a>
+            <a class="btn btn-primary pe-4 ps-4 fw-bold d-none d-lg-inline-block" href="/register">S'inscrire</a>
         </div>
     </div>
 </nav>
