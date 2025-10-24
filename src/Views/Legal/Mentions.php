@@ -1,5 +1,22 @@
+<?php
+/**
+ * Fichier : Mentions.php
+ * Rôle : Vue affichant les mentions légales du site EnergyDash.
+ * Auteur : CLOT-GODARD Kenji
+ * Description :
+ *  - Contient toutes les informations légales obligatoires (éditeur, hébergeur, données personnelles, etc.)
+ *  - Intégrée dans le Layout global, donc le header et le footer sont affichés automatiquement.
+ *  - Aucun traitement PHP ici, uniquement du contenu HTML statique.
+ *
+ * @package App\Views\Legal
+ * @see https://energydash.alwaysdata.net
+ */
+?>
+
+
 <div class="container py-4">
   <h1>Mentions légales</h1>
+
 
   <h2>Éditeur du site</h2>
   <p>
@@ -18,12 +35,14 @@
     Site à but non commercial.
   </p>
 
+
   <h2>Hébergeur</h2>
   <p>
     AlwaysData<br>
     91 rue du Faubourg Saint-Honoré, 75008 Paris, France<br>
     Site web : <a href="https://www.alwaysdata.com">www.alwaysdata.com</a>
   </p>
+
 
   <h2>Données personnelles</h2>
   <p>
@@ -34,11 +53,13 @@
     en écrivant à <a href="mailto:contact@energydash.fr">contact@energydash.fr</a>.
   </p>
 
+
   <h2>Cookies</h2>
   <p>
     Ce site utilise uniquement des cookies nécessaires à son fonctionnement
     (préférences d’affichage et authentification). Aucun cookie publicitaire ou de suivi n’est déposé.
   </p>
+
 
   <h2>Propriété intellectuelle</h2>
   <p>
@@ -46,6 +67,7 @@
     de l’équipe EnergyDash, sauf mention contraire. Toute reproduction, même partielle,
     sans autorisation est interdite.
   </p>
+
 
   <h2>Responsabilité</h2>
   <p>
