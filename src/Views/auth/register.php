@@ -17,7 +17,7 @@
     </div>
 <?php endif; ?>
 
-<div class="container">
+<div class="container mt-5 mt-md-4 mt-lg-2 px-4 px-md-3 px-lg-1">
     <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
         <div class="col-10 col-xl-5 col-sm-8 col-lg-6">
             <div class="card shadow-sm">
