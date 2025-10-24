@@ -2,11 +2,7 @@
 /**
  * Fichier : Mentions.php
  * Rôle : Vue affichant les mentions légales du site EnergyDash.
- * Auteur : CLOT-GODARD Kenji
- * Description :
- *  - Contient toutes les informations légales obligatoires (éditeur, hébergeur, données personnelles, etc.)
- *  - Intégrée dans le Layout global, donc le header et le footer sont affichés automatiquement.
- *  - Aucun traitement PHP ici, uniquement du contenu HTML statique.
+ * Auteur : Kenji CLOT-GODARD
  *
  * @package App\Views\Legal
  * @see https://energydash.alwaysdata.net
