@@ -2,7 +2,7 @@
 /**
  * Fichier : Header.php
  * Rôle : Gère le header des pages
- * Auteur : Lucas LEPAPE, Gustin MAILHÉ
+ * Auteur : Lucas LEPAPE, Gustin MAILHÉ, Adam BOUGHERARA
  */
 
 /** @var string $title */
@@ -21,16 +21,16 @@
     <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" type="image/x-icon">
 
     <!-- Bootstrap local -->
-    <link rel="stylesheet" href="<?= BASE_URL; ?>/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
 
-    <!-- Ton style perso -->
-    <link rel="stylesheet" href="<?= BASE_URL; ?>/assets/css/style.css">
+    <!-- Couleurs personnalisées -->
+    <link rel="stylesheet" href="/assets/css/VarColors.css">
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 <nav class="navbar navbar-expand bg-transparent position-absolute w-100 top-0 start-0">
     <div class="container d-flex justify-content-between align-items-center">
         <!-- Logo -->
-        <a class="navbar-brand fw-bold text-dark" href="<?= BASE_URL; ?>/">EnergyDash</a>
+        <a class="navbar-brand fw-bold text-dark" href="/">EnergyDash</a>
 
         <!-- Boutons -->
         <div class="d-flex align-items-center">
