@@ -1,3 +1,15 @@
+<?php
+/**
+ * Fichier : register.php
+ * Rôle : View de la page d'inscription.
+ * Auteur : Lucas LEPAPE, Adam Bougherara
+ */
+
+/** 
+ * @var ?string $error 
+ * @var array<string, string> $_POST 
+ */
+?>
 
 <?php if (isset($error)): ?>
     <div class="alert alert-danger position-absolute container-fluid top-0 start-50 translate-middle-x z-1" role="alert">

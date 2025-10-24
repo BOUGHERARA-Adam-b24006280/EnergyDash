@@ -4,28 +4,30 @@
  * Rôle : Gère le footer des pages.
  * Auteur : Lucas LEPAPE, Gustin MAILHÉ
  */
+?>
 
-namespace App\Views\Shared;
+</div>
 
-class Footer {
-    public function render(): void {
-        ?>
-        <footer>
-          <nav aria-label="Footer" class="mb-2">
-            <ul class="nav justify-content-center border-bottom pb-2 mb-2">
-                <li class="nav-item"><a class="nav-link px-2" href="/">Accueil</a></li>
-                <li class="nav-item"><a class="nav-link px-2" href="/login">Connexion</a></li>
-                <li class="nav-item"><a class="nav-link px-2" href="/register">Inscription</a></li>
-                <li class="nav-item"><a class="nav-link px-2" href="/dashboard">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link px-2" href="/mentions-legales">Mentions légales</a></li>
-                <li class="nav-item"><a class="nav-link px-2" href="/siteMap.php">Plan du Site</a></li>
-            </ul>
-          </nav>
+<footer class="bg-dark text-white py-4 mt-auto border-top rounded-top-5">
+  <div class="container text-center">
 
-          <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-2">
-              <p class="mb-0 small">© <?= date('Y') ?> EnergyDash — Tous droits réservés</p>
-          </div>
-        </footer>
-        <?php
-    }
-}
+    <!-- Liens du footer -->
+    <ul class="nav justify-content-center border-bottom border-secondary pb-3 mb-3">
+      <li class="nav-item"><a href="/" class="nav-link px-2 text-white">Accueil</a></li>
+      <li class="nav-item"><a href="/login" class="nav-link px-2 text-white">Connexion</a></li>
+      <li class="nav-item"><a href="/register" class="nav-link px-2 text-white">Inscription</a></li>
+      <li class="nav-item"><a href="/mentions-legales" class="nav-link px-2 text-white">Mentions Légales</a></li>
+      <li class="nav-item"><a href="/about" class="nav-link px-2 text-white">Plan du site</a></li>
+    </ul>
+
+    <!-- Copyright -->
+    <p class="text-center text-white-50 mb-0 small">
+      © <?= date('Y'); ?> EnergyDash — Tous droits réservés
+    </p>
+
+  </div>
+</footer>
+
+<script src="<?= BASE_URL; ?>/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -3,12 +3,9 @@
 use App\Core\Router;
 
 require __DIR__ . '/../vendor/autoload.php';
-
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
+require __DIR__ . '/../src/Config/config.php';
 
 $router = new Router();
-
 require __DIR__ . '/../src/Config/routes.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -23,6 +20,8 @@ if ($uri === '') {
 try {
     $router->dispatch($uri, $method);
 }catch(Exception $e) {
+    error_log("Erreur 500 : " . $e->getMessage());
     http_response_code(500);
-    echo "<h1>Erreur serveur</h1><p>{$e->getMessage()}</p>";
+    require __DIR__ ; '/../src/Views/error/500.php';
+    exit;
 }
