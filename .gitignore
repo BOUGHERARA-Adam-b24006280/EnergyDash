@@ -13,3 +13,6 @@ Thumbs.db
 
 # Ancienne version du projet
 Old/
+
+# PHPStorm
+.idea/
