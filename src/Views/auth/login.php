@@ -1,9 +1,12 @@
-<?php if (isset($_SESSION['flash'])): ?>
-    <div class="alert alert-success position-absolute container-fluid top-0 start-50 translate-middle-x z-1 text-center" role="alert">
-        <?= htmlspecialchars($_SESSION['flash']) ?>
-    </div>
-    <?php unset($_SESSION['flash']); ?>
-<?php endif; ?>
+<?php
+/**
+ * Fichier : login.php
+ * Rôle : View de la page de connexion.
+ * Auteur : Lucas LEPAPE, Adam Bougherara
+ */
+
+/** @var ?string $error */
+?>
 
 <section>
     <?php if (isset($error)): ?>

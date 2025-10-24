@@ -37,6 +37,7 @@ class Layout {
      * @return void
      */
     public function render(): void {
+        $title = $this->title;
         require __DIR__ . '/../Views/Shared/Header.php';
 
         require $this->viewPath;

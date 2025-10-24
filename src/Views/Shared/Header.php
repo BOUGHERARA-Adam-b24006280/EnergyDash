@@ -4,6 +4,8 @@
  * Rôle : Gère le header des pages
  * Auteur : Lucas LEPAPE, Gustin MAILHÉ
  */
+
+/** @var string $title */
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($this->getTitle()); ?></title>
+    <title><?= htmlspecialchars($title); ?></title>
     <meta name="description" content="EnergyDash - votre tableau de bord intelligent pour gérer vos données énergétiques.">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
