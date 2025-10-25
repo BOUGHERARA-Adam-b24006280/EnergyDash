@@ -11,4 +11,6 @@ $router->add('GET', '/', [HomeController::class, 'index']);
 $router->add('POST', '/', [HomeController::class, 'switchTheme']);
 $router->add('GET', '/login', [AuthController::class, 'login']);
 $router->add('GET', '/register', [AuthController::class, 'register']);
+$router->add('POST', '/login', [AuthController::class, 'login']);
+$router->add('POST', '/register', [AuthController::class, 'register']);
 $router->add('GET', '/mentions-legales', [LegalController::class, 'mentions']);

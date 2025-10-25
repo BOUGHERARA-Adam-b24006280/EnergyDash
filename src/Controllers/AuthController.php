@@ -8,6 +8,8 @@
 namespace App\Controllers;
 
 use App\Core\Layout;
+use App\Models\UserModel;
+use Exception;
 
 require_once __DIR__ . '/../Models/UserModel.php';
 
@@ -16,6 +18,20 @@ require_once __DIR__ . '/../Models/UserModel.php';
  */
 class AuthController {
     
+    /** @var UserModel */
+    private UserModel $userModel;
+
+    /**
+     * Constructeur qui inititalise les dépendances
+     */
+    public function __construct() {
+        $this->userModel = new UserModel();
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
     /**
      * Affiche la page de connexion en utilisant la classe Layout pour afficher la page complète
      * 
@@ -32,8 +48,55 @@ class AuthController {
      * @return void
      */
     public function register(): void {
+        $errors = [];
+
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+                        throw new Exception("Le formulaire est invalide (CSRF).");
+                    }
+                
+                $firstName = trim($_POST['first_name'] ?? '');
+                $lastName  = trim($_POST['last_name'] ?? '');
+                $email     = trim($_POST['email'] ?? '');
+                $password  = $_POST['password'] ?? '';
+                $confirm   = $_POST['confirm_password'] ?? '';
+
+                if ($firstName === '' || mb_strlen($firstName) > 100)
+                    throw new Exception("Le prénom est obligatoire et doit faire moins de 100 caractères.");
+                if ($lastName === '' || mb_strlen($lastName) > 100)
+                    throw new Exception("Le nom est obligatoire et doit faire moins de 100 caractères.");
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+                    throw new Exception("L'adresse e-mail n'est pas valide.");
+                if (mb_strlen($password) < 8)
+                    throw new Exception("Le mot de passe doit contenir au moins 8 caractères.");
+                if ($password !== $confirm)
+                    throw new Exception("Les mots de passe ne correspondent pas.");
+
+                if ($this->userModel->emailExists($email))
+                    throw new Exception("Un compte avec cette adresse e-mail existe déjà.");
+
+                if ($this->userModel->createUser($firstName, $lastName, $email, $password)) {
+                        unset($_SESSION['csrf_token']);
+                        header('Location: /login?registered=1');
+                        exit;
+                    } else {
+                        throw new Exception("Une erreur est survenue lors de l’inscription.");
+                    }
+            } catch (Exception $e) {
+                $errors[] = $e->getMessage();
+            }
+        }
+
         $layout = new Layout(__DIR__ . '/../Views/auth/register.php', 'Inscription');
-        $layout->render();
+        $layout->render([
+            'errors' => $errors,
+            'csrf_token' => $_SESSION['csrf_token'],
+        ]);
     }
 
     /**
@@ -45,5 +108,6 @@ class AuthController {
         session_start();
         session_destroy();
         header('Location: /login');
+        exit;
     }
 }

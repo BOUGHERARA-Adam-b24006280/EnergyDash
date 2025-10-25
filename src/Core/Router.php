@@ -66,7 +66,7 @@ class Router
                     throw new \Exception("Méthode {$action} absente dans {$controller}");
                 }
 
-                $controllerInstance = new $controller($this->db);
+                $controllerInstance = new $controller();
                 $controllerInstance->$action();
                 return;
             }

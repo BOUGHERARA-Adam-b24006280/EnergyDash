@@ -36,7 +36,8 @@ class Layout {
      * 
      * @return void
      */
-    public function render(): void {
+    public function render(array $data = []): void {
+        extract($data);
         $title = $this->title;
         require __DIR__ . '/../Views/Shared/Header.php';
 
