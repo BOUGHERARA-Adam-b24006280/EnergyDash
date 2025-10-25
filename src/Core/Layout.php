@@ -13,10 +13,10 @@ namespace App\Core;
  */
 class Layout {
 
-    /** @var string $viewPath Chemin vers le ficheir de la vue à afficher */
+    /** @var string $viewPath Chemin vers le fichier de la vue à afficher */
     private string $viewPath;
 
-    /** @var string $titlte Titre de la page affiché dans la balise <title> */
+    /** @var string $title Titre de la page affichée dans la balise <title> */
     private string $title;
 
     /**

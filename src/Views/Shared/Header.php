@@ -2,7 +2,7 @@
 /**
  * Fichier : Header.php
  * Rôle : Gère le header des pages
- * Auteur : Lucas LEPAPE, Gustin MAILHÉ, Adam BOUGHERARA
+ * Auteur :  Adam BOUGHERARA, Lucas LEPAPE, Gustin MAILHÉ
  */
 
 /** @var string $title */

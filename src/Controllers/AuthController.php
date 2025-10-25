@@ -7,7 +7,6 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Layout;
 
 require_once __DIR__ . '/../Models/UserModel.php';
@@ -15,7 +14,7 @@ require_once __DIR__ . '/../Models/UserModel.php';
 /**
  * Classe Authcontroller qui gère la gestion et les actions des différentes pages d'authentifications
  */
-class AuthController extends Controller {
+class AuthController {
     
     /**
      * Affiche la page de connexion en utilisant la classe Layout pour afficher la page complète
