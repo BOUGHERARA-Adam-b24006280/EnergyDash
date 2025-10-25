@@ -2,7 +2,7 @@
 /**
  * Fichier : Router.php
  * Rôle : Gère la logique de routage des requêtes HTTP
- * Auteur : Mohamed-Amine HADDAH
+ * Auteur : Mohamed-Amine HADDAD
  */
 
 namespace App\Core;
