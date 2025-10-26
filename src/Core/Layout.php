@@ -34,15 +34,14 @@ class Layout {
     /**
      * Affiche la page complète en incluant tout les fichiers necessaires
      * 
+     * @param array<string, mixed> $data Données qui seront mise dans la vue (exemple : les errors et csrf_token)
      * @return void
      */
     public function render(array $data = []): void {
         extract($data);
         $title = $this->title;
         require __DIR__ . '/../Views/Shared/Header.php';
-
         require $this->viewPath;
-
         require __DIR__ . '/../Views/Shared/Footer.php';
     }
 

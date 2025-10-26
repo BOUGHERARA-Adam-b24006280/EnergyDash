@@ -56,15 +56,18 @@ class AuthController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-                        throw new Exception("Le formulaire est invalide (CSRF).");
-                    }
+                $csrfSession = $_SESSION['csrf_token'] ?? '';
+                $csrfPost = $_POST['csrf_token'] ?? '';
                 
-                $firstName = trim($_POST['first_name'] ?? '');
-                $lastName  = trim($_POST['last_name'] ?? '');
-                $email     = trim($_POST['email'] ?? '');
-                $password  = $_POST['password'] ?? '';
-                $confirm   = $_POST['confirm_password'] ?? '';
+                if (!is_string($csrfPost) || !is_string($csrfSession) || !hash_equals($csrfSession, $csrfPost)) {
+                    throw new Exception("Le formulaire est invalide (CSRF).");
+                }
+                
+                $firstName = isset($_POST['first_name']) && is_scalar($_POST['first_name']) ? trim((string)$_POST['first_name']) : '';
+                $lastName  = isset($_POST['last_name'])  && is_scalar($_POST['last_name'])  ? trim((string)$_POST['last_name'])  : '';
+                $email     = isset($_POST['email'])      && is_scalar($_POST['email'])      ? trim((string)$_POST['email'])      : '';
+                $password  = isset($_POST['password'])   && is_scalar($_POST['password'])   ? (string)$_POST['password']         : '';
+                $confirm   = isset($_POST['confirm_password']) && is_scalar($_POST['confirm_password']) ? (string)$_POST['confirm_password'] : '';
 
                 if ($firstName === '' || mb_strlen($firstName) > 100)
                     throw new Exception("Le prénom est obligatoire et doit faire moins de 100 caractères.");

@@ -4,10 +4,20 @@
  * Rôle : View de la page d'inscription.
  * Auteur : Lucas LEPAPE, Adam Bougherara
  *
- * @var array $errors
- * @var string $csrf_token
+ * @var array<int, string> $errors Liste des messages d'erreur
+ * @var string $csrf_token Jetons CSRF unique côté serveur
  */
+
+// Vérifie le type avant de nettoyer avec htmlspecialchars()
+$first  = isset($_POST['first_name']) && is_string($_POST['first_name']) ? htmlspecialchars($_POST['first_name'], ENT_QUOTES, 'UTF-8') : '';
+$last   = isset($_POST['last_name'])  && is_string($_POST['last_name'])  ? htmlspecialchars($_POST['last_name'], ENT_QUOTES, 'UTF-8')  : '';
+$email  = isset($_POST['email'])      && is_string($_POST['email'])      ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8')      : '';
+$action = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
+    ? htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8')
+    : '';
 ?>
+
+
 
 <?php if (!empty($errors)): ?>
     <div class="alert alert-danger position-absolute container-fluid top-0 start-50 translate-middle-x z-1" role="alert">
@@ -24,22 +34,22 @@
         <div class="col-10 col-xl-5 col-sm-8 col-lg-6">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form action="<?= htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8') ?>" method="post">
+                    <form action="<?= $action ?>" method="post">
                         <h2 class="text-center fw-bold p-3">Inscription</h2>
                         <div class="ps-5 pe-5 mt-3">
                             <label for="first_name" class="form-label">Prénom *</label>
                             <input type="text" class="form-control" id="first_name" name="first_name"
-                                   value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>" placeholder="John" required>
+                                   value="<?= $first ?>" placeholder="John" required>
                         </div>
                         <div class="ps-5 pe-5 mt-3">
                             <label for="last_name" class="form-label">Nom *</label>
                             <input type="text" class="form-control" id="last_name" name="last_name"
-                                   value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>" placeholder="Doe" required>
+                                   value="<?= $last ?>" placeholder="Doe" required>
                         </div>
                         <div class="ps-5 pe-5 mt-3">
                             <label for="email" class="form-label">Adresse mail *</label>
                             <input type="email" class="form-control" id="email" name="email"
-                                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" placeholder="john.doe@gmail.com" required>
+                                   value="<?= $email ?>" placeholder="john.doe@gmail.com" required>
                         </div>
                         <div class="ps-5 pe-5 mt-3">
                             <label for="password" class="form-label">Mot de passe *</label>
@@ -52,7 +62,7 @@
                                    required minlength="8">
                             <div class="form-text">Le mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</div>
                         </div>
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
                         <div class="ps-5 pe-5 mt-3 mb-4">
                             <button type="submit" class="btn btn-primary w-100 p-3 fw-semibold form-button">
                                 S'inscrire

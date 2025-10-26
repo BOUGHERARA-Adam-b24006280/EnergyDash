@@ -22,12 +22,6 @@ class Router
      * }>
      */
     private array $routes = [];
-    private \PDO $db;
-
-    public function __construct() {
-        $database = new Database();
-        $this->db = $database->getConnection();
-    }
 
     /**
      * Ajoute une route à la liste.
