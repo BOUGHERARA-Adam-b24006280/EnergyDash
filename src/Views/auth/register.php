@@ -17,8 +17,6 @@ $action = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
     : '';
 ?>
 
-
-
 <?php if (!empty($errors)): ?>
     <div class="alert alert-danger position-absolute container-fluid top-0 start-50 translate-middle-x z-1" role="alert">
         <ul class="mb-0">

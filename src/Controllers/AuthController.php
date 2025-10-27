@@ -38,8 +38,60 @@ class AuthController {
      * @return void
      */
     public function login(): void {
+        $errors = [];
+
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $csrfSession = $_SESSION['csrf_token'] ?? '';
+                $csrfPost = $_POST['csrf_token'] ?? '';
+
+                if (!is_string($csrfPost) || !is_string($csrfSession) || !hash_equals($csrfSession, $csrfPost)) {
+                    throw new Exception("Le formulaire est invalide (CSRF).");
+                }
+
+                $email    = isset($_POST['email']) && is_scalar($_POST['email']) ? trim((string)$_POST['email']) : '';
+                $password = isset($_POST['password']) && is_scalar($_POST['password']) ? (string)$_POST['password'] : '';
+
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Adresse e-mail invalide.");
+                }
+                if (mb_strlen($password) < 8) {
+                    throw new Exception("Le mot de passe est trop court.");
+                }
+
+                $user = $this->userModel->getUserByEmail($email);
+                if (!$user) {
+                    throw new Exception("Aucun compte trouvé avec cet e-mail.");
+                }
+
+                $hash = $user['password'];
+                if (!password_verify($password, $hash)) {
+                    throw new Exception("Mot de passe incorrect.");
+                }
+
+                session_regenerate_id(true); // Empêche le vol de session (OWASP #7)
+                $_SESSION['user'] = [
+                    'id' => $user['id'],
+                    'first_name' => $user['first_name'],
+                    'last_name' => $user['last_name'],
+                    'email' => $user['email'],
+                ];
+
+                unset($_SESSION['csrf_token']);
+
+                header('Location: /dashboard');
+                exit;
+            } catch (Exception $e) {
+                $errors[] = $e -> getMessage();
+            }
+        }
+
         $layout = new Layout(__DIR__ . '/../Views/auth/login.php', 'Connexion');
-        $layout->render();
+        $layout->render(['errors' => $errors, 'csrf_token' => $_SESSION['csrf_token'], ]);
     }
 
     /**
@@ -97,10 +149,7 @@ class AuthController {
         }
 
         $layout = new Layout(__DIR__ . '/../Views/auth/register.php', 'Inscription');
-        $layout->render([
-            'errors' => $errors,
-            'csrf_token' => $_SESSION['csrf_token'],
-        ]);
+        $layout->render(['errors' => $errors, 'csrf_token' => $_SESSION['csrf_token'], ]);
     }
 
     /**
