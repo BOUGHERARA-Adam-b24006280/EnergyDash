@@ -79,7 +79,8 @@ class AuthController {
                     throw new Exception("Le mot de passe doit contenir au moins 8 caractères.");
                 if ($password !== $confirm)
                     throw new Exception("Les mots de passe ne correspondent pas.");
-
+                if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password))
+                    throw new Exception("Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.");
                 if ($this->userModel->emailExists($email))
                     throw new Exception("Un compte avec cette adresse e-mail existe déjà.");
 
