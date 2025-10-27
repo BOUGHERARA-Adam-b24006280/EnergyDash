@@ -73,4 +73,29 @@ class UserModel {
             return false;
         }
     }
+
+    /**
+     * Récupère un utilisateur par son email
+     * 
+     * @param string $email
+     * @return array{id:int, first_name:string, last_name:string, email:string, password:string}|null
+     */
+    public function getUserByEmail(string $email): ?array {
+        try {
+            $stmt = $this->db->prepare("SELECT id, first_name, last_name, email, password FROM users WHERE email = :email LIMIT 1");
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->execute();
+
+            /** @var array{id: int, first_name: string, last_name: string, email: string, password: string}|false $user */
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user === false) {
+                return null;
+            }
+
+            return ['id' => (int) $user['id'], 'first_name' => (string) $user['first_name'], 'last_name' => (string) $user['last_name'], 'email' => (string) $user['email'], 'password' => (string) $user['password'], ];
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération d'utilisateur : " . $e->getMessage());
+            return null;
+        }
+    }
 }
