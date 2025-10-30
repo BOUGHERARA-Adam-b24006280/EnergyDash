@@ -14,7 +14,7 @@ use Exception;
 require_once __DIR__ . '/../Models/UserModel.php';
 
 /**
- * Classe Authcontroller qui gère la gestion et les actions des différentes pages d'authentifications
+ * Classe AuthController qui gère la gestion et les actions des différentes pages d'authentifications
  */
 class AuthController {
     
