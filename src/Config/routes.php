@@ -5,6 +5,7 @@ use App\Controllers\HomeController;
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\LegalController;
+use App\Controllers\EnergyController;
 
 $router = new Router();
 
@@ -26,3 +27,6 @@ $router->add('GET', '/dashboard', [DashboardController::class, 'index']);
 
 // Mentions légales
 $router->add('GET', '/mentions-legales', [LegalController::class, 'mentions']);
+
+// Api
+$router->add('GET', '/api/energy', [EnergyController::class, 'index']);
