@@ -16,6 +16,9 @@ use PDOException;
  * Classe UserModel qui gère les intéractions avec la table 'users'
  */
 class UserModel extends Model{
+
+    protected string $table = 'users';
+
     /**
      * Constructeur : récupère la connexion PDO depuis la classe Database
      */
