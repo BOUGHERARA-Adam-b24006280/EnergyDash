@@ -2,11 +2,12 @@
 /**
  * Fichier : UserModel.php
  * Rôle : Gère les interactions avec la table 'users'
- * Auteur : Lucas LEPAPE
+ * Auteur : Mohamed-Amine Haddad, Lucas LEPAPE
  */
 
 namespace App\Models;
 
+use App\Core\Model;
 use App\Core\Database;
 use PDO;
 use PDOException;
@@ -14,10 +15,7 @@ use PDOException;
 /**
  * Classe UserModel qui gère les intéractions avec la table 'users'
  */
-class UserModel {
-    /** @var PDO Connexion à la base de données */
-    private PDO $db;
-
+class UserModel extends Model{
     /**
      * Constructeur : récupère la connexion PDO depuis la classe Database
      */
@@ -45,57 +43,36 @@ class UserModel {
     }
 
     /**
-     * Enregistre un nouvelle utilisateur
-     * 
+     * Crée un nouvel utilisateur.
+     *
      * @param string $firstName Prénom
      * @param string $lastName Nom
      * @param string $email Adresse mail
      * @param string $password Mot de passe
-     * @return bool true si la création fonctionne
-     * @throws PDOException En cas d'erreur
+     * @return bool True si l’insertion réussit, false sinon
      */
-    public function createUser(string $firstName, string $lastName, string $email, string $password) : bool {
-        try{
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $this->db->prepare("
-                INSERT INTO users (first_name, last_name, email, password)
-                VALUES (:first_name, :last_name, :email, :password)
-            ");
-            
-            $stmt->bindParam(':first_name', $firstName, PDO::PARAM_STR);
-            $stmt->bindParam(':last_name', $lastName, PDO::PARAM_STR);
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    public function createUser(string $firstName, string $lastName, string $email, string $password): bool
+    {
+        // Hasher le mot de passe avant insertion
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            return $stmt->execute();
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la création d'utilisateur : " . $e->getMessage());
-            return false;
-        }
+        // Appel de la méthode générique create() du Model parent
+        return $this->create([
+            'first_name' => $firstName,
+            'last_name'  => $lastName,
+            'email'      => $email,
+            'password'   => $hashedPassword,
+        ]) !== false;
     }
 
     /**
-     * Récupère un utilisateur par son email
-     * 
+     * Récupère un utilisateur par son adresse e-mail.
+     *
      * @param string $email
-     * @return array{id:int, first_name:string, last_name:string, email:string, password:string}|null
+     * @return array<string, mixed>|null
      */
-    public function getUserByEmail(string $email): ?array {
-        try {
-            $stmt = $this->db->prepare("SELECT id, first_name, last_name, email, password FROM users WHERE email = :email LIMIT 1");
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->execute();
-
-            /** @var array{id: int, first_name: string, last_name: string, email: string, password: string}|false $user */
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($user === false) {
-                return null;
-            }
-
-            return ['id' => (int) $user['id'], 'first_name' => (string) $user['first_name'], 'last_name' => (string) $user['last_name'], 'email' => (string) $user['email'], 'password' => (string) $user['password'], ];
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération d'utilisateur : " . $e->getMessage());
-            return null;
-        }
+    public function getUserByEmail(string $email): ?array
+    {
+        return $this->findOneBy('email', $email);
     }
 }
