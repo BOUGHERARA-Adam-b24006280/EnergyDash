@@ -32,3 +32,6 @@ $router->add('GET', '/mentions-legales', [LegalController::class, 'mentions']);
 
 // Api
 $router->add('GET', '/api/energy', [EnergyController::class, 'index']);
+
+// Profil utilisateur
+$router->add('GET', '/profile', [App\Controllers\ProfileController::class, 'index']);

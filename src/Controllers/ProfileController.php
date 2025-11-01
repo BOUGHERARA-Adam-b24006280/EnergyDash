@@ -1,6 +1,6 @@
 <?php
 /**
- * Fichier : DashboardController.php
+ * Fichier : ProfileController.php
  * Rôle : 
  * Auteur : Lucas LEPAPE,
  */
@@ -8,13 +8,8 @@
 namespace App\Controllers;
 
 use App\Core\Layout;
-Use Exception;
 
-/**
- * Classe DashboardController
- * Vérifie l'authentification et affiche le tableau de bord utilisateur
- */
-class DashboardController
+class ProfileController
 {
     public function __construct()
     {
@@ -25,17 +20,16 @@ class DashboardController
 
     public function index(): void
     {
+        // Vérifie que l’utilisateur est connecté
         if (empty($_SESSION['user'])) {
             header('Location: /login');
             exit;
         }
 
-        $layout = new Layout(
-            __DIR__ . '/../Views/dashboard/dashboard.php',
-            'Dashboard',
-            'dashboard'
-        );
+        $user = $_SESSION['user'];
 
-        $layout->render(['user' => $_SESSION['user']]);
+        // Appelle la vue profile.php via Layout
+        $layout = new Layout(__DIR__ . '/../Views/profile/profile.php', 'Profil', 'dashboard');
+        $layout->render(['user' => $user]);
     }
 }
