@@ -1,10 +1,8 @@
 <?php
-
 use App\Core\Router;
 
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/../src/Config/config.php';
-require __DIR__ . '/../public/api/index.php';
 
 $router = new Router();
 require __DIR__ . '/../src/Config/routes.php';
@@ -29,7 +27,7 @@ if ($uri === '' || $uri === null) {
 }
 
 try {
-    $router->dispatch($uri, $method);
+    $router->dispatch($method, $uri);
 }catch(Exception $e) {
     error_log("Erreur 500 : " . $e->getMessage());
     http_response_code(500);

@@ -11,9 +11,6 @@ use App\Core\Database;
 use PDO;
 use Exception;
 
-/**
- * Classe EnergyModel qui gère les intéractions avec la table 'energy_data'
- */
 class EnergyModel
 {
     private PDO $db;
@@ -24,20 +21,20 @@ class EnergyModel
     }
 
     /**
-     * Récupère les données de production/consommation entre deux dates
+     * Récupère les données énergétiques d'une ville entre deux dates.
      */
     public function getEnergyData(string $city, string $type, string $from, string $to): array
     {
         $validTypes = ['solar', 'wind', 'hydro'];
-        if (!in_array($type, $validTypes, true)) {
+        if (!in_array(strtolower($type), $validTypes, true)) {
             throw new Exception("Type de production invalide : $type");
         }
 
         $query = "
             SELECT city, date, type, production, consumption
             FROM energy_data
-            WHERE city = :city 
-              AND type = :type 
+            WHERE city = :city
+              AND type = :type
               AND date BETWEEN :from AND :to
             ORDER BY date ASC
         ";
@@ -55,30 +52,12 @@ class EnergyModel
             throw new Exception("Aucune donnée trouvée pour $city entre $from et $to ($type)");
         }
 
-        // Calcul des totaux et moyennes
-        $totalProd = array_sum(array_column($results, 'production'));
-        $totalCons = array_sum(array_column($results, 'consumption'));
-        $days = count($results);
-        $avgProd = $totalProd / $days;
-        $avgCons = $totalCons / $days;
-        $diff = $avgProd - $avgCons;
-        $percentage = round(($diff / $avgCons) * 100, 2);
-        $comparison = ($percentage >= 0 ? '+' : '') . $percentage . '%';
-
         return [
             'asset' => ucfirst($city),
             'type' => $type,
             'from' => $from,
             'to' => $to,
-            'days_count' => $days,
-            'average_production' => round($avgProd, 2),
-            'average_consumption' => round($avgCons, 2),
-            'comparison' => $comparison,
-            'unit' => 'kWh',
             'data' => $results
         ];
-
-        var_dump($results);
-        exit;
     }
 }

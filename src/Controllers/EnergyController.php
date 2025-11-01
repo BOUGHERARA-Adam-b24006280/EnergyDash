@@ -4,7 +4,6 @@
  * Rôle : 
  * Auteur : Lucas LEPAPE, Adam Bougherara
  */
-
 namespace App\Controllers;
 
 use App\Core\JsonResponse;
@@ -16,21 +15,15 @@ use Exception;
  */
 class EnergyController
 {
-    private string $apiKey = 'energydash123';
-
     public function index(): void
     {
-        // (Tu peux réactiver la sécurité plus tard)
-        // $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-        // if ($header !== 'Bearer ' . $this->apiKey) {
-        //     JsonResponse::error('Clé API invalide', 401);
-        // }
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
 
-        // Récupération des paramètres
-        $city = filter_input(INPUT_GET, 'city', FILTER_SANITIZE_STRING);
-        $type = filter_input(INPUT_GET, 'type', FILTER_SANITIZE_STRING);
-        $from = filter_input(INPUT_GET, 'from', FILTER_SANITIZE_STRING);
-        $to   = filter_input(INPUT_GET, 'to', FILTER_SANITIZE_STRING);
+        $city = isset($_GET['city']) ? htmlspecialchars(trim($_GET['city'])) : null;
+        $type = isset($_GET['type']) ? htmlspecialchars(trim($_GET['type'])) : null;
+        $from = isset($_GET['from']) ? htmlspecialchars(trim($_GET['from'])) : null;
+        $to   = isset($_GET['to'])   ? htmlspecialchars(trim($_GET['to']))   : null;
 
         if (!$city || !$type || !$from || !$to) {
             JsonResponse::error('Paramètres requis : city, type, from, to', 400);
