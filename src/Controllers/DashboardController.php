@@ -8,15 +8,15 @@
 namespace App\Controllers;
 
 use App\Core\Layout;
+use App\Models\EnergyModel;
+Use Exception;
 
 /**
- * Classe DashboardController qui gère la gestion et les actions des différentes pages du Dashboard
+ * Classe DashboardController
+ * Vérifie l'authentification et affiche le tableau de bord utilisateur
  */
-class DashboardController {
-
-    /**
-     * Constructeur qui inititalise les dépendances
-     */
+class DashboardController
+{
     public function __construct()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -24,16 +24,19 @@ class DashboardController {
         }
     }
 
-    /**
-     * Vérifie l'authentification avant d'afficher le dashboard
-     */
-    public function index(): void {
+    public function index(): void
+    {
         if (empty($_SESSION['user'])) {
             header('Location: /login');
             exit;
         }
 
-        $layout = new Layout(__DIR__ . '/../Views/dashboard/dashboard.php');
+        $layout = new Layout(
+            __DIR__ . '/../Views/dashboard/dashboard.php',
+            'Dashboard',
+            'dashboard'
+        );
+
         $layout->render(['user' => $_SESSION['user']]);
     }
 }

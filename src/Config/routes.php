@@ -21,9 +21,11 @@ $router->add('POST', '/register', [AuthController::class, 'register']);
 
 // Déconnexion
 $router->add('GET', '/logout', [AuthController::class, 'logout']);
+$router->add('POST', '/logout', [AuthController::class, 'logout']);
 
 // Dashboard
 $router->add('GET', '/dashboard', [DashboardController::class, 'index']);
+$router->add('POST', '/dashboard', [DashboardController::class, 'index']);
 
 // Mentions légales
 $router->add('GET', '/mentions-legales', [LegalController::class, 'mentions']);
