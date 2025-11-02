@@ -5,29 +5,43 @@
  * Auteur : Lucas LEPAPE, Gustin MAILHÉ
  */
 ?>
+<!-- ========== FOOTER ========== -->
+<footer class="mt-auto bg-gray-900 w-full dark:bg-neutral-950">
+    <div class="mt-auto w-full max-w-340 py-10 px-4 sm:px-6 lg:px-8 lg:pt-20 mx-auto">
+        <!-- Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <div class="col-span-full lg:col-span-1">
+                <a class="flex-none text-xl font-semibold text-white focus:outline-hidden focus:opacity-80" href="#" aria-label="EnergyDash">EnergyDash</a>
+            </div>
 
-</div>
+            <div class="col-span-1">
+                <h4 class="font-semibold text-gray-100">Energy Dash</h4>
 
-<footer class="bg-dark text-white py-4 mt-auto border-top rounded-top-5">
-  <div class="container text-center">
+                <div class="mt-3 grid space-y-3">
+                    <p><a class="inline-flex gap-x-2 text-gray-400 hover:text-gray-200 focus:outline-hidden focus:text-gray-200 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="/dashboard">Dashboard</a></p>
+                </div>
+            </div>
 
-    <!-- Liens du footer -->
-    <ul class="nav justify-content-center border-bottom border-secondary pb-3 mb-3">
-      <li class="nav-item"><a href="/" class="nav-link px-2 text-white">Accueil</a></li>
-      <li class="nav-item"><a href="/login" class="nav-link px-2 text-white">Connexion</a></li>
-      <li class="nav-item"><a href="/register" class="nav-link px-2 text-white">Inscription</a></li>
-      <li class="nav-item"><a href="/mentions-legales" class="nav-link px-2 text-white">Mentions Légales</a></li>
-      <li class="nav-item"><a href="/about" class="nav-link px-2 text-white">Plan du site</a></li>
-    </ul>
+            <div class="col-span-1">
+                <h4 class="font-semibold text-gray-100">Compte</h4>
 
-    <!-- Copyright -->
-    <p class="text-center text-white-50 mb-0 small">
-      © <?= date('Y'); ?> EnergyDash — Tous droits réservés
-    </p>
+                <div class="mt-3 grid space-y-3">
+                    <p><a class="inline-flex gap-x-2 text-gray-400 hover:text-gray-200 focus:outline-hidden focus:text-gray-200 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="/login">Connexion</a></p>
+                    <p><a class="inline-flex gap-x-2 text-gray-400 hover:text-gray-200 focus:outline-hidden focus:text-gray-200 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="/register">Inscription</a></p>
+                </div>
+            </div>
+        </div>
 
-  </div>
+        <div class="mt-5 sm:mt-12 grid gap-y-2 sm:gap-y-0 sm:flex sm:justify-between sm:items-center">
+            <div class="flex flex-wrap justify-between items-center gap-2">
+                <p class="text-sm text-gray-400 dark:text-neutral-400">
+                    © 2025 EnergyDash. Tout droits réservés.
+                </p>
+            </div>
+        </div>
+    </div>
 </footer>
-
-<script src="<?= BASE_URL; ?>/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- ========== END FOOTER ========== -->
+<script src="<?= BASE_URL; ?>/../node_modules/preline/dist/preline.js"></script>
 </body>
 </html>
