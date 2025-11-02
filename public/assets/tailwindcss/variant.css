@@ -9,7 +9,7 @@
 /* Plugins */
 @plugin "@tailwindcss/forms";
 
-/* Adds pointer cursor to buttons */
+/* Ajoute un curseur pointeur aux boutons */
 @layer base {
     button:not(:disabled),
     [role="button"]:not(:disabled) {
@@ -17,5 +17,5 @@
     }
 }
 
-/* Defaults hover styles on all devices */
+/* Styles par défaut au hover sur tous les appareils */
 @custom-variant hover (&:hover);

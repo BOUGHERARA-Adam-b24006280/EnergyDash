@@ -42,6 +42,7 @@
     </div>
 </footer>
 <!-- ========== END FOOTER ========== -->
-<script src="<?= BASE_URL; ?>/../node_modules/preline/dist/preline.js"></script>
+
+<script src="/assets/preline/dist/preline.js"></script>
 </body>
 </html>

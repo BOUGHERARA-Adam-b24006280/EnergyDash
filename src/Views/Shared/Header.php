@@ -24,7 +24,7 @@
 
 </head>
 <body>
-<header class="flex flex-wrap  md:justify-start md:flex-nowrap z-50 w-full bg-white  border-gray-200 dark:bg-neutral-800 dark:border-neutral-700">
+<header class="flex flex-wrap  md:justify-start md:flex-nowrap z-50 w-full 0">
     <nav class="relative max-w-340 w-full mx-auto md:flex md:items-center md:justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center gap-x-1">
             <a class="flex-none font-bold text-3xl text-blue-600 focus:outline-hidden focus:opacity-80 dark:text-white" href="/" aria-label="EnergyDash">Energy Dash</a>
