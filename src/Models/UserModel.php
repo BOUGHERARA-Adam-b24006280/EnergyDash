@@ -65,6 +65,7 @@ class UserModel extends Model{
             'last_name'  => $lastName,
             'email'      => $email,
             'password'   => $hashedPassword,
+            'role'       => 'user'
         ]) !== false;
     }
 
@@ -76,6 +77,75 @@ class UserModel extends Model{
      */
     public function getUserByEmail(string $email): ?array
     {
-        return $this->findOneBy('email', $email);
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT id, first_name, last_name, email, password, role 
+                 FROM users 
+                 WHERE email = :email LIMIT 1"
+            );
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $result ?: null;
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération de l'utilisateur : " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function updateUser(int $id, string $firstName, string $lastName, string $email, string $password = ''): bool
+    {
+        $query = "UPDATE users SET first_name = :first, last_name = :last, email = :email";
+        $params = [
+            ':first' => $firstName,
+            ':last'  => $lastName,
+            ':email' => $email,
+            ':id'    => $id
+        ];
+
+        if (!empty($password)) {
+            $query .= ", password = :password";
+            $params[':password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        $query .= " WHERE id = :id";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute($params);
+    }
+
+    /**
+     * Met à jour le rôle d’un utilisateur
+     * 
+     * @param int $id Identifiant de l'utilisateur
+     * @param string $role Nouveau rôle ('admin' ou 'user')
+     * @return bool
+     */
+    public function updateUserRole(int $id, string $role): bool
+    {
+        try {
+            $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :id");
+            return $stmt->execute([':role' => $role, ':id' => $id]);
+        } catch (PDOException $e) {
+            error_log("Erreur mise à jour rôle : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Récupère tous les utilisateurs depuis la base de données
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAllUsers(): array
+    {
+        try {
+            $stmt = $this->db->query("SELECT id, first_name, last_name, email, role FROM users ORDER BY last_name ASC");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la récupération de tous les utilisateurs : " . $e->getMessage());
+            return [];
+        }
     }
 }

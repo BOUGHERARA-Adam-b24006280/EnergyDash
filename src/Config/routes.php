@@ -6,6 +6,7 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\LegalController;
 use App\Controllers\EnergyController;
+use App\Controllers\ProfileController;
 
 $router = new Router();
 
@@ -34,4 +35,5 @@ $router->add('GET', '/mentions-legales', [LegalController::class, 'mentions']);
 $router->add('GET', '/api/energy', [EnergyController::class, 'index']);
 
 // Profil utilisateur
-$router->add('GET', '/profile', [App\Controllers\ProfileController::class, 'index']);
+$router->add('GET', '/profile', [ProfileController::class, 'index']);
+$router->add('POST', '/profile/updateRole', [ProfileController::class, 'updateRole']);
