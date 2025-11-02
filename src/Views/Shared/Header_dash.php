@@ -60,6 +60,7 @@ $user = $_SESSION['user'] ?? null;
                 <!-- Menu déroulant -->
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                     <li><a class="dropdown-item" href="/profile">Mon profil</a></li>
+                    <li><a class="dropdown-item" href="/dashboard">Tableau de bord</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="/logout" method="post" class="m-0">

@@ -1,14 +1,13 @@
 <?php
 /**
- * Fichier : AuthController.php
- * Rôle : Gère les actions d'authentification (inscription, connexion, déconnexion)
+ * Fichier : DashboardController.php
+ * Rôle : 
  * Auteur : Lucas LEPAPE,
  */
 
 namespace App\Controllers;
 
 use App\Core\Layout;
-use App\Models\EnergyModel;
 Use Exception;
 
 /**
