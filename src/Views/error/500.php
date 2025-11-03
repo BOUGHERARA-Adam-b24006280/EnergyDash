@@ -1,6 +1,6 @@
 <?php
 /**
- * Fichier : 404.php
+ * Fichier : 500.php
  * Rôle : Affiche une page d'erreur 404 personnalisée
  * Auteur : Adam BOUGHERARA, Lucas LEPAPE
  */
