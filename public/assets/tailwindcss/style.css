@@ -326,6 +326,9 @@
   .bottom-full {
     bottom: 100%;
   }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
+  }
   .-z-10 {
     z-index: calc(10 * -1);
   }
@@ -700,6 +703,12 @@
   .h-100 {
     height: calc(var(--spacing) * 100);
   }
+  .h-200 {
+    height: calc(var(--spacing) * 200);
+  }
+  .h-\[200\%\] {
+    height: 200%;
+  }
   .h-auto {
     height: auto;
   }
@@ -741,6 +750,9 @@
   }
   .w-100 {
     width: calc(var(--spacing) * 100);
+  }
+  .w-200 {
+    width: calc(var(--spacing) * 200);
   }
   .w-\[calc\(100\%-32px\)\] {
     width: calc(100% - 32px);

@@ -40,8 +40,9 @@ $action = is_string($uri)
 </div>
 <?php endif; ?>
 
-<div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
-
+<div class="fixed left-0 top-0 -z-10 h-full w-full">
+    <div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
+</div>
 <main id="content" class="w-full max-w-md mx-auto p-6 py-20">
     <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-700">
         <div class="p-4 sm:p-7">
