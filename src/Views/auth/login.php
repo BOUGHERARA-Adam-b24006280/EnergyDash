@@ -40,7 +40,7 @@ $action = is_string($uri)
 </div>
 <?php endif; ?>
 
-<div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]"></div>
+<div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
 
 <main id="content" class="w-full max-w-md mx-auto p-6 py-20">
     <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-700">
@@ -86,7 +86,7 @@ $action = is_string($uri)
                             <p class="mt-2 mb-4 text-sm text-gray-500 dark:text-neutral-500" id="hs-input-helper-text">Votre mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.</p>
                         </div>
                         <!-- End Form Group -->
-
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
                         <button type="submit" class="w-full py-3 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">Connexion</button>
                     </div>
                 </form>

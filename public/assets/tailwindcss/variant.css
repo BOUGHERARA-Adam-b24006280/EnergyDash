@@ -4,7 +4,7 @@
 @source "../../../node_modules/preline/dist/*.js";
 @import "../../../node_modules/preline/variants.css";
 
-@custom-variant dark (&:where([data-theme=light], [data-theme=light] *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* Plugins */
 @plugin "@tailwindcss/forms";
