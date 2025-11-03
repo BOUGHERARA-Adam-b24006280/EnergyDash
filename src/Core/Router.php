@@ -2,7 +2,7 @@
 /**
  * Fichier : Router.php
  * Rôle : Gère la logique de routage des requêtes HTTP
- * Auteur : Mohamed-Amine HADDAH
+ * Auteur : Mohamed-Amine HADDAD
  */
 
 namespace App\Core;
@@ -22,12 +22,6 @@ class Router
      * }>
      */
     private array $routes = [];
-    private \PDO $db;
-
-    public function __construct() {
-        $database = new Database();
-        $this->db = $database->getConnection();
-    }
 
     /**
      * Ajoute une route à la liste.
@@ -52,27 +46,21 @@ class Router
      * @param string $method
      * @throws \Exception Si le contrôleur ou la méthode sont introuvables.
      */
-    public function dispatch(string $uri, string $method): void
-    {
+    public function dispatch(string $method, string $uri): void {
+        $cleanUri = parse_url($uri, PHP_URL_PATH);
+        $cleanUri = rtrim($cleanUri, '/') ?: '/';
+
         foreach ($this->routes as $route) {
-            if ($route['method'] === strtoupper($method) && $route['path'] === (rtrim($uri, '/') ?: '/')) {
+            $path = rtrim($route['path'], '/') ?: '/';
+            if ($route['method'] === strtoupper($method) && $path === $cleanUri) {
                 [$controller, $action] = $route['action'];
-
-                if (!class_exists($controller)) {
-                    throw new \Exception("Contrôleur {$controller} introuvable");
-                }
-
-                if (!method_exists($controller, $action)) {
-                    throw new \Exception("Méthode {$action} absente dans {$controller}");
-                }
-
-                $controllerInstance = new $controller($this->db);
+                $controllerInstance = new $controller();
                 $controllerInstance->$action();
                 return;
             }
         }
 
         http_response_code(404);
-        require __DIR__ . '/../Views/error/404.php';
+        echo "<h1>Erreur 404 : route non trouvée ($cleanUri)</h1>";
     }
 }

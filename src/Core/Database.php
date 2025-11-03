@@ -9,7 +9,6 @@ namespace App\Core;
 
 use PDO;
 use PDOException;
-use Dotenv\Dotenv;
 
 /**
  * Classe Database qui gère la connexion avec la BDD
@@ -60,9 +59,9 @@ class Database {
                 $this->pdo = new PDO($dsn, $this->username, $this->password);
                 $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             } catch (PDOException $e) {
-                error_log('Erreur de connexion à la BDD :' . $e->getMessage());
-                die('Une erreur interne est survenue. Veuillez réessayer plus tard.');
+                throw new \RuntimeException('Erreur de connexion à la base de données.', 0, $e);
             }
+
         }
         return $this->pdo;
     }

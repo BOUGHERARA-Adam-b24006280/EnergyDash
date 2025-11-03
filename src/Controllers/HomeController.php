@@ -7,13 +7,12 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
 use App\Core\Layout;
 
 /**
  * Classe HomeController qui gère la gestion de l'affichage de la page d'accueil
  */
-class HomeController extends Controller {
+class HomeController {
 
     /**
      * Affiche la page d'accueil en utilisant la classe Layout pour assembler les différentes parties

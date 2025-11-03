@@ -2,17 +2,15 @@
 namespace App\Core;
 
 use PDO;
-use App\Core\Database;
 
 abstract class Model
 {
     protected PDO $db;
     protected string $table;
 
-    public function __construct()
+    public function __construct(PDO $db)
     {
-        $database = new Database();
-        $this->db = $database->getConnection();
+        $this->db = $db;
     }
 
     /**
@@ -52,11 +50,32 @@ abstract class Model
     }
 
     /**
-     * Crée une nouvelle ligne dans la table.
+     * Recherche une ligne par une colonne spécifique.
+     *
+     * @param string $column
+     * @param mixed $value
+     * @return array<string, mixed>|null
+     */
+    public function findOneBy(string $column, mixed $value): ?array
+    {
+        $sql = "SELECT * FROM {$this->table} WHERE {$column} = :value LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['value' => $value]);
+
+        /** @var array<string, mixed>|false $row */
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ?: null;
+    }
+
+
+    /**
+     * Crée une nouvelle ligne dans la table et renvoie son ID.
      *
      * @param array<string, mixed> $data
+     * @return int|false ID inséré ou false en cas d’échec
      */
-    public function create(array $data): bool
+    public function create(array $data): int|false
     {
         if (empty($data)) {
             return false;
@@ -75,7 +94,11 @@ abstract class Model
         $stmt = $this->db->prepare($sql);
 
         try {
-            return $stmt->execute($data);
+            $success = $stmt->execute($data);
+            if ($success) {
+                return (int) $this->db->lastInsertId();
+            }
+            return false;
         } catch (\Throwable $e) {
             error_log('DB insert error: ' . $e->getMessage());
             return false;

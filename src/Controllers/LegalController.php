@@ -6,6 +6,7 @@
  */
 
 namespace App\Controllers;
+
 use App\Core\Layout;
 
 /**
@@ -13,7 +14,6 @@ use App\Core\Layout;
  */
 final class LegalController
 {
-
     /**
      * Affiche la pge des mentions légales en utilisant la classe Layout pour afficher la page complète
      * 
