@@ -48,8 +48,8 @@ class Router
      */
     public function dispatch(string $method, string $uri): void {
         $cleanUri = parse_url($uri, PHP_URL_PATH);
-        $cleanUri = rtrim($cleanUri, '/') ?: '/';
-
+        $cleanUri = rtrim((string) parse_url($uri, PHP_URL_PATH), '/') ?: '/';
+        
         foreach ($this->routes as $route) {
             $path = rtrim($route['path'], '/') ?: '/';
             if ($route['method'] === strtoupper($method) && $path === $cleanUri) {
