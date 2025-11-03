@@ -1,3 +1,11 @@
+<?php
+/**
+ * Fichier : 404.php
+ * Rôle : Affiche une page d'erreur 404 personnalisée
+ * Auteur : Adam BOUGHERARA, Lucas LEPAPE
+ */
+?>
+
 <div class="fixed left-0 top-0 -z-10 h-full w-full">
     <div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
 </div>
