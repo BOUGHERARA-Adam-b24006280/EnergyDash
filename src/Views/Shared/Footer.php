@@ -15,7 +15,7 @@
             </div>
 
             <div class="col-span-1">
-                <h4 class="font-semibold text-gray-100">Energy Dash</h4>
+                <h4 class="font-semibold text-gray-100">EnergyDash</h4>
 
                 <div class="mt-3 grid space-y-3">
                     <p><a class="inline-flex gap-x-2 text-gray-400 hover:text-gray-200 focus:outline-hidden focus:text-gray-200 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="/dashboard">Dashboard</a></p>
@@ -35,7 +35,7 @@
         <div class="mt-5 sm:mt-12 grid gap-y-2 sm:gap-y-0 sm:flex sm:justify-between sm:items-center">
             <div class="flex flex-wrap justify-between items-center gap-2">
                 <p class="text-sm text-gray-400 dark:text-neutral-400">
-                    © 2025 EnergyDash. Tout droits réservés.
+                    © 2025 Energy Dash. Tout droits réservés.
                 </p>
             </div>
         </div>
