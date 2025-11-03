@@ -31,6 +31,7 @@ try {
 }catch(Exception $e) {
     error_log("Erreur 500 : " . $e->getMessage());
     http_response_code(500);
+
     require __DIR__ . '/../src/Views/error/500.php';
     exit;
 }

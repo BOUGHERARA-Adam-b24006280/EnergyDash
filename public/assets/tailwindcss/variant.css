@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* Preline UI */
+@source "../../../node_modules/preline/dist/*.js";
+@import "../../../node_modules/preline/variants.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Plugins */
+@plugin "@tailwindcss/forms";
+
+/* Ajoute un curseur pointeur aux boutons */
+@layer base {
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+/* Styles par défaut au hover sur tous les appareils */
+@custom-variant hover (&:hover);

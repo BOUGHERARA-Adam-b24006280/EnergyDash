@@ -61,6 +61,9 @@ class Router
         }
 
         http_response_code(404);
-        echo "<h1>Erreur 404 : route non trouvée ($cleanUri)</h1>";
+        $title = "Page non trouvée";
+        require __DIR__ . '/../Views/Shared/Header.php';
+        require __DIR__ . '/../Views/error/404.php';
+        require __DIR__ . '/../Views/Shared/Footer.php';
     }
 }
