@@ -7,20 +7,15 @@
 
 namespace App\Controllers;
 
-use App\Core\Layout;
+use App\Core\Controller;
 
 /**
  * Classe HomeController qui gère la gestion de l'affichage de la page d'accueil
  */
-class HomeController {
-
-    /**
-     * Affiche la page d'accueil en utilisant la classe Layout pour assembler les différentes parties
-     * 
-     * @return void
-     */
-    public function index(): void {
-        $layout = new Layout(__DIR__ . '/../Views/home/index.php', 'Accueil');
-        $layout->render();
+class HomeController extends Controller
+{
+    public function index(): void
+    {
+        $this->render(__DIR__ . '/../Views/home/index.php', 'Accueil');
     }
 }
