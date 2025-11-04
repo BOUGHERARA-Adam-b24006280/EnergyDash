@@ -1,4 +1,10 @@
 <?php
+/**
+ * Fichier : index.php
+ * Rôle : Point d'entrée principal de l'application web
+ * Auteur :  Adam BOUGHERARA, Lucas LEPAPE
+ */
+
 use App\Core\Router;
 
 require __DIR__ . '/../vendor/autoload.php';
