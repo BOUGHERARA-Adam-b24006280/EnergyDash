@@ -25,8 +25,12 @@ class ProfileController extends Controller
     public function index(): void
     {
         $this->requireLogin();
+        $user = $_SESSION['user'] ?? null;
 
-        $user = $_SESSION['user'];
+        if (!is_array($user) || !isset($user['role'])) {
+            $this->redirect('/login');
+            exit;
+        }
 
         if ($user['role'] === 'admin') {
             $users = $this->userModel->getAllUsers();
@@ -46,7 +50,17 @@ class ProfileController extends Controller
     {
         $this->requireLogin();
 
-        $id = $_SESSION['user']['id'];
+        if (
+            !isset($_SESSION['user']) ||
+            !is_array($_SESSION['user']) ||
+            !isset($_SESSION['user']['id'])
+        ) {
+            $this->redirect('/login');
+            exit;
+        }
+        assert(is_numeric($_SESSION['user']['id']));
+        $id = (int) $_SESSION['user']['id'];
+
         $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
 
         if (!$email) {
@@ -71,6 +85,7 @@ class ProfileController extends Controller
 
         $this->redirect('/profile');
     }
+
 
     public function updateRole(): void
     {
