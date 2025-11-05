@@ -2,40 +2,29 @@
 /**
  * Fichier : DashboardController.php
  * Rôle : 
- * Auteur : Lucas LEPAPE,
+ * Auteur : Lucas LEPAPE
  */
 
 namespace App\Controllers;
 
-use App\Core\Layout;
-Use Exception;
+use App\Core\Controller;
 
 /**
  * Classe DashboardController
  * Vérifie l'authentification et affiche le tableau de bord utilisateur
  */
-class DashboardController
-{
-    public function __construct()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
 
+class DashboardController extends Controller
+{
     public function index(): void
     {
-        if (empty($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
+        $this->requireLogin();
 
-        $layout = new Layout(
+        $this->render(
             __DIR__ . '/../Views/dashboard/dashboard.php',
             'Dashboard',
-            'dashboard'
+            'dashboard',
+            ['user' => $_SESSION['user']]
         );
-
-        $layout->render(['user' => $_SESSION['user']]);
     }
 }

@@ -1,4 +1,4 @@
-?php
+<?php
 /**
  * Fichier : Header.php
  * Rôle : Gère le header des pages

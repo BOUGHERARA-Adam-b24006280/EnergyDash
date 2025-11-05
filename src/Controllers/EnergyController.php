@@ -6,6 +6,7 @@
  */
 namespace App\Controllers;
 
+use App\Core\Controller;
 use App\Core\JsonResponse;
 use App\Models\EnergyModel;
 use Exception;
@@ -13,17 +14,14 @@ use Exception;
 /**
  * Classe EnergyController qui gère les vérifications, la clé API et le format des réponses
  */
-class EnergyController
+class EnergyController extends Controller
 {
     public function index(): void
     {
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
-
-        $city = isset($_GET['city']) ? htmlspecialchars(trim($_GET['city'])) : null;
-        $type = isset($_GET['type']) ? htmlspecialchars(trim($_GET['type'])) : null;
-        $from = isset($_GET['from']) ? htmlspecialchars(trim($_GET['from'])) : null;
-        $to   = isset($_GET['to'])   ? htmlspecialchars(trim($_GET['to']))   : null;
+        $city = $this->sanitize($_GET['city'] ?? '');
+        $type = $this->sanitize($_GET['type'] ?? '');
+        $from = $this->sanitize($_GET['from'] ?? '');
+        $to   = $this->sanitize($_GET['to'] ?? '');
 
         if (!$city || !$type || !$from || !$to) {
             JsonResponse::error('Paramètres requis : city, type, from, to', 400);
