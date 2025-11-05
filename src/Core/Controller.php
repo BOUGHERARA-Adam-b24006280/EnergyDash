@@ -1,8 +1,8 @@
 <?php
 /**
- * Fichier : BaseController.php
+ * Fichier : Controller.php
  * Rôle : Contrôleur parent abstrait pour centraliser les fonctionnalités communes
- * Auteur : Mohamed-Amine Haddad, Lucas LEPAPE
+ * Auteur : Lucas LEPAPE
  */
 
 namespace App\Core;
@@ -10,7 +10,7 @@ namespace App\Core;
 use App\Core\Layout;
 
 /**
- * Classe abstraite BaseController
+ * Classe abstraite Controller
  * Fournit les utilitaires communs à tous les contrôleurs :
  * - gestion de session
  * - redirections
@@ -20,6 +20,9 @@ use App\Core\Layout;
  */
 abstract class Controller
 {
+    /**
+     * Constructeur : démarre la session automatiquement
+     */
     public function __construct()
     {
         $this->startSession();
@@ -57,7 +60,12 @@ abstract class Controller
     protected function requireAdmin(): void
     {
         $this->requireLogin();
-        if ($_SESSION['user']['role'] !== 'admin') {
+
+        // Sécurise et typise la session utilisateur
+        $user = $_SESSION['user'] ?? null;
+
+        // Vérifie que la clé 'role' existe et qu'elle vaut bien 'admin'
+        if (!is_array($user) || !isset($user['role']) || $user['role'] !== 'admin') {
             $this->redirect('/dashboard');
         }
     }
@@ -65,10 +73,10 @@ abstract class Controller
     /**
      * Rend une vue avec la classe Layout
      *
-     * @param string $viewPath Chemin du fichier de vue
-     * @param string $title    Titre de la page
-     * @param string $layout   Nom du layout à utiliser (par défaut 'default')
-     * @param array  $data     Données à passer à la vue
+     * @param string $viewPath            Chemin du fichier de vue
+     * @param string $title               Titre de la page
+     * @param string $layout              Nom du layout à utiliser (par défaut 'default')
+     * @param array<string, mixed> $data  Données à passer à la vue
      */
     protected function render(string $viewPath, string $title, string $layout = 'default', array $data = []): void
     {
@@ -78,6 +86,8 @@ abstract class Controller
 
     /**
      * Redirige vers une URL et arrête l’exécution
+     *
+     * @param string $url URL de redirection
      */
     protected function redirect(string $url): void
     {
@@ -104,8 +114,8 @@ abstract class Controller
      */
     protected function getFlash(string $type): ?string
     {
-        if (isset($_SESSION[$type])) {
-            $message = $_SESSION[$type];
+        if (isset($_SESSION[$type]) && is_scalar($_SESSION[$type])) {
+            $message = (string) $_SESSION[$type];
             unset($_SESSION[$type]);
             return $message;
         }
@@ -114,9 +124,12 @@ abstract class Controller
 
     /**
      * Sécurise une entrée utilisateur (trim + htmlspecialchars)
+     *
+     * @param string|null $value
+     * @return string
      */
     protected function sanitize(?string $value): string
     {
-        return htmlspecialchars(trim((string) $value));
+        return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
     }
 }
