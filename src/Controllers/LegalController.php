@@ -19,7 +19,7 @@ final class LegalController
      * 
      * @return void
      */
-    public function mentions(): void
+    public function legal(): void
     {
         $layout = new Layout(__DIR__ . '/../Views/Legal/Mentions.php', 'Mentions Légales');
         $layout->render();
