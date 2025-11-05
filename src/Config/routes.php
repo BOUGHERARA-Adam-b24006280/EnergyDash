@@ -19,6 +19,7 @@ $router->add('GET', '/login', [AuthController::class, 'login']);
 $router->add('GET', '/register', [AuthController::class, 'register']);
 $router->add('POST', '/login', [AuthController::class, 'login']);
 $router->add('POST', '/register', [AuthController::class, 'register']);
+$router->add('GET', '/forgot', [AuthController::class, 'forgot']);
 
 // Déconnexion
 $router->add('GET', '/logout', [AuthController::class, 'logout']);

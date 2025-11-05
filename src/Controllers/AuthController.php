@@ -152,6 +152,14 @@ final class AuthController extends Controller
     }
 
     /**
+     * Affiche la page de mot de passe oublié.
+     */
+    public function forgot(): void
+    {
+        $this->render(__DIR__ . '/../Views/Auth/forgot.php', 'Mot de passe oublié');
+    }
+
+    /**
      * Index par défaut -> redirige vers /login
      */
     public function index(): void
