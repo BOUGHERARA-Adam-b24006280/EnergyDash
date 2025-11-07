@@ -19,6 +19,7 @@ $router->add('GET', '/login', [AuthController::class, 'login']);
 $router->add('GET', '/register', [AuthController::class, 'register']);
 $router->add('POST', '/login', [AuthController::class, 'login']);
 $router->add('POST', '/register', [AuthController::class, 'register']);
+$router->add('GET', '/forgot', [AuthController::class, 'forgot']);
 
 // Déconnexion
 $router->add('GET', '/logout', [AuthController::class, 'logout']);
@@ -29,7 +30,7 @@ $router->add('GET', '/dashboard', [DashboardController::class, 'index']);
 $router->add('POST', '/dashboard', [DashboardController::class, 'index']);
 
 // Mentions légales
-$router->add('GET', '/mentions-legales', [LegalController::class, 'mentions']);
+$router->add('GET', '/legal', [LegalController::class, 'legal']);
 
 // Api
 $router->add('GET', '/api/energy', [EnergyController::class, 'index']);
