@@ -42,7 +42,7 @@ class ProfileController
         }
 
         // Appelle la vue profile.php via Layout
-        $layout = new Layout($viewPath, 'Profil', 'dashboard');
+        $layout = new Layout($viewPath, 'Profil');
         $layout->render(['user' => $user, 'users' => $users,]);
     }
 

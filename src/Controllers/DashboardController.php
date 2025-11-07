@@ -30,11 +30,7 @@ class DashboardController
             exit;
         }
 
-        $layout = new Layout(
-            __DIR__ . '/../Views/dashboard/dashboard.php',
-            'Dashboard',
-            'dashboard'
-        );
+        $layout = new Layout(__DIR__ . '/../Views/dashboard/dashboard.php', 'Dashboard');
 
         $layout->render(['user' => $_SESSION['user']]);
     }
