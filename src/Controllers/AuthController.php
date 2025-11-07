@@ -7,6 +7,7 @@
 
 namespace App\Controllers;
 
+use App\Core\Controller;
 use App\Core\Layout;
 use App\Core\Mailer;
 use App\Models\UserModel;
@@ -15,7 +16,7 @@ use Exception;
 /**
  * Classe AuthController qui gère la gestion et les actions des différentes pages d'authentifications
  */
-class AuthController {
+class AuthController extends Controller {
     
     /** @var UserModel */
     private UserModel $userModel;
