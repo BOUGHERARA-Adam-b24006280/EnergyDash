@@ -66,4 +66,6 @@ class Router
         require __DIR__ . '/../Views/error/404.php';
         require __DIR__ . '/../Views/Shared/Footer.php';
     }
+
+
 }
