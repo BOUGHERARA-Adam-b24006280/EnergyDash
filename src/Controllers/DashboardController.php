@@ -8,7 +8,6 @@
 namespace App\Controllers;
 
 use App\Core\Layout;
-Use Exception;
 
 /**
  * Classe DashboardController

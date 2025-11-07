@@ -2,16 +2,15 @@
 /**
  * Fichier : AuthController.php
  * Rôle : Gère les actions d'authentification (inscription, connexion, déconnexion)
- * Auteur : Lucas LEPAPE,
+ * Auteur : Mohamed-Amine HADDAD, Lucas LEPAPE
  */
 
 namespace App\Controllers;
 
 use App\Core\Layout;
+use App\Core\Mailer;
 use App\Models\UserModel;
 use Exception;
-
-require_once __DIR__ . '/../Models/UserModel.php';
 
 /**
  * Classe AuthController qui gère la gestion et les actions des différentes pages d'authentifications
@@ -163,5 +162,120 @@ class AuthController {
         session_destroy();
         header('Location: /login');
         exit;
+    }
+
+    /**
+     * Affiche et traite le formulaire de "mot de passe oublié"
+     */
+    public function forgotPassword(): void
+    {
+        $errors = [];
+        $success = '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $email = trim($_POST['email'] ?? '');
+
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    throw new Exception("Adresse e-mail invalide.");
+                }
+
+                $user = $this->userModel->getUserByEmail($email);
+                if (!$user) {
+                    throw new Exception("Aucun utilisateur trouvé avec cet e-mail.");
+                }
+
+                // Génère un token unique et le hash
+                $token = bin2hex(random_bytes(32));
+                $hashedToken = hash('sha256', $token);
+
+                // Fixe le fuseau et calcule l'expiration
+                $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
+
+                // Enregistre le token haché dans la base
+                $this->userModel->storeResetToken($user['id'], $hashedToken, $expiresAt);
+
+                // Prépare le lien de réinitialisation (avec le token non haché)
+                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $resetLink = "$protocol://{$_SERVER['HTTP_HOST']}/reset?token=$token";
+
+                // Contenu du mail
+                $subject = "Réinitialisation de votre mot de passe";
+                $message = <<<EOT
+                    Bonjour {$user['first_name']},
+
+                    Vous avez demandé à réinitialiser votre mot de passe.
+                    Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :
+                    $resetLink
+
+                    Ce lien expirera dans 30 minutes.
+
+                    Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.
+
+                    L'équipe Energy Dash.
+                EOT;
+
+                // Envoi du mail
+                $mailer = new Mailer();
+                if (!$mailer->send($email, $subject, $message)) {
+                    throw new Exception("Impossible d'envoyer l'e-mail. Veuillez réessayer plus tard.");
+                }
+
+                $success = "Un e-mail de réinitialisation a été envoyé à $email.";
+            } catch (Exception $e) {
+                $errors[] = $e->getMessage();
+            }
+        }
+
+        $layout = new Layout(__DIR__ . '/../Views/auth/forgot.php', 'Mot de passe oublié');
+        $layout->render(['errors' => $errors, 'success' => $success]);
+    }
+
+    /**
+     * Page de réinitialisation du mot de passe via token
+     */
+    public function resetPassword(): void
+    {
+        $errors = [];
+        $success = '';
+        $token = $_GET['token'] ?? '';
+
+        if (!$token) {
+            $errors[] = "Lien de réinitialisation invalide ou manquant.";
+        } else {
+            // On calcule le hash du token pour vérifier
+            $hashedToken = hash('sha256', $token);
+            $user = $this->userModel->getUserByToken($hashedToken);
+
+            if (!$user) {
+                $errors[] = "Ce lien est invalide ou a expiré.";
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                try {
+                    $password = $_POST['password'] ?? '';
+                    $confirm  = $_POST['confirm_password'] ?? '';
+
+                    if ($password !== $confirm) {
+                        throw new Exception("Les mots de passe ne correspondent pas.");
+                    }
+                    if (mb_strlen($password) < 8) {
+                        throw new Exception("Le mot de passe doit contenir au moins 8 caractères.");
+                    }
+
+                    // Mise à jour et suppression du token
+                    $this->userModel->updatePassword($user['id'], $password);
+                    $this->userModel->invalidateToken($hashedToken);
+
+                    $success = "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.";
+                } catch (Exception $e) {
+                    $errors[] = $e->getMessage();
+                }
+            }
+        }
+
+        $layout = new Layout(__DIR__ . '/../Views/auth/reset.php', 'Réinitialiser le mot de passe');
+        $layout->render([
+            'errors'  => $errors,
+            'success' => $success
+        ]);
     }
 }

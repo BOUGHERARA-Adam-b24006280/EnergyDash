@@ -68,7 +68,6 @@ abstract class Model
         return $row ?: null;
     }
 
-
     /**
      * Crée une nouvelle ligne dans la table et renvoie son ID.
      *
