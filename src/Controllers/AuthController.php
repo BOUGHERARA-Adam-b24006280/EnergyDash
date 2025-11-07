@@ -181,85 +181,89 @@ class AuthController extends Controller {
     }
 
     /**
-     * Affiche et traite le formulaire de "mot de passe oublié"
+     * Gère la demande de réinitialisation de mot de passe.
+     * 
+     * Cette méthode :
+     * - Vérifie la validité de l'adresse e-mail.
+     * - Si l'utilisateur existe, génère un token et envoie un mail avec un lien de réinitialisation.
+     * - Dans tous les cas, affiche un message de succès neutre (pour éviter la fuite d'information).
      */
     public function forgotPassword(): void
     {
         $errors = [];
         $success = '';
 
+        // Si le formulaire a été soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // Assure que $email est une chaîne avant trim
+                // Sécurise et valide l'adresse e-mail reçue
                 $email = isset($_POST['email']) && is_scalar($_POST['email']) ? trim((string)$_POST['email']) : '';
-
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     throw new Exception("Adresse e-mail invalide.");
                 }
 
+                // Recherche de l'utilisateur par e-mail
                 $user = $this->userModel->getUserByEmail($email);
-                if (!$user) {
-                    throw new Exception("Aucun utilisateur trouvé avec cet e-mail.");
+
+                // Si l'utilisateur existe, on génère et envoie le mail
+                if ($user) {
+                    // Génère un token sécurisé et son hash
+                    $token = bin2hex(random_bytes(32));
+                    $hashedToken = hash('sha256', $token);
+
+                    // Date d'expiration du lien (dans 30 minutes)
+                    $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
+
+                    // Vérifie et force le type de l'ID utilisateur
+                    $userId = $user['id'] ?? null;
+                    if (!is_numeric($userId)) {
+                        throw new Exception("ID utilisateur invalide.");
+                    }
+
+                    // Enregistre le token dans la base
+                    $this->userModel->storeResetToken((int)$userId, $hashedToken, $expiresAt);
+
+                    // Génère le lien complet de réinitialisation
+                    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                    $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                    $resetLink = "$protocol://{$httpHost}/reset?token=$token";
+
+                    // Récupère le prénom de l'utilisateur pour personnaliser le message
+                    $firstName = $user['first_name'] ?? 'Utilisateur';
+                    if (!is_string($firstName)) {
+                        $firstName = 'Utilisateur';
+                    }
+
+                    // Prépare le contenu du mail
+                    $subject = "Réinitialisation de votre mot de passe";
+                    $message = <<<EOT
+                        Bonjour {$firstName},
+
+                        Vous avez demandé à réinitialiser votre mot de passe.
+                        Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :
+                        $resetLink
+
+                        Ce lien expirera dans 30 minutes.
+
+                        Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.
+
+                        L'équipe Energy Dash.
+                    EOT;
+
+                    // Envoie du mail
+                    $mailer = new Mailer();
+                    $mailer->send($email, $subject, $message);
                 }
 
-                // Génère un token unique et le hash
-                $token = bin2hex(random_bytes(32));
-                $hashedToken = hash('sha256', $token);
-
-                // Fixe le fuseau et calcule l'expiration
-                $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
-
-                // Assure que $user['id'] est un entier
-                $userId = $user['id'] ?? null;
-                if (!is_numeric($userId)) {
-                    throw new Exception("ID utilisateur invalide.");
-                }
-                $this->userModel->storeResetToken((int)$userId, $hashedToken, $expiresAt);
-
-                // Prépare le lien de réinitialisation avec le token non haché
-                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                
-                // Assure que $_SERVER['HTTP_HOST'] est une chaîne
-                $httpHost = $_SERVER['HTTP_HOST'] ?? null;
-                if (!is_string($httpHost) || empty($httpHost)) {
-                    throw new Exception("Impossible de déterminer l'hôte du serveur.");
-                }
-                $resetLink = "$protocol://{$httpHost}/reset?token=$token";
-
-                // Assure que $user['first_name'] est une chaîne
-                $firstName = $user['first_name'] ?? 'Utilisateur';
-                if (!is_string($firstName)) {
-                    $firstName = 'Utilisateur'; // Fallback
-                }
-
-                // Contenu du mail
-                $subject = "Réinitialisation de votre mot de passe";
-                $message = <<<EOT
-                    Bonjour {$firstName},
-
-                    Vous avez demandé à réinitialiser votre mot de passe.
-                    Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :
-                    $resetLink
-
-                    Ce lien expirera dans 30 minutes.
-
-                    Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.
-
-                    L'équipe Energy Dash.
-                EOT;
-
-                // Envoi du mail
-                $mailer = new Mailer();
-                if (!$mailer->send($email, $subject, $message)) {
-                    throw new Exception("Impossible d'envoyer l'e-mail. Veuillez réessayer plus tard.");
-                }
-
-                $success = "Un e-mail de réinitialisation a été envoyé à $email.";
+                // Message neutre envoyé dans tous les cas (même si l'email n'existe pas)
+                $success = "Un e-mail de réinitialisation a été envoyé à $email, s’il existe dans notre base de données.";
             } catch (Exception $e) {
+                // Gestion des erreurs d'envoi ou de validation
                 $errors[] = $e->getMessage();
             }
         }
 
+        // Rendu de la page
         $layout = new Layout(__DIR__ . '/../Views/auth/forgot.php', 'Mot de passe oublié');
         $layout->render(['errors' => $errors, 'success' => $success]);
     }
