@@ -17,8 +17,9 @@ class Mailer
     {
         $this->mail = new PHPMailer(true);
 
-        // Charge la configuration SMTP depuis config.php
+        /** @var array{smtp: array{host: string, port: int, username: string, password: string, from: string, from_name: string}, env?: string} $config*/
         $config = require __DIR__ . '/../Config/config.php';
+        /** @var array{host: string, port: int, username: string, password: string, from: string, from_name: string} $smtp */
         $smtp = $config['smtp'];
 
         try {

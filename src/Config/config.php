@@ -28,7 +28,7 @@ return [
 
     'smtp' => [
         'host' => $_ENV['SMTP_HOST'],
-        'port' => (int)($_ENV['SMTP_PORT']),
+        'port' => $_ENV['SMTP_PORT'],
         'username' => $_ENV['SMTP_USER'],
         'password' => $_ENV['SMTP_PASS'],
         'from' => $_ENV['SMTP_FROM'],

@@ -33,8 +33,7 @@ class AuthController {
 
     /**
      * Affiche la page de connexion en utilisant la classe Layout pour afficher la page complète
-     * 
-     * @return void
+     * * @return void
      */
     public function login(): void {
         $errors = [];
@@ -67,7 +66,7 @@ class AuthController {
                     throw new Exception("Aucun compte trouvé avec cet e-mail.");
                 }
 
-                $hash = $user['password'];
+                $hash = $user['password'] ?? '';
                 if (!password_verify($password, $hash)) {
                     throw new Exception("Mot de passe incorrect.");
                 }
@@ -96,8 +95,7 @@ class AuthController {
 
     /**
      * Affiche la page d'inscription en utilisant la classe Layout pour afficher la page complète
-     * 
-     * @return void
+     * * @return void
      */
     public function register(): void {
         $errors = [];
@@ -154,8 +152,7 @@ class AuthController {
 
     /**
      * Déconnecte l'utilisateur actif et le redirige vers la page de connexion
-     * 
-     * @return void
+     * * @return void
      */
     public function logout(): void {
         session_start();
@@ -174,7 +171,8 @@ class AuthController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                $email = trim($_POST['email'] ?? '');
+                // Assure que $email est une chaîne avant trim
+                $email = isset($_POST['email']) && is_scalar($_POST['email']) ? trim((string)$_POST['email']) : '';
 
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     throw new Exception("Adresse e-mail invalide.");
@@ -192,17 +190,33 @@ class AuthController {
                 // Fixe le fuseau et calcule l'expiration
                 $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
-                // Enregistre le token haché dans la base
-                $this->userModel->storeResetToken($user['id'], $hashedToken, $expiresAt);
+                // Assure que $user['id'] est un entier
+                $userId = $user['id'] ?? null;
+                if (!is_numeric($userId)) {
+                    throw new Exception("ID utilisateur invalide.");
+                }
+                $this->userModel->storeResetToken((int)$userId, $hashedToken, $expiresAt);
 
-                // Prépare le lien de réinitialisation (avec le token non haché)
+                // Prépare le lien de réinitialisation avec le token non haché
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                $resetLink = "$protocol://{$_SERVER['HTTP_HOST']}/reset?token=$token";
+                
+                // Assure que $_SERVER['HTTP_HOST'] est une chaîne
+                $httpHost = $_SERVER['HTTP_HOST'] ?? null;
+                if (!is_string($httpHost) || empty($httpHost)) {
+                    throw new Exception("Impossible de déterminer l'hôte du serveur.");
+                }
+                $resetLink = "$protocol://{$httpHost}/reset?token=$token";
+
+                // Assure que $user['first_name'] est une chaîne
+                $firstName = $user['first_name'] ?? 'Utilisateur';
+                if (!is_string($firstName)) {
+                    $firstName = 'Utilisateur'; // Fallback
+                }
 
                 // Contenu du mail
                 $subject = "Réinitialisation de votre mot de passe";
                 $message = <<<EOT
-                    Bonjour {$user['first_name']},
+                    Bonjour {$firstName},
 
                     Vous avez demandé à réinitialiser votre mot de passe.
                     Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :
@@ -238,9 +252,11 @@ class AuthController {
     {
         $errors = [];
         $success = '';
-        $token = $_GET['token'] ?? '';
+        
+        // FIX (Ligne 247) : Assure que $token (de $_GET) est une chaîne avant hash()
+        $token = isset($_GET['token']) && is_scalar($_GET['token']) ? (string)$_GET['token'] : '';
 
-        if (!$token) {
+        if ($token === '') {
             $errors[] = "Lien de réinitialisation invalide ou manquant.";
         } else {
             // On calcule le hash du token pour vérifier
@@ -251,8 +267,9 @@ class AuthController {
                 $errors[] = "Ce lien est invalide ou a expiré.";
             } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 try {
-                    $password = $_POST['password'] ?? '';
-                    $confirm  = $_POST['confirm_password'] ?? '';
+                    // FIX (Ligne 260) : Assure que $password et $confirm sont des chaînes
+                    $password = isset($_POST['password']) && is_scalar($_POST['password']) ? (string)$_POST['password'] : '';
+                    $confirm  = isset($_POST['confirm_password']) && is_scalar($_POST['confirm_password']) ? (string)$_POST['confirm_password'] : '';
 
                     if ($password !== $confirm) {
                         throw new Exception("Les mots de passe ne correspondent pas.");
@@ -261,8 +278,14 @@ class AuthController {
                         throw new Exception("Le mot de passe doit contenir au moins 8 caractères.");
                     }
 
-                    // Mise à jour et suppression du token
-                    $this->userModel->updatePassword($user['id'], $password);
+                    // FIX (Ligne 265) : Assure que $user['id'] est un entier et $password une chaîne
+                    $userId = $user['id'] ?? null;
+                    if (!is_numeric($userId)) {
+                        throw new Exception("ID utilisateur invalide pour la mise à jour.");
+                    }
+                    
+                    // $password est déjà une chaîne grâce au fix de la Ligne 260
+                    $this->userModel->updatePassword((int)$userId, $password);
                     $this->userModel->invalidateToken($hashedToken);
 
                     $success = "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.";

@@ -151,7 +151,7 @@ class UserModel extends Model
             ");
             return $stmt->execute([
                 ':user_id'   => $userId,
-                ':token'     => $hashedToken, // ✅ déjà haché
+                ':token'     => $hashedToken,
                 ':created_at'=> date('Y-m-d H:i:s'),
                 ':expires_at'=> $expiresAt
             ]);
@@ -161,6 +161,12 @@ class UserModel extends Model
         }
     }
 
+    /**
+     * Récupère un utilisateur associé à un token de réinitialisation.
+     *
+     * @param string $token Token haché (SHA-256)
+     * @return array<string, mixed>|null Retourne les infos de l'utilisateur ou null si invalide/expiré
+     */
     public function getUserByToken(string $token): ?array
     {
         try {
@@ -172,8 +178,11 @@ class UserModel extends Model
                 LIMIT 1
             ");
             $stmt->execute([':token' => $token]);
+
+            /** @var array<string, mixed>|false $result */
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result ?: null;
+
+            return $result !== false ? $result : null;
         } catch (PDOException $e) {
             error_log('Erreur getUserByToken : ' . $e->getMessage());
             return null;
