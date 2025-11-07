@@ -40,7 +40,7 @@ $router->add('GET', '/profile', [ProfileController::class, 'index']);
 $router->add('POST', '/profile/updateRole', [ProfileController::class, 'updateRole']);
 
 // Mot de passe oublié
-$router->add('GET', '/forgot', [AuthController::class, 'forgotPassword']);
-$router->add('POST', '/forgot', [AuthController::class, 'forgotPassword']);
+$router->add('GET', '/forgot', [AuthController::class, 'forgot']);            // Affiche la page
+$router->add('POST', '/forgot', [AuthController::class, 'forgotPassword']);   // Traite le formulaire
 $router->add('GET', '/reset', [AuthController::class, 'resetPassword']);
 $router->add('POST', '/reset', [AuthController::class, 'resetPassword']);
