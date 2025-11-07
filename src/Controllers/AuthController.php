@@ -256,7 +256,8 @@ class AuthController extends Controller {
                 }
 
                 // Message neutre envoyé dans tous les cas (même si l'email n'existe pas)
-                $success = "Un e-mail de réinitialisation a été envoyé à $email, si un compte est lié à cet e-mail";
+                $success = "Si un compte est associé à cette adresse e-mail, un lien de réinitialisation vous a été envoyé.";
+
             } catch (Exception $e) {
                 // Gestion des erreurs d'envoi ou de validation
                 $errors[] = $e->getMessage();
