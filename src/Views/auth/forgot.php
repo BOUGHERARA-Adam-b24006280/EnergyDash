@@ -25,6 +25,21 @@
     </div>
 <?php endif; ?>
 
+<?php if (!empty($success)): ?>
+    <div class="bg-green-50 border border-green-200 text-sm text-green-800 rounded-lg p-4 dark:bg-green-800/10 dark:border-green-900 dark:text-green-500 mx-2 mb-4" role="alert">
+        <div class="flex">
+            <div class="shrink-0">
+                <svg class="shrink-0 size-4 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <div class="ms-4">
+                <p><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></p>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 <div class="fixed left-0 top-0 -z-10 h-full w-full">
     <div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
 </div>
