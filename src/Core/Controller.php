@@ -80,7 +80,7 @@ abstract class Controller
      */
     protected function render(string $viewPath, string $title, string $layout = 'default', array $data = []): void
     {
-        $layout = new Layout($viewPath, $title, $layout);
+        $layout = new Layout($viewPath, $title);
         $layout->render($data);
     }
 

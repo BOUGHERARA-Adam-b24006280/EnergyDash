@@ -169,7 +169,7 @@ class AuthController extends Controller {
      */
     public function forgot(): void
     {
-        $this->render(__DIR__ . '/../Views/Auth/forgot.php', 'Mot de passe oublié');
+        $this->render(__DIR__ . '/../Views/auth/forgot.php', 'Mot de passe oublié');
     }
 
     /**
