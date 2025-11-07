@@ -40,10 +40,9 @@ class ProfileController extends Controller
             $viewPath = __DIR__ . '/../Views/profile/profile.php';
         }
 
-        $this->render($viewPath, 'Profil', 'dashboard', [
-            'user' => $user,
-            'users' => $users,
-        ]);
+        // Appelle la vue profile.php via Layout
+        $layout = new Layout($viewPath, 'Profil');
+        $layout->render(['user' => $user, 'users' => $users,]);
     }
 
     public function update(): void

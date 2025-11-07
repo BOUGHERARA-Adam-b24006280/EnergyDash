@@ -20,11 +20,8 @@ class DashboardController extends Controller
     {
         $this->requireLogin();
 
-        $this->render(
-            __DIR__ . '/../Views/dashboard/dashboard.php',
-            'Dashboard',
-            'dashboard',
-            ['user' => $_SESSION['user']]
-        );
+        $layout = new Layout(__DIR__ . '/../Views/dashboard/dashboard.php', 'Dashboard');
+
+        $layout->render(['user' => $_SESSION['user']]);
     }
 }
