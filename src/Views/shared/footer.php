@@ -35,7 +35,7 @@
                 <h4 class="font-semibold text-gray-100">Juridique</h4>
 
                 <div class="mt-3 grid space-y-3">
-                    <p><a class="inline-flex gap-x-2 text-gray-400 hover:text-gray-200 focus:outline-hidden focus:text-gray-200 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="/legal">Mentions légales</a></p>
+                    <p><a class="inline-flex gap-x-2 text-gray-400 hover:text-gray-200 focus:outline-hidden focus:text-gray-200 dark:text-neutral-400 dark:hover:text-neutral-200 dark:focus:text-neutral-200" href="/mentions">Mentions légales</a></p>
                 </div>
             </div>
         </div>

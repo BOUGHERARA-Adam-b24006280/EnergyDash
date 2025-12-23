@@ -62,8 +62,8 @@ class Router
 
         http_response_code(404);
         $title = "Page non trouvée";
-        require __DIR__ . '/../Views/Shared/Header.php';
+        require __DIR__ . '/../Views/shared/header.php';
         require __DIR__ . '/../Views/error/404.php';
-        require __DIR__ . '/../Views/Shared/Footer.php';
+        require __DIR__ . '/../Views/shared/footer.php';
     }
 }

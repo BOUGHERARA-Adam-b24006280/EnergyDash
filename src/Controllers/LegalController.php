@@ -17,7 +17,7 @@ final class LegalController extends Controller
     public function index(): void
     {
         $this->render(
-            __DIR__ . '/../Views/Legal/Mentions.php',
+            __DIR__ . '/../Views/legal/mentions.php',
             'Mentions Légales'
         );
     }

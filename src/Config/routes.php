@@ -30,7 +30,7 @@ $router->add('GET', '/dashboard', [DashboardController::class, 'index']);
 $router->add('POST', '/dashboard', [DashboardController::class, 'index']);
 
 // Mentions légales
-$router->add('GET', '/legal', [LegalController::class, 'legal']);
+$router->add('GET', '/mentions', [LegalController::class, 'index']);
 
 // Api
 $router->add('GET', '/api/energy', [EnergyController::class, 'index']);

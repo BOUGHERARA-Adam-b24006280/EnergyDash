@@ -1,6 +1,6 @@
 <?php
 /**
- * Fichier : Header.php
+ * Fichier : header.php
  * Rôle : Gère le header des pages
  * Auteur :  Adam BOUGHERARA, Lucas LEPAPE, Gustin MAILHÉ
  */

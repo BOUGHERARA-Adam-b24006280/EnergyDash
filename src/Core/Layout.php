@@ -41,9 +41,9 @@ class Layout {
         extract($data);
         $title = $this->title;
         
-        require __DIR__ . '/../Views/Shared/Header.php';
+        require __DIR__ . '/../Views/shared/header.php';
         require $this->viewPath;
-        require __DIR__ . '/../Views/Shared/Footer.php';
+        require __DIR__ . '/../Views/shared/footer.php';
     }
 
     /**
