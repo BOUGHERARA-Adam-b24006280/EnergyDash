@@ -19,7 +19,10 @@ class ProfileController extends Controller
 
     public function __construct()
     {
-        parent::__construct(); // démarre la session
+       if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $this->userModel = new UserModel();
     }
 
@@ -35,15 +38,17 @@ class ProfileController extends Controller
 
         if ($user['role'] === 'admin') {
             $users = $this->userModel->getAllUsers();
-            $viewPath = __DIR__ . '/../Views/profile/profile_admin.php';
+            $viewPath = 'profile/profile_admin';
         } else {
             $users = [];
-            $viewPath = __DIR__ . '/../Views/profile/profile.php';
+            $viewPath = 'profile/profile';
         }
 
-        // Appelle la vue profile.php via Layout
-        $layout = new Layout($viewPath, 'Profil');
-        $layout->render(['user' => $user, 'users' => $users,]);
+        $this->render($viewPath, [
+            'title' => 'Mon Profil',
+            'user'  => $user,
+            'users' => $users
+        ]);
     }
 
     public function update(): void
@@ -92,13 +97,20 @@ class ProfileController extends Controller
         $this->requireAdmin();
 
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_STRING);
+        $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_SPECIAL_CHARS);
 
-        if ($id && in_array($role, ['admin', 'user'])) {
+        if ($id && in_array($role, ['user', 'editor'])) {
+            
+            if ($id === $_SESSION['user']['id']) {
+                $this->flash('error', "Vous ne pouvez pas modifier votre propre rôle ici.");
+                $this->redirect('/profile');
+                exit;
+            }
+
             $this->userModel->updateUserRole($id, $role);
-            $this->flash('success', "Les droits de l’utilisateur ont été mis à jour.");
+            $this->flash('success', "Le rôle de l'utilisateur a été mis à jour (Admin impossible).");
         } else {
-            $this->flash('error', "Erreur : rôle invalide.");
+            $this->flash('error', "Action non autorisée ou rôle invalide.");
         }
 
         $this->redirect('/profile');

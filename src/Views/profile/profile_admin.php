@@ -52,7 +52,7 @@
                                 <input type="hidden" name="id" value="<?= $u['id']; ?>">
                                 <select name="role" class="form-select form-select-sm w-auto me-2">
                                     <option value="user" <?= $u['role'] === 'user' ? 'selected' : ''; ?>>Utilisateur</option>
-                                    <option value="admin" <?= $u['role'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                                    <option value="editor" <?= $u['role'] === 'editor' ? 'selected' : '' ?>>Autorisé (Import)</option>
                                 </select>
                                 <button type="submit" class="btn btn-sm btn-primary">Modifier</button>
                             </form>

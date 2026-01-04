@@ -16,6 +16,6 @@ class HomeController extends Controller
 {
     public function index(): void
     {
-        $this->render(__DIR__ . '/../Views/home/index.php', 'Accueil');
+        $this->render('home/index', ['title' => 'Accueil']);
     }
 }

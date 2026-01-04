@@ -23,7 +23,10 @@ class AuthController extends Controller {
 
     public function __construct()
     {
-        parent::__construct(); // démarre la session via BaseController
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $this->userModel = new UserModel();
     }
 
@@ -82,15 +85,17 @@ class AuthController extends Controller {
 
                 unset($_SESSION['csrf_token']);
                 $this->redirect('/dashboard');
+                exit;
 
             } catch (Exception $e) {
                 $errors[] = $e->getMessage();
             }
         }
 
-        $this->render(__DIR__ . '/../Views/auth/login.php', 'Connexion', 'default', [
-            'errors' => $errors,
-            'csrf_token' => $_SESSION['csrf_token'],
+        $this->render('auth/login', [
+            'title'      => 'Connexion',
+            'errors'     => $errors,
+            'csrf_token' => $_SESSION['csrf_token'] ?? ''
         ]);
     }
 
@@ -148,9 +153,10 @@ class AuthController extends Controller {
             }
         }
 
-        $this->render(__DIR__ . '/../Views/auth/register.php', 'Inscription', 'default', [
-            'errors' => $errors,
-            'csrf_token' => $_SESSION['csrf_token'],
+        $this->render('auth/register', [
+            'title'      => 'Inscription',
+            'errors'     => $errors,
+            'csrf_token' => $_SESSION['csrf_token'] ?? ''
         ]);
     }
 
@@ -160,8 +166,17 @@ class AuthController extends Controller {
      */
     public function logout(): void
     {
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
         session_destroy();
         $this->redirect('/login');
+        exit;
     }
 
     /**
@@ -169,7 +184,9 @@ class AuthController extends Controller {
      */
     public function forgot(): void
     {
-        $this->render(__DIR__ . '/../Views/auth/forgot.php', 'Mot de passe oublié');
+        $this->render('auth/forgot', [
+            'title' => 'Mot de passe oublié'
+        ]);
     }
 
     /**
@@ -265,8 +282,11 @@ class AuthController extends Controller {
         }
 
         // Rendu de la page
-        $layout = new Layout(__DIR__ . '/../Views/auth/forgot.php', 'Mot de passe oublié');
-        $layout->render(['errors' => $errors, 'success' => $success]);
+        $this->render('auth/forgot', [
+            'title'   => 'Mot de passe oublié',
+            'errors'  => $errors,
+            'success' => $success
+        ]);
     }
 
     /**
@@ -319,8 +339,8 @@ class AuthController extends Controller {
             }
         }
 
-        $layout = new Layout(__DIR__ . '/../Views/auth/reset.php', 'Réinitialiser le mot de passe');
-        $layout->render([
+        $this->render('auth/reset', [
+            'title'   => 'Réinitialiser le mot de passe',
             'errors'  => $errors,
             'success' => $success
         ]);

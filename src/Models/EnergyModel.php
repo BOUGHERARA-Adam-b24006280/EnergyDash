@@ -1,76 +1,161 @@
 <?php
-/**
- * Fichier : EnergyModel.php
- * Rôle : Gère les interactions avec la table 'energy_data'
- * Auteur : Lucas LEPAPE, Adam Bougherara
- */
-
 namespace App\Models;
 
-use App\Core\Model;
-use App\Core\Database;
-use PDO;
-use Exception;
-
-class EnergyModel extends Model
+class EnergyModel
 {
-    // 🔹 Nom de la table associée à ce modèle
-    protected string $table = 'energy_data';
+    private string $csvPath;
+    private string $delimiter = ','; // Par défaut
 
-    /**
-     * Constructeur : initialise la connexion PDO via Database
-     */
     public function __construct()
     {
-        $db = (new Database())->getConnection(); // se connecte à la BDD à partir du .env
-        parent::__construct($db);                // passe la connexion au Model parent
+        // --- CORRECTION : ON FORCE LE DÉMARRAGE DE SESSION ---
+        // Sans ça, l'API ne sait pas qui tu es et charge le fichier par défaut.
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $userId = $_SESSION['user']['id'] ?? null;
+        $userRole = $_SESSION['user']['role'] ?? 'user';
+
+        // Chemins des fichiers
+        $userFile = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
+        $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
+
+        $canUpload = in_array($userRole, ['admin', 'editor']);
+
+        if ($userId && $canUpload && file_exists($userFile)) {
+            $this->csvPath = $userFile;
+        } else {
+            $this->csvPath = $defaultFile;
+        }
+        
+        // Détection séparateur (Code existant...)
+        if (file_exists($this->csvPath)) {
+            $this->delimiter = $this->detectDelimiter($this->csvPath);
+        }
     }
 
     /**
-     * Récupère les données énergétiques d'une ville entre deux dates.
-     *
-     * @param string $city Nom de la ville
-     * @param string $type Type d’énergie (solar, wind, hydro)
-     * @param string $from Date de début (YYYY-MM-DD)
-     * @param string $to   Date de fin (YYYY-MM-DD)
-     * @return array<string, mixed>
-     * @throws Exception Si le type est invalide ou aucune donnée trouvée
+     * Regarde la première ligne pour voir si c'est du format Excel (;) ou Standard (,)
      */
-    public function getEnergyData(string $city, string $type, string $from, string $to): array
+    private function detectDelimiter(string $file): string
     {
-        $validTypes = ['solar', 'wind', 'hydro'];
-        if (!in_array(strtolower($type), $validTypes, true)) {
-            throw new Exception("Type de production invalide : $type");
+        $handle = fopen($file, "r");
+        if ($handle) {
+            $line = fgets($handle); // Lit la première ligne brute
+            fclose($handle);
+            // Si on trouve plus de points-virgules que de virgules, c'est du Excel FR
+            if (substr_count($line, ';') > substr_count($line, ',')) {
+                return ';';
+            }
         }
+        return ',';
+    }
 
-        $sql = "
-            SELECT city, date, type, production, consumption
-            FROM {$this->table}
-            WHERE city = :city
-              AND type = :type
-              AND date BETWEEN :from AND :to
-            ORDER BY date ASC
-        ";
+    private function cleanHeaders(array $headers): array
+    {
+        // Nettoie le BOM (caractère invisible Excel)
+        $bom = pack('H*','EFBBBF');
+        $headers[0] = preg_replace("/^$bom/", '', $headers[0]);
+        
+        return array_map(function($h) {
+            return strtolower(trim($h));
+        }, $headers);
+    }
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':city', strtolower($city));
-        $stmt->bindValue(':type', strtolower($type));
-        $stmt->bindValue(':from', $from);
-        $stmt->bindValue(':to', $to);
-        $stmt->execute();
+    public function getAvailableCities(): array
+    {
+        if (!file_exists($this->csvPath)) return [];
+        $cities = [];
+        
+        if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
+            // Utilise le délimiteur détecté ($this->delimiter)
+            $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
+            
+            if ($rawHeaders) {
+                $headers = $this->cleanHeaders($rawHeaders);
+                $cityIndex = array_search('ville', $headers);
 
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if (empty($results)) {
-            throw new Exception("Aucune donnée trouvée pour $city entre $from et $to ($type)");
+                if ($cityIndex !== false) {
+                    while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
+                        if (isset($row[$cityIndex])) {
+                            $cities[] = trim($row[$cityIndex]);
+                        }
+                    }
+                }
+            }
+            fclose($handle);
         }
+        $unique = array_unique($cities);
+        sort($unique);
+        return $unique;
+    }
 
-        return [
-            'asset' => ucfirst($city),
-            'type'  => $type,
-            'from'  => $from,
-            'to'    => $to,
-            'data'  => $results,
-        ];
+    // On ajoute le paramètre $compareCity
+    public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array
+    {
+        if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
+
+        $results = [];
+        
+        if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
+            $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
+            
+            if ($rawHeaders) {
+                $headers = $this->cleanHeaders($rawHeaders);
+
+                while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
+                    if (count($row) !== count($headers)) continue;
+                    $data = array_combine($headers, $row);
+
+                    // --- FILTRES ---
+                    // 1. Type
+                    if ($type !== 'all' && (!isset($data['type']) || strtolower(trim($data['type'])) !== strtolower($type))) {
+                        continue;
+                    }
+
+                    // 2. Ville (MODIFIÉ POUR LA COMPARAISON)
+                    $rowCity = strtolower(trim($data['ville'] ?? ''));
+                    $targetCity = strtolower($city);
+                    $compCity = $compareCity ? strtolower($compareCity) : null;
+
+                    // Si on ne veut pas "toutes les zones"
+                    if ($city !== 'all') {
+                        // On garde la ligne SI c'est la ville 1 OU la ville 2
+                        // Si ce n'est ni l'une ni l'autre, on passe à la suivante
+                        if ($rowCity !== $targetCity && $rowCity !== $compCity) {
+                            continue;
+                        }
+                    }
+
+                    // 3. Date
+                    if (isset($data['date_heure'])) {
+                        $cleanDate = str_replace('/', '-', $data['date_heure']);
+                        $d = date('Y-m-d', strtotime($cleanDate));
+                        
+                        if ($d >= $from && $d <= $to) {
+                            $results[] = [
+                                'date' => $data['date_heure'],
+                                'production' => (float)($data['production_kw'] ?? 0),
+                                'ville' => $data['ville'],
+                                'meteo'      => (float)($data['valeur_meteo'] ?? 0),
+                                'temp'       => (float)($data['temperature_c'] ?? 0)
+                            ];
+                        }
+                    }
+                }
+            }
+            fclose($handle);
+        }
+        // On trie les résultats par date pour avoir un graphique propre
+        usort($results, function($a, $b) {
+            return strtotime(str_replace('/', '-', $a['date'])) - strtotime(str_replace('/', '-', $b['date']));
+        });
+
+        return $this->fmt($type, $city, $from, $to, $results);
+    }
+
+    private function fmt($type, $city, $from, $to, $data): array {
+        return ['type' => $type, 'city' => $city, 'from' => $from, 'to' => $to, 'data' => $data];
     }
 }
