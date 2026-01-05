@@ -30,11 +30,11 @@ class Router
      * @param string $path URI de la route
      * @param array{0: class-string, 1: string} $action Contrôleur et méthode associés
      */
-    public function add(string $method, string $path, array $action): void
+    public function add(string $method, string $uri, array $action): void
     {
         $this->routes[] = [
-            'method' => strtoupper($method),
-            'path'   => rtrim($path, '/') ?: '/',
+            'method' => $method,
+            'uri'    => $uri,
             'action' => $action,
         ];
     }
@@ -46,16 +46,25 @@ class Router
      * @param string $method
      * @throws \Exception Si le contrôleur ou la méthode sont introuvables.
      */
-    public function dispatch(string $method, string $uri): void {
-        $cleanUri = parse_url($uri, PHP_URL_PATH);
-        $cleanUri = rtrim((string) parse_url($uri, PHP_URL_PATH), '/') ?: '/';
+    public function dispatch(): void {
+        $method = $_SERVER['REQUEST_METHOD']; // Récupère la méthode HTTP réelle
+        $method = strtoupper($method); // Met en majuscules pour uniformité
+
+        $uri = $_SERVER['REQUEST_URI']; // Récupère l'URI réelle
+        $uri = parse_url($uri, PHP_URL_PATH); // Extrait le chemin sans les paramètres de requête
+        
+        if ($uri !== '/') {
+            $uri = rtrim($uri, '/'); // Supprime le slash final si l'URI ne vaut pas '/' (pas d'accueil)
+        }
         
         foreach ($this->routes as $route) {
-            $path = rtrim($route['path'], '/') ?: '/';
-            if ($route['method'] === strtoupper($method) && $path === $cleanUri) {
+            
+            if ($route['method'] === $method && $route['uri'] === $uri) {
                 [$controller, $action] = $route['action'];
+
                 $controllerInstance = new $controller();
                 $controllerInstance->$action();
+
                 return;
             }
         }
