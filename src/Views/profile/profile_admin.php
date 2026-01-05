@@ -51,8 +51,12 @@
                             <form method="POST" action="/profile/updateRole" class="d-flex justify-content-center">
                                 <input type="hidden" name="id" value="<?= $u['id']; ?>">
                                 <select name="role" class="form-select form-select-sm w-auto me-2">
-                                    <option value="user" <?= $u['role'] === 'user' ? 'selected' : ''; ?>>Utilisateur</option>
+                                    <?php if ($u['role'] === 'admin'): ?>
+                                        <option value="admin" selected>Administrateur</option>
+                                    <?php else: ?>
+                                        <option value="user" <?= $u['role'] === 'user' ? 'selected' : ''; ?>>Utilisateur</option>
                                     <option value="editor" <?= $u['role'] === 'editor' ? 'selected' : '' ?>>Autorisé (Import)</option>
+                                    <?php endif; ?>
                                 </select>
                                 <button type="submit" class="btn btn-sm btn-primary">Modifier</button>
                             </form>
