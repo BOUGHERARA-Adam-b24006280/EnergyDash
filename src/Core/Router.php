@@ -10,8 +10,7 @@ namespace App\Core;
 /**
  * Routeur basique gérant des routes GET/POST et leur dispatch.
  */
-class Router
-{
+class Router {
     /**
      * Liste des routes enregistrées.
      *
@@ -54,25 +53,29 @@ class Router
         $uri = parse_url($uri, PHP_URL_PATH); // Extrait le chemin sans les paramètres de requête
         
         if ($uri !== '/') {
-            $uri = rtrim($uri, '/'); // Supprime le slash final si l'URI ne vaut pas '/' (pas d'accueil)
+            $uri = rtrim($uri, '/'); // Supprime le slash final si l'URI ne vaut pas '/' (page d'accueil)
         }
         
         foreach ($this->routes as $route) {
             
             if ($route['method'] === $method && $route['uri'] === $uri) {
                 [$controller, $action] = $route['action'];
+                if (!class_exists($controller)) {
+                    throw new \LogicException("Unable to load class: $controller");
+                }
+                $controller = new $controller();
 
-                $controllerInstance = new $controller();
-                $controllerInstance->$action();
+                if (!is_callable([$controller, $action])) {
+                    throw new \LogicException("Method not callable or not found: $action");
+                }
+
+                $controller->$action();
 
                 return;
             }
         }
 
-        http_response_code(404);
-        $title = "Page non trouvée";
-        require __DIR__ . '/../Views/shared/header.php';
-        require __DIR__ . '/../Views/error/404.php';
-        require __DIR__ . '/../Views/shared/footer.php';
+        $errorController = new \App\Controllers\ErrorController();
+        $errorController->error404page();
     }
 }

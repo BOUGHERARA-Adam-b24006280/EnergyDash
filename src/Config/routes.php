@@ -2,7 +2,7 @@
 /**
  * Fichier : routes.php
  * Rôle : Défini les routes à suivre pour les méthode lié.
- * Auteur : Lucas Lepape, Mohamed-Amine Haddad, Adam Bougherara,
+ * Auteur : Mohamed-Amine Haddad
  */
 
 $router = new App\Core\Router();
@@ -41,6 +41,3 @@ $router->add('POST', '/reset',              [App\Controllers\AuthController::cla
 
 $router->add('GET',  '/api/energy',         [App\Controllers\EnergyController::class,    'index']);
 $router->add('POST', '/energy/upload',      [App\Controllers\EnergyController::class,    'upload']);
-
-// Route de test pour voir ce qui cloche avec le CSV
-$router->add('GET',  '/debug-csv',          [App\Controllers\EnergyController::class,    'debug']);
