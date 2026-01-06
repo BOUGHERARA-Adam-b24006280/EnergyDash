@@ -1,135 +1,99 @@
 <?php
 /**
  * Fichier : Controller.php
- * Rôle : Contrôleur parent abstrait pour centraliser les fonctionnalités communes
- * Auteur : Lucas LEPAPE
+ * Rôle : Classe parente de tous les contrôleurs.
+ * Elle fait le lien entre le DashboardController et le Layout.
  */
 
 namespace App\Core;
 
-use App\Core\Layout;
-
-/**
- * Classe abstraite Controller
- * Fournit les utilitaires communs à tous les contrôleurs :
- * - gestion de session
- * - redirections
- * - authentification
- * - rendu de vue
- * - messages flash
- */
 abstract class Controller
 {
     /**
-     * Constructeur : démarre la session automatiquement
+     * Affiche une vue en utilisant le Layout principal.
+     * * @param string $view Nom du fichier vue (ex: 'dashboard/dashboard')
+     * @param array $data Données à passer à la vue (ex: ['cities' => $cities])
      */
-    public function __construct()
+    protected function render(string $view, array $data = []): void
     {
-        $this->startSession();
+        // 1. On construit le chemin complet vers le fichier de vue
+        // Note : __DIR__ est src/Core, donc on remonte d'un cran pour aller dans Views
+        $viewPath = __DIR__ . '/../Views/' . $view . '.php';
+
+        // 2. On récupère le titre s'il est défini, sinon titre par défaut
+        $title = $data['title'] ?? 'EnergyDash';
+
+        // 3. On instancie ta classe Layout (celle que tu viens de m'envoyer)
+        $layout = new Layout($viewPath, $title);
+
+        // 4. On lance l'affichage via le Layout
+        $layout->render($data);
     }
 
     /**
-     * Méthode par défaut : chaque contrôleur enfant doit la définir.
-     * Cela permet d'assurer une cohérence entre les routes.
+     * Vérifie si l'utilisateur est connecté.
+     * Sinon, redirige vers la page de login.
      */
-    abstract public function index(): void;
-
-    /**
-     * Démarre la session si elle n'est pas déjà active
-     */
-    protected function startSession(): void
+    protected function requireLogin(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-    }
 
-    /**
-     * Vérifie qu'un utilisateur est connecté, sinon redirige vers /login
-     */
-    protected function requireLogin(): void
-    {
-        if (empty($_SESSION['user'])) {
+        if (!isset($_SESSION['user'])) {
             $this->redirect('/login');
         }
     }
 
     /**
-     * Vérifie qu'un utilisateur est administrateur, sinon redirige vers /dashboard
+     * Vérifie si l'utilisateur est ADMIN.
+     * Sinon, redirige vers le profil ou l'accueil.
      */
     protected function requireAdmin(): void
     {
         $this->requireLogin();
 
-        // Sécurise et typise la session utilisateur
-        $user = $_SESSION['user'] ?? null;
-
-        // Vérifie que la clé 'role' existe et qu'elle vaut bien 'admin'
-        if (!is_array($user) || !isset($user['role']) || $user['role'] !== 'admin') {
-            $this->redirect('/dashboard');
+        if (($_SESSION['user']['role'] ?? '') !== 'admin') { 
+            $this->redirect('/profile'); 
+            exit;
         }
     }
 
     /**
-     * Rend une vue avec la classe Layout
-     *
-     * @param string $viewPath            Chemin du fichier de vue
-     * @param string $title               Titre de la page
-     * @param string $layout              Nom du layout à utiliser (par défaut 'default')
-     * @param array<string, mixed> $data  Données à passer à la vue
+     * Nettoie une chaîne de caractères pour éviter les failles XSS.
+     * Remplace les caractères spéciaux par des entités HTML.
      */
-    protected function render(string $viewPath, string $title, string $layout = 'default', array $data = []): void
-    {
-        $layout = new Layout($viewPath, $title);
-        $layout->render($data);
-    }
+    protected function sanitize(string $input): string
+        {
+            return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+        }
 
     /**
-     * Redirige vers une URL et arrête l’exécution
-     *
-     * @param string $url URL de redirection
+     * Redirige vers une autre URL.
      */
     protected function redirect(string $url): void
     {
-        header("Location: {$url}");
+        header("Location: $url");
         exit;
     }
 
     /**
-     * Ajoute un message flash à la session
-     *
-     * @param string $type    Type du message ('success', 'error', etc.)
-     * @param string $message Contenu du message
+     * Gestion des messages Flash (Succès / Erreur).
      */
     protected function flash(string $type, string $message): void
     {
+        if (session_status() === PHP_SESSION_NONE) session_start();
         $_SESSION[$type] = $message;
     }
 
-    /**
-     * Récupère et supprime un message flash de la session
-     *
-     * @param string $type
-     * @return string|null
-     */
     protected function getFlash(string $type): ?string
     {
-        if (isset($_SESSION[$type]) && is_scalar($_SESSION[$type])) {
-            $message = (string) $_SESSION[$type];
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (isset($_SESSION[$type])) {
+            $msg = $_SESSION[$type];
             unset($_SESSION[$type]);
-            return $message;
+            return $msg;
         }
         return null;
-    }
-
-    /**
-     * Sécurise une entrée utilisateur (trim + htmlspecialchars)
-     *
-     * @param string|null $value
-     * @return string
-     */
-    protected function sanitize(?string $value): string
-    {
-        return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
     }
 }

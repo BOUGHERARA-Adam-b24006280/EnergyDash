@@ -1,0 +1,16 @@
+type,date_heure,production_kw,valeur_meteo,ville,temperature_c,statut
+solaire,2023-12-15 08:00:00,0.2,50,Lyon,2,actif
+solaire,2023-12-15 10:00:00,1.5,200,Lyon,4,actif
+solaire,2023-12-15 12:00:00,2.8,450,Lyon,6,actif
+solaire,2023-12-15 14:00:00,2.1,380,Lyon,7,actif
+solaire,2023-12-15 16:30:00,0.1,20,Lyon,5,actif
+solaire,2023-12-15 12:00:00,4.5,700,Nice,14,actif
+eolien,2023-12-15 02:00:00,3.5,45,Nice,10,actif
+eolien,2023-12-15 08:00:00,4.2,55,Nice,11,actif
+eolien,2023-12-15 14:00:00,6.5,80,Nice,13,actif
+eolien,2023-12-15 20:00:00,5.1,65,Nice,11,actif
+eolien,2023-12-16 08:00:00,1.2,20,Lyon,3,actif
+hydraulique,2023-12-15 00:00:00,6.0,15,Grenoble,1,actif
+hydraulique,2023-12-15 12:00:00,6.1,15,Grenoble,4,actif
+hydraulique,2023-12-15 23:00:00,5.9,15,Grenoble,0,actif
+hydraulique,2023-12-15 10:00:00,4.0,12,Lyon,4,maintenance

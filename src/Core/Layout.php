@@ -1,29 +1,22 @@
 <?php
 /**
  * Fichier : Layout.php
- * Rôle : Fournit un modèle réutilisable pour les views (Header + view + Footer)
+ * Rôle : Gère l'affichage global (Header + Vue + Footer) et les outils de vue (Flash messages).
  * Auteur : Lucas LEPAPE, Gustin MAILHE
  */
 
 namespace App\Core;
 
-/**
- * Classe Layout qui gère le rendu complet des pages
- * (Header + view + footer)
- */
 class Layout {
 
     /** @var string $viewPath Chemin vers le fichier de la vue à afficher */
     private string $viewPath;
 
-    /** @var string $title Titre de la page affichée dans la balise <title> */
+    /** @var string $title Titre de la page */
     private string $title;
 
     /**
-     * Constructeur de la classe Layout qui initialise le chemin vers la vue à afficher ainsi que le titre de la page
-     * 
-     * @param string $viewPath Chemin complet vers la vue
-     * @param string $title Titre de la page (par défaut : 'EnergyDash')
+     * Constructeur
      */
     public function __construct(string $viewPath, string $title = 'EnergyDash')
     {
@@ -32,28 +25,48 @@ class Layout {
     }
 
     /**
-     * Affiche la page complète en incluant tout les fichiers necessaires
-     * 
-     * @param array<string, mixed> $data Données qui seront mise dans la vue (exemple : les errors et csrf_token)
-     * @return void
+     * Affiche la page complète
      */
     public function render(array $data = []): void {
+        // Extrait les variables pour qu'elles soient accessibles dans la vue (ex: $cities)
         extract($data);
+        
+        // Rend le titre accessible
         $title = $this->title;
         
+        // Inclut les parties de la page
+        // Assurez-vous que le chemin 'shared' existe bien dans Views
         require __DIR__ . '/../Views/shared/header.php';
         require $this->viewPath;
         require __DIR__ . '/../Views/shared/footer.php';
     }
 
     /**
-     * Getter pour le titre
-     * 
-     * @return string
+     * Récupère le titre de la page
      */
     public function getTitle(): string {
         return $this->title;
     }
+
+    /**
+     * AJOUT CRITIQUE : Permet de récupérer les messages Flash dans les vues.
+     * C'est cette méthode qui manquait et causait votre erreur.
+     * * @param string $key La clé du message (ex: 'success', 'error')
+     * @return string|null Le message ou null s'il n'y en a pas
+     */
+    public function getFlash(string $key): ?string
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (isset($_SESSION[$key])) {
+            $msg = $_SESSION[$key];
+            // On supprime le message après l'avoir lu pour qu'il ne s'affiche qu'une fois
+            unset($_SESSION[$key]);
+            return $msg;
+        }
+
+        return null;
+    }
 }
-
-
