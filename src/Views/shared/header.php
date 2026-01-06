@@ -78,7 +78,7 @@ $fullName = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_nam
                     <!-- Menu déroulant -->
                     <div id="dropdownMenu"
                         class="hidden absolute right-0 mt-2 w-48 origin-top-right rounded-lg bg-white shadow-lg 
-                            ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 dark:ring-neutral-700 transform 
+                            z-50 ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 dark:ring-neutral-700 transform 
                             scale-95 opacity-0 transition-all duration-200">
                         <a href="/profile" 
                            class="block px-4 py-2 text-sm text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-700">
