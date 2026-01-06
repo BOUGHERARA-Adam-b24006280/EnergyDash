@@ -4,7 +4,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Config/config.php';
 require_once __DIR__ . '/../src/Config/routes.php';
 
-// On transforme les erreurs en Exception
+// Transforme les erreurs en Exception
 set_error_handler(function($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });

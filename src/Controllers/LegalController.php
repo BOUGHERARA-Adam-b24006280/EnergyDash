@@ -9,15 +9,9 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 
-final class LegalController extends Controller
-{
-    /**
-     * Affiche la page des mentions légales.
-     */
-    public function index(): void
-    {
-        $this->render('legal/mentions', [
-            'title' => 'Mentions Légales'
-        ]);
+class LegalController extends Controller {
+
+    public function index(): void {
+        $this->render('legal/mentions', ['title' => 'Mentions Légales']);
     }
 }

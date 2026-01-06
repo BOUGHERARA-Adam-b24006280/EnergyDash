@@ -2,13 +2,11 @@
 /**
  * Fichier : AuthController.php
  * Rôle : Gère les actions d'authentification (inscription, connexion, déconnexion)
- * Auteur : Mohamed-Amine HADDAD, Lucas LEPAPE
  */
 
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Layout;
 use App\Core\Mailer;
 use App\Models\UserModel;
 use Exception;

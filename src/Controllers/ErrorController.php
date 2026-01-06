@@ -2,7 +2,10 @@
 
 namespace App\Controllers;
 
-class ErrorController {
+use App\Core\Controller;
+
+class ErrorController extends Controller {
+    
     public function error404page(): void {
         $title = "Page non trouvée";
 

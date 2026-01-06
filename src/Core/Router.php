@@ -68,7 +68,6 @@ class Router {
                 if (!is_callable([$controller, $action])) {
                     throw new \LogicException("Method not callable or not found: $action");
                 }
-
                 $controller->$action();
 
                 return;
