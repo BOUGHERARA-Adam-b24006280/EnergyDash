@@ -2,21 +2,18 @@
 /**
  * Fichier : routes.php
  * Rôle : Défini les routes à suivre pour les méthode lié.
- * Auteur : Mohamed-Amine Haddad
  */
 
 $router = new App\Core\Router();
 
 // Page d'accueil
 $router->add('GET',  '/',                   [App\Controllers\HomeController::class,      'index']);
-$router->add('POST', '/',                   [App\Controllers\HomeController::class,      'switchTheme']);
 
 //Authentification
 $router->add('GET',  '/login',              [App\Controllers\AuthController::class,      'login']);
 $router->add('GET',  '/register',           [App\Controllers\AuthController::class,      'register']);
 $router->add('POST', '/login',              [App\Controllers\AuthController::class,      'login']);
 $router->add('POST', '/register',           [App\Controllers\AuthController::class,      'register']);
-$router->add('GET',  '/forgot',             [App\Controllers\AuthController::class,      'forgot']);
 
 // Déconnexion
 $router->add('GET',  '/logout',             [App\Controllers\AuthController::class,      'logout']);
