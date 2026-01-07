@@ -5,20 +5,19 @@ use App\Core\Controller;
 use App\Models\UserModel;
 use Exception;
 
-class AuthController extends Controller {
+class AuthController extends Controller
+{
     private UserModel $userModel;
 
-    public function __construct() {
-        // Déplace ce session_start dans index.php si possible pour éviter de le répéter partout
-        if (session_status() === PHP_SESSION_NONE)
-            session_start();
-
+    public function __construct()
+    {
         $this->userModel = new UserModel();
     }
 
     // Connexion
 
-    public function showLogin(): void {
+    public function showLogin(): void
+    {
         $this->initCsrf();
         $this->render('auth/login', [
             'title' => 'Connexion',
@@ -26,7 +25,8 @@ class AuthController extends Controller {
         ]);
     }
 
-    public function processLogin(): void {
+    public function processLogin(): void
+    {
         try {
             $this->validateCsrf();
 
@@ -56,7 +56,8 @@ class AuthController extends Controller {
 
     // Déconnexion
 
-    public function logout(): void {
+    public function logout(): void
+    {
         $_SESSION = [];
 
         if (ini_get("session.use_cookies")) {
@@ -79,7 +80,8 @@ class AuthController extends Controller {
 
     // Inscription
 
-    public function showRegister(): void {
+    public function showRegister(): void
+    {
         $this->initCsrf();
         $this->render('auth/register', [
             'title' => 'Inscription',
@@ -87,7 +89,8 @@ class AuthController extends Controller {
         ]);
     }
 
-    public function processRegister(): void {
+    public function processRegister(): void
+    {
         try {
             $this->validateCsrf();
 
@@ -127,7 +130,8 @@ class AuthController extends Controller {
 
     // Mot de passe oublié
 
-    public function showForgot(): void {
+    public function showForgot(): void
+    {
         $this->initCsrf();
         $this->render('auth/forgot', [
             'title' => 'Mot de passe oublié',
@@ -135,7 +139,8 @@ class AuthController extends Controller {
         ]);
     }
 
-    public function processForgot(): void {
+    public function processForgot(): void
+    {
         $start_time = microtime(true);
         $success = '';
 
@@ -188,7 +193,8 @@ class AuthController extends Controller {
 
     // Réinitialisation mot de passe
 
-    public function showReset(): void {
+    public function showReset(): void
+    {
         $this->initCsrf();
 
         $token = $_GET['token'] ?? '';
@@ -206,7 +212,8 @@ class AuthController extends Controller {
         ]);
     }
 
-    public function processReset(): void {
+    public function processReset(): void
+    {
         try {
             $this->validateCsrf();
 
@@ -237,11 +244,8 @@ class AuthController extends Controller {
             // On invalide TOUS les tokens de cet utilisateur par sécurité
             $this->userModel->deleteResetTokensForUser($user['id']);
 
-            $this->render('auth/reset', [
-                'title' => 'Réinitialisation',
-                'success' => "Mot de passe modifié avec succès. Vous pouvez vous connecter.",
-                'csrf_token' => $_SESSION['csrf_token']
-            ]);
+            $this->flash('success', "Mot de passe modifié avec succès. Vous pouvez vous connecter.");
+            $this->redirect('/login');
 
         } catch (Exception $e) {
             $this->render('auth/reset', [
@@ -254,7 +258,8 @@ class AuthController extends Controller {
 
     // Méthodes utilitaires
 
-    private function createSession(array $user): void {
+    private function createSession(array $user): void
+    {
         session_regenerate_id(true);
         $_SESSION['user'] = [
             'id' => $user['id'],
@@ -266,20 +271,23 @@ class AuthController extends Controller {
         unset($_SESSION['csrf_token']);
     }
 
-    private function initCsrf(): void {
+    private function initCsrf(): void
+    {
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
     }
 
-    private function validateCsrf(): void {
+    private function validateCsrf(): void
+    {
         $token = $_POST['csrf_token'] ?? '';
         if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
             throw new Exception("Session expirée. Veuillez recharger la page.");
         }
     }
 
-    private function validateRegisterInput(array $data): void {
+    private function validateRegisterInput(array $data): void
+    {
         if (empty($data['first_name']) || mb_strlen($data['first_name']) > 100) {
             throw new Exception("Prénom invalide.");
         }

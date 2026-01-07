@@ -14,7 +14,12 @@ abstract class Controller
      * * @param string $view Nom du fichier vue (ex: 'dashboard/dashboard')
      * @param array $data Données à passer à la vue (ex: ['cities' => $cities])
      */
-    protected function render(string $view, array $data = []): void {
+    protected function render(string $view, array $data = []): void
+    {
+        // Injection automatique des messages flash
+        $data['success'] = $data['success'] ?? $this->getFlash('success');
+        $data['error'] = $data['error'] ?? $this->getFlash('error');
+
         $viewPath = __DIR__ . '/../Views/' . $view . '.php';
         $title = $data['title'] ?? 'EnergyDash';
         $layout = new Layout($viewPath, $title);
@@ -27,10 +32,6 @@ abstract class Controller
      */
     protected function requireLogin(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         if (!isset($_SESSION['user'])) {
             $this->redirect('/login');
         }
@@ -40,11 +41,12 @@ abstract class Controller
      * Vérifie si l'utilisateur est ADMIN.
      * Sinon, redirige vers le profil ou l'accueil.
      */
-    protected function requireAdmin(): void {
+    protected function requireAdmin(): void
+    {
         $this->requireLogin();
 
-        if (($_SESSION['user']['role'] ?? '') !== 'admin') { 
-            $this->redirect('/profile'); 
+        if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+            $this->redirect('/profile');
         }
     }
 
@@ -52,14 +54,16 @@ abstract class Controller
      * Nettoie une chaîne de caractères pour éviter les failles XSS.
      * Remplace les caractères spéciaux par des entités HTML.
      */
-    protected function sanitize(string $input): string {
-            return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+    protected function sanitize(string $input): string
+    {
+        return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
     }
 
     /**
      * Redirige vers une autre URL.
      */
-    protected function redirect(string $url): void {
+    protected function redirect(string $url): void
+    {
         header("Location: $url");
         exit;
     }
@@ -69,13 +73,11 @@ abstract class Controller
      */
     protected function flash(string $type, string $message): void
     {
-        if (session_status() === PHP_SESSION_NONE) session_start();
         $_SESSION[$type] = $message;
     }
 
     protected function getFlash(string $type): ?string
     {
-        if (session_status() === PHP_SESSION_NONE) session_start();
         if (isset($_SESSION[$type])) {
             $msg = $_SESSION[$type];
             unset($_SESSION[$type]);

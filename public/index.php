@@ -2,17 +2,30 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Config/config.php';
+
+// Configuration sécurisée de la session
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '', // Utilise le domaine courant
+        'secure' => isset($_SERVER['HTTPS']), // Sécurisé si HTTPS
+        'httponly' => true, // Empêche l'accès via JS
+        'samesite' => 'Strict' // Protection CSRF
+    ]);
+    session_start();
+}
+
 require_once __DIR__ . '/../src/Config/routes.php';
 
 // Transforme les erreurs en Exception
-set_error_handler(function($severity, $message, $file, $line) {
+set_error_handler(function ($severity, $message, $file, $line) {
     throw new \ErrorException($message, 0, $severity, $file, $line);
 });
 
 try {
     $router->dispatch();
-}
-catch(Throwable $e) {
+} catch (Throwable $e) {
     $errorController = new App\Controllers\ErrorController();
     $errorController->error500page();
 }
