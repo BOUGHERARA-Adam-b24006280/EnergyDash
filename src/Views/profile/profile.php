@@ -16,7 +16,7 @@
 </div>
 <main id="content" class="w-full max-w-2xl mx-auto p-6 py-20">
     <!-- Card Section -->
-        <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-70">
+        <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-700">
             <div class="p-4 mx-4 sm:p-7 ">
             <div class="mb-8">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
