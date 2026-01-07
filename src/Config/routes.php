@@ -9,11 +9,21 @@ $router = new App\Core\Router();
 // Page d'accueil
 $router->add('GET',  '/',                   [App\Controllers\HomeController::class,      'index']);
 
-//Authentification
-$router->add('GET',  '/login',              [App\Controllers\AuthController::class,      'login']);
-$router->add('GET',  '/register',           [App\Controllers\AuthController::class,      'register']);
-$router->add('POST', '/login',              [App\Controllers\AuthController::class,      'login']);
-$router->add('POST', '/register',           [App\Controllers\AuthController::class,      'register']);
+// Connexion
+$router->add('GET',  '/login',              [App\Controllers\AuthController::class,      'showLogin']);
+$router->add('POST', '/login',              [App\Controllers\AuthController::class,      'processLogin']);
+
+// Inscription
+$router->add('GET',  '/register',           [App\Controllers\AuthController::class,      'showRegister']);
+$router->add('POST', '/register',           [App\Controllers\AuthController::class,      'processRegister']);
+
+// Mot de passe oublié
+$router->add('GET',  '/forgot',             [App\Controllers\AuthController::class,      'showForgot']);
+$router->add('POST', '/forgot',             [App\Controllers\AuthController::class,      'processForgot']);
+
+// Réinitialisation du mot de passe
+$router->add('GET',  '/reset',              [App\Controllers\AuthController::class,      'showReset']);
+$router->add('POST', '/reset',              [App\Controllers\AuthController::class,      'processReset']);
 
 // Déconnexion
 $router->add('GET',  '/logout',             [App\Controllers\AuthController::class,      'logout']);
@@ -29,12 +39,3 @@ $router->add('GET',  '/mentions',           [App\Controllers\LegalController::cl
 // Profil utilisateur
 $router->add('GET',  '/profile',            [App\Controllers\ProfileController::class,   'index']);
 $router->add('POST', '/profile/updateRole', [App\Controllers\ProfileController::class,   'updateRole']);
-
-// Mot de passe oublié
-$router->add('GET',  '/forgot',             [App\Controllers\AuthController::class,      'forgot']);
-$router->add('POST', '/forgot',             [App\Controllers\AuthController::class,      'forgotPassword']);
-$router->add('GET',  '/reset',              [App\Controllers\AuthController::class,      'resetPassword']);
-$router->add('POST', '/reset',              [App\Controllers\AuthController::class,      'resetPassword']);
-
-$router->add('GET',  '/api/energy',         [App\Controllers\EnergyController::class,    'index']);
-$router->add('POST', '/energy/upload',      [App\Controllers\EnergyController::class,    'upload']);

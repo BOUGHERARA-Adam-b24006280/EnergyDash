@@ -27,11 +27,11 @@ return [
     ],
 
     'smtp' => [
-        'host' => $_ENV['SMTP_HOST'],
-        'port' => $_ENV['SMTP_PORT'],
-        'username' => $_ENV['SMTP_USER'],
-        'password' => $_ENV['SMTP_PASS'],
-        'from' => $_ENV['SMTP_FROM'],
-        'from_name' => $_ENV['SMTP_FROM_NAME'],
+        'host' => $_ENV['SMTP_HOST'] ?? 'localhost',
+        'port' => $_ENV['SMTP_PORT'] ?? 1025,
+        'username' => $_ENV['SMTP_USER'] ?? '',
+        'password' => $_ENV['SMTP_PASS'] ?? '',
+        'from' => $_ENV['SMTP_FROM'] ?? 'no-reply@localhost',
+        'from_name' => $_ENV['SMTP_FROM_NAME'] ?? 'EnergyDash',
     ],
 ];
