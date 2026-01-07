@@ -1,4 +1,9 @@
 <?php
+/**
+ * Fichier : index.php
+ * Rôle : Point d'entrée unique de l'application (Front Controller).
+ * Initialise la session, charge l'autoloader et dispatche la requête via le routeur.
+ */
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Config/config.php';

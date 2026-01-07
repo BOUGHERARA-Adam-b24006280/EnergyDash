@@ -5,9 +5,17 @@ use PDO;
 
 abstract class Model
 {
+    /** @var PDO Instance de connexion à la base de données via PDO */
     protected PDO $db;
+    
+    /** @var string Nom de la table associée au modèle */
     protected string $table;
 
+    /**
+     * Constructeur.
+     *
+     * @param PDO $db Instance de connexion PDO.
+     */
     public function __construct(PDO $db)
     {
         $this->db = $db;

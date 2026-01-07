@@ -5,19 +5,39 @@ use App\Core\Controller;
 use App\Models\UserModel;
 use Exception;
 
-class AuthController extends Controller
-{
+/**
+ * Contrôleur gérant l'authentification des utilisateurs.
+ *
+ * Ce contrôleur gère la connexion, la déconnexion, l'inscription,
+ * et la réinitialisation de mot de passe.
+ *
+ * @package App\Controllers
+ */
+class AuthController extends Controller {
+    /**
+     * Modèle pour la gestion des utilisateurs.
+     * @var UserModel
+     */
     private UserModel $userModel;
 
-    public function __construct()
-    {
+    /**
+     * Constructeur.
+     * Initialise le modèle utilisateur.
+     */
+    public function __construct() {
         $this->userModel = new UserModel();
     }
 
     // Connexion
 
-    public function showLogin(): void
-    {
+    /**
+     * Affiche le formulaire de connexion.
+     *
+     * Initialise le token CSRF et charge la vue de connexion.
+     *
+     * @return void
+     */
+    public function showLogin(): void {
         $this->initCsrf();
         $this->render('auth/login', [
             'title' => 'Connexion',
@@ -25,8 +45,16 @@ class AuthController extends Controller
         ]);
     }
 
-    public function processLogin(): void
-    {
+    /**
+     * Traite la soumission du formulaire de connexion.
+     *
+     * Vérifie le token CSRF, valide les identifiants utilisateur,
+     * crée la session utilisateur et redirige vers le tableau de bord.
+     * En cas d'échec, réaffiche le formulaire avec les erreurs.
+     *
+     * @return void
+     */
+    public function processLogin(): void {
         try {
             $this->validateCsrf();
 
@@ -56,8 +84,15 @@ class AuthController extends Controller
 
     // Déconnexion
 
-    public function logout(): void
-    {
+    /**
+     * Déconnecte l'utilisateur.
+     *
+     * Détruit la session active et supprime le cookie de session,
+     * puis redirige vers la page de connexion.
+     *
+     * @return void
+     */
+    public function logout(): void {
         $_SESSION = [];
 
         if (ini_get("session.use_cookies")) {
@@ -80,8 +115,14 @@ class AuthController extends Controller
 
     // Inscription
 
-    public function showRegister(): void
-    {
+    /**
+     * Affiche le formulaire d'inscription.
+     *
+     * Initialise le token CSRF et charge la vue d'inscription.
+     *
+     * @return void
+     */
+    public function showRegister(): void {
         $this->initCsrf();
         $this->render('auth/register', [
             'title' => 'Inscription',
@@ -89,8 +130,15 @@ class AuthController extends Controller
         ]);
     }
 
-    public function processRegister(): void
-    {
+    /**
+     * Traite la soumission du formulaire d'inscription.
+     *
+     * Vérifie le token CSRF, valide les données saisies, vérifie l'unicité de l'email,
+     * crée le nouvel utilisateur et redirige vers la connexion.
+     *
+     * @return void
+     */
+    public function processRegister(): void {
         try {
             $this->validateCsrf();
 
@@ -130,8 +178,12 @@ class AuthController extends Controller
 
     // Mot de passe oublié
 
-    public function showForgot(): void
-    {
+    /**
+     * Affiche le formulaire de demande de réinitialisation de mot de passe.
+     *
+     * @return void
+     */
+    public function showForgot(): void {
         $this->initCsrf();
         $this->render('auth/forgot', [
             'title' => 'Mot de passe oublié',
@@ -139,8 +191,16 @@ class AuthController extends Controller
         ]);
     }
 
-    public function processForgot(): void
-    {
+    /**
+     * Traite la demande de réinitialisation de mot de passe.
+     *
+     * Vérifie si l'email existe, génère un token de réinitialisation,
+     * et envoie un email avec le lien de réinitialisation.
+     * Inclut une protection contre les attaques temporelles.
+     *
+     * @return void
+     */
+    public function processForgot(): void {
         $start_time = microtime(true);
         $success = '';
 
@@ -193,10 +253,16 @@ class AuthController extends Controller
 
     // Réinitialisation mot de passe
 
-    public function showReset(): void
-    {
+    /**
+     * Affiche le formulaire de réinitialisation de mot de passe.
+     *
+     * Vérifie la validité du token fourni dans l'URL.
+     *
+     * @return void
+     */
+    public function showReset(): void {
         $this->initCsrf();
-
+        
         $token = $_GET['token'] ?? '';
         $errors = [];
 
@@ -212,8 +278,15 @@ class AuthController extends Controller
         ]);
     }
 
-    public function processReset(): void
-    {
+    /**
+     * Traite la réinitialisation du mot de passe.
+     *
+     * Vérifie le token, valide le nouveau mot de passe, met à jour le mot de passe
+     * de l'utilisateur et invalide tous les tokens de réinitialisation associés.
+     *
+     * @return void
+     */
+    public function processReset(): void {
         try {
             $this->validateCsrf();
 
@@ -258,8 +331,13 @@ class AuthController extends Controller
 
     // Méthodes utilitaires
 
-    private function createSession(array $user): void
-    {
+    /**
+     * Crée la session utilisateur après une connexion réussie.
+     *
+     * @param array $user Les données de l'utilisateur (id, email, prénon, nom, role).
+     * @return void
+     */
+    private function createSession(array $user): void {
         session_regenerate_id(true);
         $_SESSION['user'] = [
             'id' => $user['id'],
@@ -271,23 +349,38 @@ class AuthController extends Controller
         unset($_SESSION['csrf_token']);
     }
 
-    private function initCsrf(): void
-    {
+    /**
+     * Initialise le token CSRF s'il n'existe pas déjà.
+     *
+     * @return void
+     */
+    private function initCsrf(): void {
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
     }
 
-    private function validateCsrf(): void
-    {
+    /**
+     * Valide le token CSRF reçu en POST.
+     *
+     * @throws Exception Si le token est invalide ou manquant.
+     * @return void
+     */
+    private function validateCsrf(): void {
         $token = $_POST['csrf_token'] ?? '';
         if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
             throw new Exception("Session expirée. Veuillez recharger la page.");
         }
     }
 
-    private function validateRegisterInput(array $data): void
-    {
+    /**
+     * Valide les données d'inscription.
+     *
+     * @param array $data Tableau contenant les champs (first_name, last_name, email, password, confirm).
+     * @throws Exception Si une validation échoue.
+     * @return void
+     */
+    private function validateRegisterInput(array $data): void{
         if (empty($data['first_name']) || mb_strlen($data['first_name']) > 100) {
             throw new Exception("Prénom invalide.");
         }

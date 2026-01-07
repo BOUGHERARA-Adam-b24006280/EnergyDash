@@ -9,16 +9,24 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\UserModel;
-use App\Core\Layout;
 use Exception;
 
-
-class ProfileController extends Controller
-{
+/**
+ * Contrôleur ProfileController
+ * Gère la consultation et la modification du profil utilisateur.
+ * Gère également l'administration des utilisateurs pour les admins.
+ *
+ * @package App\Controllers
+ */
+class ProfileController extends Controller {
+    /** @var UserModel Instance du modèle utilisateur */
     private UserModel $userModel;
 
-    public function __construct()
-    {
+    /**
+     * Constructeur.
+     * Initialise la session si nécessaire et le modèle utilisateur.
+     */
+    public function __construct(){
        if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -26,8 +34,14 @@ class ProfileController extends Controller
         $this->userModel = new UserModel();
     }
 
-    public function index(): void
-    {
+    /**
+     * Affiche la page de profil.
+     * Si l'utilisateur est admin, affiche également la liste des utilisateurs.
+     * Route: GET /profile
+     *
+     * @return void
+     */
+    public function index(): void {
         $this->requireLogin();
         $user = $_SESSION['user'] ?? null;
 
@@ -51,8 +65,13 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(): void
-    {
+    /**
+     * Met à jour les informations du profil connecté (Non, Prénom, Email, MDP).
+     * Route: POST /profile
+     *
+     * @return void
+     */
+    public function update(): void {
         $this->requireLogin();
 
         if (
@@ -92,8 +111,13 @@ class ProfileController extends Controller
     }
 
 
-    public function updateRole(): void
-    {
+    /**
+     * Met à jour le rôle d'un utilisateur (Admin seulement).
+     * Route: POST /profile/updateRole
+     *
+     * @return void
+     */
+    public function updateRole(): void {
         $this->requireAdmin();
 
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);

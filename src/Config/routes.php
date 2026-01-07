@@ -1,7 +1,7 @@
 <?php
 /**
  * Fichier : routes.php
- * Rôle : Défini les routes à suivre pour les méthode lié.
+ * Rôle : Défini les routes à suivre pour les méthode liées.
  */
 
 $router = new App\Core\Router();

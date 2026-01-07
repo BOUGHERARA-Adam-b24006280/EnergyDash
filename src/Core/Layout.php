@@ -7,6 +7,12 @@
 
 namespace App\Core;
 
+/**
+ * Classe Layout
+ * Gère le rendu de la structure globale des pages (Header, Contenu, Footer).
+ *
+ * @package App\Core
+ */
 class Layout
 {
 
@@ -18,6 +24,9 @@ class Layout
 
     /**
      * Constructeur
+     *
+     * @param string $viewPath Chemin absolu vers le fichier de vue.
+     * @param string $title Titre de la page (affiché dans la balise <title>).
      */
     public function __construct(string $viewPath, string $title = 'EnergyDash')
     {
@@ -26,7 +35,10 @@ class Layout
     }
 
     /**
-     * Affiche la page complète
+     * Affiche la page complète (Header + Vue + Footer).
+     *
+     * @param array $data Données à extraire pour la vue.
+     * @return void
      */
     public function render(array $data = []): void
     {
@@ -45,11 +57,11 @@ class Layout
 
     /**
      * Récupère le titre de la page
+     *
+     * @return string
      */
     public function getTitle(): string
     {
         return $this->title;
     }
-
-
 }

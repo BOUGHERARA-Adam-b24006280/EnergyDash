@@ -1,15 +1,26 @@
 <?php
 namespace App\Models;
 
-class EnergyModel
-{
+/**
+ * Classe EnergyModel
+ * Gère l'accès aux données énergétiques stockées dans des fichiers CSV.
+ * Gère le parsing, le filtrage et la détection du format CSV.
+ *
+ * @package App\Models
+ */
+class EnergyModel {
+    /** @var string Chemin vers le fichier CSV actuellement utilisé */
     private string $csvPath;
+    
+    /** @var string Délimiteur CSV détecté (',' ou ';') */
     private string $delimiter = ','; // Par défaut
 
-    public function __construct()
-    {
-        // --- CORRECTION : ON FORCE LE DÉMARRAGE DE SESSION ---
-        // Sans ça, l'API ne sait pas qui tu es et charge le fichier par défaut.
+    /**
+     * Constructeur.
+     * Détermine quel fichier CSV utiliser (fichier utilisateur ou défaut) 
+     * et détecte son délimiteur.
+     */
+    public function __construct() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -37,9 +48,11 @@ class EnergyModel
 
     /**
      * Regarde la première ligne pour voir si c'est du format Excel (;) ou Standard (,)
+     *
+     * @param string $file Chemin du fichier à analyser.
+     * @return string Le délimiteur détecté (';' ou ',').
      */
-    private function detectDelimiter(string $file): string
-    {
+    private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
         if ($handle) {
             $line = fgets($handle); // Lit la première ligne brute
@@ -52,8 +65,13 @@ class EnergyModel
         return ',';
     }
 
-    private function cleanHeaders(array $headers): array
-    {
+    /**
+     * Nettoie les en-têtes CSV (suppression BOM, espaces, minuscules).
+     *
+     * @param array $headers Les en-têtes bruts.
+     * @return array Les en-têtes nettoyés.
+     */
+    private function cleanHeaders(array $headers): array {
         // Nettoie le BOM (caractère invisible Excel)
         $bom = pack('H*','EFBBBF');
         $headers[0] = preg_replace("/^$bom/", '', $headers[0]);
@@ -63,8 +81,12 @@ class EnergyModel
         }, $headers);
     }
 
-    public function getAvailableCities(): array
-    {
+    /**
+     * Récupère la liste des villes disponibles dans le fichier CSV.
+     *
+     * @return array Liste des villes triées par ordre alphabétique.
+     */
+    public function getAvailableCities(): array{
         if (!file_exists($this->csvPath)) return [];
         $cities = [];
         
@@ -91,9 +113,17 @@ class EnergyModel
         return $unique;
     }
 
-    // On ajoute le paramètre $compareCity
-    public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array
-    {
+    /**
+     * Récupère les données énergétiques filtrées.
+     *
+     * @param string $type Type d'énergie ('all', 'eolien', 'solaire', etc.)
+     * @param string $city Ville principale à filtrer ('all' pour toutes).
+     * @param string $from Date de début (Y-m-d).
+     * @param string $to Date de fin (Y-m-d).
+     * @param string|null $compareCity Ville à comparer (optionnel).
+     * @return array Tableau contenant les métadonnées et les données filtrées.
+     */
+    public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array{
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
 
         $results = [];
@@ -155,6 +185,16 @@ class EnergyModel
         return $this->fmt($type, $city, $from, $to, $results);
     }
 
+    /**
+     * Formate la réponse finale.
+     *
+     * @param string $type
+     * @param string $city
+     * @param string $from
+     * @param string $to
+     * @param array $data
+     * @return array
+     */
     private function fmt($type, $city, $from, $to, $data): array {
         return ['type' => $type, 'city' => $city, 'from' => $from, 'to' => $to, 'data' => $data];
     }

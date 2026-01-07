@@ -7,12 +7,20 @@ use PHPMailer\PHPMailer\Exception;
 
 /**
  * Classe Mailer
- * Gère l'envoi d'e-mails via SMTP (AlwaysData ou autre serveur réel)
+ * Gère l'envoi d'e-mails via SMTP via la librairie PHPMailer.
+ * Charge la configuration depuis Config/config.php.
+ *
+ * @package App\Core
  */
 class Mailer
 {
+    /** @var PHPMailer Instance de PHPMailer */
     private PHPMailer $mail;
 
+    /**
+     * Constructeur.
+     * Configure le serveur SMTP avec les paramètres de l'application.
+     */
     public function __construct()
     {
         $this->mail = new PHPMailer(true);

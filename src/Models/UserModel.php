@@ -19,7 +19,7 @@ class UserModel extends Model {
     protected string $table = 'users';
 
     public function __construct(){
-        $db = (new Database())->getConnection();
+        $db = Database::getInstance();
         parent::__construct($db);
     }
 

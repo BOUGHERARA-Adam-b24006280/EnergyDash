@@ -1,4 +1,10 @@
 <?php
+/**
+ * Fichier : config.php
+ * Rôle : Fichier de configuration principale de l'application.
+ * Charge les variables d'environnement et retourne un tableau de configuration.
+ */
+
 require __DIR__ . '/../../vendor/autoload.php';
 
 use Dotenv\Dotenv;

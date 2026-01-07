@@ -11,11 +11,20 @@ use App\Core\Controller;
 use App\Models\EnergyModel;
 use App\Core\JsonResponse;
 
+/**
+ * Contrôleur EnergyController
+ * Gère les données énergétiques (API pour graphiques) et l'import de données (CSV).
+ *
+ * @package App\Controllers
+ */
 class EnergyController extends Controller
 {
     /**
-     * API : Renvoie les données JSON filtrées au graphique.
-     * URL : /api/energy
+     * API : Renvoie les données énergétiques au format JSON pour le graphique.
+     * Supporte le filtrage par type, ville, date et la comparaison de ville.
+     * Route: GET /api/energy
+     *
+     * @return void
      */
     public function index(): void
     {
@@ -30,7 +39,6 @@ class EnergyController extends Controller
 
         try {
             $model = new EnergyModel();
-            // On passe $compare au modèle
             $data = $model->getEnergyData($type, $city, $from, $to, $compare);
             
             JsonResponse::send($data);
@@ -40,8 +48,11 @@ class EnergyController extends Controller
     }
 
     /**
-     * Action : Traite le formulaire d'upload.
-     * URL : /energy/upload
+     * Action : Traite l'upload d'un fichier CSV de données énergétiques.
+     * Vérifie le fichier, le déplace dans le stockage utilisateur et redirige.
+     * Route: POST /energy/upload
+     *
+     * @return void
      */
     public function upload(): void
     {

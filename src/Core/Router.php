@@ -29,8 +29,7 @@ class Router {
      * @param string $path URI de la route
      * @param array{0: class-string, 1: string} $action Contrôleur et méthode associés
      */
-    public function add(string $method, string $uri, array $action): void
-    {
+    public function add(string $method, string $uri, array $action): void{
         $this->routes[] = [
             'method' => $method,
             'uri'    => $uri,
@@ -41,9 +40,12 @@ class Router {
     /**
      * Cherche la route correspondante et exécute son action.
      *
-     * @param string $uri
-     * @param string $method
-     * @throws \Exception Si le contrôleur ou la méthode sont introuvables.
+     * Cette méthode analyse l'URI de la requête et la méthode HTTP pour trouver
+     * une route correspondante enregistrée. Si trouvée, elle instancie le contrôleur
+     * et appelle la méthode associée. Sinon, elle affiche une page 404.
+     *
+     * @return void
+     * @throws \LogicException Si le contrôleur ou la méthode sont introuvables.
      */
     public function dispatch(): void {
         $method = $_SERVER['REQUEST_METHOD']; // Récupère la méthode HTTP réelle
