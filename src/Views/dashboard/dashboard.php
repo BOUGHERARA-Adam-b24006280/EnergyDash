@@ -9,6 +9,10 @@
  *
  * Auteur : L'équipe EnergyDash
  */
+
+    $userId = $_SESSION['user']['id'];
+    $userFilePath = __DIR__ . '/../../../Storage/energy_user_' . $userId . '.csv';
+    $fileExists = file_exists($userFilePath);
 ?>
 
 <div class="max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
@@ -75,6 +79,40 @@
                         CLIQUER ICI POUR ENVOYER
                     </button>
                 </form>
+
+                <div class="mt-4 pt-4 border-t border-gray-100 dark:border-neutral-700">
+                        <div class="flex items-center justify-between">
+                            
+                            <div>
+                                <?php if ($fileExists): ?>
+                                    <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-500">
+                                        <svg class="flex-shrink-0 size-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                        </svg>
+                                        Fichier actif
+                                    </span>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        Modifié le : <?= date("d/m/Y H:i", filemtime($userFilePath)) ?>
+                                    </p>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-white">
+                                        Aucun fichier perso
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+
+                            <?php if ($fileExists): ?>
+                                <form action="/energy/delete" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer vos données et revenir à l\'affichage par défaut ?');">
+                                    <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:bg-red-800/30">
+                                        <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                        Supprimer
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+
+                        </div>
+                    </div>
+
             </div>
         
         <?php endif; ?>
@@ -253,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateChart(jsonData, type) {
+        // 1. Nettoyage de l'ancien graphique
         if (chartInstance) chartInstance.destroy();
 
         const rawData = jsonData.data;
@@ -260,43 +299,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(document.getElementById('energyForm'));
         const compareCity = formData.get('compare');
         
+        // On récupère le mode d'affichage secondaire (Météo ou Température)
         const secondaryMode = document.querySelector('input[name="secondaryView"]:checked').value;
-        // ON ENLÈVE LA RESTRICTION ICI : On veut voir la météo même en mode "Total"
-        // const isAllTypes = (type === 'all'); 
         const theme = themes[type] || themes['all'];
 
+        // --- NOUVEAU : DÉTECTION DU FUTUR ---
+        // On regarde si la première ligne de données possède le statut 'prevision'
+        const isPrediction = rawData.length > 0 && rawData[0].statut === 'prevision';
+
+        // 2. Préparation des données
         let dates = [];
         let dataCity1 = [], dataSecondary = [], dataCity2 = [];
 
+        // Extraction des dates uniques
         rawData.forEach(item => {
             if (!dates.includes(item.date)) dates.push(item.date);
         });
         dates.sort();
 
+        // Remplissage des tableaux de données
         dates.forEach(date => {
-            // Ville 1
+            // --- Ville Principale ---
             const points1 = rawData.filter(d => d.date === date && d.ville.toLowerCase() === mainCity.toLowerCase());
             const totalProd1 = points1.reduce((sum, p) => sum + parseFloat(p.production), 0);
             dataCity1.push(totalProd1);
 
-            // --- CORRECTION RÉCUPÉRATION DONNÉES SECONDAIRES ---
+            // --- Données Secondaires (Météo / Temp) ---
             let secValue = 0;
             if (points1.length > 0) {
                 if (secondaryMode === 'meteo') {
-                    // ASTUCE : Si on a plusieurs énergies (Solaire + Hydraulique), l'une peut avoir météo=0.
-                    // On prend la valeur MAXIMALE trouvée pour cette heure-là pour être sûr d'afficher quelque chose.
+                    // On prend la valeur max (utile si plusieurs sources d'énergie)
                     const maxMeteo = points1.reduce((max, p) => Math.max(max, parseFloat(p.meteo || 0)), 0);
                     secValue = maxMeteo;
                 } 
                 else if (secondaryMode === 'temp') {
-                    // Pour la température, on prend la première valeur valide trouvée
-                    const pWithTemp = points1.find(p => p.temp !== 0); 
+                    // On cherche une température valide
+                    const pWithTemp = points1.find(p => p.temp !== 0 && p.temp !== null); 
                     secValue = pWithTemp ? parseFloat(pWithTemp.temp) : 0;
                 }
             }
             dataSecondary.push(secValue);
 
-            // Ville 2
+            // --- Ville de Comparaison ---
             if (compareCity) {
                 const points2 = rawData.filter(d => d.date === date && d.ville.toLowerCase() === compareCity.toLowerCase());
                 const total2 = points2.reduce((sum, p) => sum + parseFloat(p.production), 0);
@@ -304,25 +348,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 3. Construction des Datasets (Couches du graphique)
+        
         // --- Dataset 1 : Ville Principale ---
         let datasets = [{
-            label: `Production ${mainCity}`,
+            // Le titre change si c'est une prévision
+            label: isPrediction ? `Prévision ${mainCity} (IA)` : `Production ${mainCity}`,
             data: dataCity1,
             borderColor: theme.color,
             backgroundColor: theme.bg,
             yAxisID: 'y',
-            tension: 0.3,
-            fill: true
+            tension: 0.4, // Courbe un peu plus douce
+            fill: true,
+            
+            // --- STYLE VISUEL DU FUTUR ---
+            // Pointillés [10px plein, 5px vide] si prévision, sinon ligne continue
+            borderDash: isPrediction ? [10, 5] : [],
+            // Pas de points sur les prévisions (pour ne pas surcharger), sinon points normaux
+            pointRadius: isPrediction ? 0 : 3,
+            pointHoverRadius: 6
         }];
 
-        // --- Dataset 2 : Météo ou Température ---
-        // CORRECTION : On affiche la météo PEU IMPORTE le type (on a enlevé !isAllTypes)
+        // --- Dataset 2 : Axe Secondaire (Météo ou Temp) ---
         if (secondaryMode === 'meteo') {
             datasets.push({
-                label: 'Indice Météo',
+                label: 'Indice Météo (Vent/Soleil/Pluie)',
                 data: dataSecondary,
                 borderColor: '#fbbf24', // Jaune
-                borderDash: [5, 5],     // Pointillés
+                borderDash: [5, 5],     // Pointillés fins
                 pointRadius: 0,
                 yAxisID: 'y1',
                 tension: 0.1,
@@ -334,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data: dataSecondary,
                 borderColor: '#ef4444', // Rouge
                 borderWidth: 2,
-                borderDash: [5, 5],     // Pointillés
+                borderDash: [5, 5],
                 pointRadius: 0,
                 yAxisID: 'y1',
                 tension: 0.4,
@@ -351,10 +404,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 borderWidth: 2,
                 yAxisID: 'y',
                 tension: 0.3,
-                fill: false
+                fill: false,
+                // On met aussi des pointillés si la comparaison est aussi une prévision (optionnel)
+                borderDash: isPrediction ? [5, 5] : [] 
             });
         }
 
+        // 4. Création du Graphique
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: { labels: dates, datasets: datasets },
@@ -362,6 +418,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            // Petit bonus : Ajout de l'unité dans l'infobulle
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                    if (context.dataset.yAxisID === 'y') label += ' kW';
+                                    else if (secondaryMode === 'temp') label += ' °C';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
                 scales: {
                     y: { 
                         type: 'linear', position: 'left', beginAtZero: true,
@@ -369,9 +442,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     y1: {
                         type: 'linear', position: 'right',
-                        // On affiche l'axe si un mode secondaire est actif (plus de restriction 'all')
                         display: (secondaryMode !== 'none'),
-                        grid: { drawOnChartArea: false },
+                        grid: { drawOnChartArea: false }, // Cache la grille pour ne pas surcharger
                         title: { display: true, text: secondaryMode === 'temp' ? 'Température (°C)' : 'Indice Météo' }
                     }
                 }

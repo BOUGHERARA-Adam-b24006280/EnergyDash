@@ -49,6 +49,4 @@ $router->add('POST', '/reset', [AuthController::class, 'resetPassword']);
 
 $router->add('GET', '/api/energy', [EnergyController::class, 'index']);
 $router->add('POST', '/energy/upload', [EnergyController::class, 'upload']);
-
-// Route de test pour voir ce qui cloche avec le CSV
-$router->add('GET', '/debug-csv', [App\Controllers\EnergyController::class, 'debug']);
+$router->add('POST', '/energy/delete', [EnergyController::class, 'delete']);
