@@ -1,14 +1,14 @@
 <?php
-namespace App\Models;
+namespace App\Services;
 
 /**
- * Classe EnergyModel
+ * Classe EnergyCsvService
  * Gère l'accès aux données énergétiques stockées dans des fichiers CSV.
  * Gère le parsing, le filtrage et la détection du format CSV.
  *
- * @package App\Models
+ * @package App\Services
  */
-class EnergyModel {
+class EnergyCsvService {
     /** @var string Chemin vers le fichier CSV actuellement utilisé */
     private string $csvPath;
     

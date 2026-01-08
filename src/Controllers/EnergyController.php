@@ -8,7 +8,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\EnergyModel;
+use App\Services\EnergyCsvService;
 use App\Core\JsonResponse;
 
 /**
@@ -19,11 +19,11 @@ use App\Core\JsonResponse;
  */
 class EnergyController extends Controller
 {
-    private EnergyModel $energyModel;
+    private EnergyCsvService $energyService;
 
     public function __construct() {
         parent::__construct();
-        $this->energyModel = new EnergyModel();
+        $this->energyService = new EnergyCsvService();
     }
 
     /**
@@ -45,7 +45,7 @@ class EnergyController extends Controller
         $to   = $this->sanitize($_GET['to']   ?? date('Y-m-d'));
 
         try {
-            $data = $this->energyModel->getEnergyData($type, $city, $from, $to, $compare);
+            $data = $this->energyService->getEnergyData($type, $city, $from, $to, $compare);
             
             JsonResponse::send($data);
         } catch (\Exception $e) {

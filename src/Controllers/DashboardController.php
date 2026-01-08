@@ -7,7 +7,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\EnergyModel;
+use App\Services\EnergyCsvService;
 
 /**
  * Contrôleur DashboardController
@@ -16,11 +16,11 @@ use App\Models\EnergyModel;
  * @package App\Controllers
  */
 class DashboardController extends Controller {
-    private EnergyModel $energyModel;
+    private EnergyCsvService $energyService;
 
     public function __construct() {
         parent::__construct();
-        $this->energyModel = new EnergyModel();
+        $this->energyService = new EnergyCsvService();
     }
 
     /**
@@ -33,11 +33,11 @@ class DashboardController extends Controller {
     public function index(): void {
         $this->requireLogin();
 
-        $cities = $this->energyModel->getAvailableCities();
+        $cities = $this->energyService->getAvailableCities();
 
         $this->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',
             'cities' => $cities
-    ]);
+        ]);
     }
 }
