@@ -13,7 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Récupère les infos utilisateur si connecté
 $user = $_SESSION['user'] ?? null;
-$fullName = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) : null;
+$fullName = $user ? htmlspecialchars(($user['first_name'] ?? 'Utilisateur') . ' ' . ($user['last_name'] ?? '')) : null;
 ?>
 
 <!DOCTYPE html>
@@ -30,7 +30,7 @@ $fullName = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_nam
     <link rel="stylesheet" href="/assets/tailwindcss/style.css">
 </head>
 
-<body>
+<body class="bg-gray-50 dark:bg-neutral-900 text-gray-800 dark:text-gray-200">
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full">
     <nav class="relative max-w-340 w-full mx-auto flex items-center justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-x-1">
