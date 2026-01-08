@@ -64,16 +64,9 @@ class ProfileController extends Controller {
      * @return void
      */
     public function update(): void {
+        
         $this->requireLogin();
 
-        if (
-            !isset($_SESSION['user']) ||
-            !is_array($_SESSION['user']) ||
-            !isset($_SESSION['user']['id'])
-        ) {
-            $this->redirect('/login');
-            exit;
-        }
         assert(is_numeric($_SESSION['user']['id']));
         $id = (int) $_SESSION['user']['id'];
 
