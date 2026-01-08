@@ -25,6 +25,7 @@ class AuthController extends Controller {
      * Initialise le modèle utilisateur.
      */
     public function __construct() {
+        parent::__construct();
         $this->userModel = new UserModel();
     }
 

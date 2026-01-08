@@ -27,15 +27,7 @@ class UserModel extends Model {
      * Vérifie si une adresse mail est déjà utilisée
      */
     public function emailExists(string $email): bool {
-        try {
-            $stmt = $this->db->prepare("SELECT id FROM users WHERE email = :email LIMIT 1");
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->execute();
-            return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la vérification d'email : " . $e->getMessage());
-            return false;
-        }
+        return $this->findOneBy('email', $email) !== null;
     }
 
     /**
@@ -59,43 +51,21 @@ class UserModel extends Model {
      * @return array<string, mixed>|null
      */
     public function getUserByEmail(string $email): ?array {
-        try {
-            $stmt = $this->db->prepare("
-                SELECT id, first_name, last_name, email, password, role 
-                FROM users 
-                WHERE email = :email LIMIT 1
-            ");
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->execute();
-
-            /** @var array<string, mixed>|false $result */
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            return $result !== false ? $result : null;
-        } catch (PDOException $e) {
-            error_log("Erreur lors de la récupération de l'utilisateur : " . $e->getMessage());
-            return null;
-        }
+        return $this->findOneBy('email', $email);
     }
 
     public function updateUser(int $id, string $firstName, string $lastName, string $email, string $password = ''): bool {
-        $query = "UPDATE users SET first_name = :first, last_name = :last, email = :email";
-        $params = [
-            ':first' => $firstName,
-            ':last'  => $lastName,
-            ':email' => $email,
-            ':id'    => $id
+        $data = [
+            'first_name' => $firstName,
+            'last_name'  => $lastName,
+            'email'      => $email,
         ];
 
         if ($password !== '') {
-            $query .= ", password = :password";
-            $params[':password'] = password_hash($password, PASSWORD_DEFAULT);
+            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
         }
 
-        $query .= " WHERE id = :id";
-
-        $stmt = $this->db->prepare($query);
-        return $stmt->execute($params);
+        return $this->update($id, $data);
     }
 
     public function updateUserRole(int $id, string $role): bool {

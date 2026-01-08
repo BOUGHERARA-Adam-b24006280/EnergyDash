@@ -18,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
         'httponly' => true, // Empêche l'accès via JS
         'samesite' => 'Strict' // Protection CSRF
     ]);
-    session_start();
+    // session_start(); // Désactivé ici, géré par le Controller
 }
 
 require_once __DIR__ . '/../src/Config/routes.php';

@@ -21,10 +21,6 @@ class EnergyModel {
      * et détecte son délimiteur.
      */
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
         $userId = $_SESSION['user']['id'] ?? null;
         $userRole = $_SESSION['user']['role'] ?? 'user';
 

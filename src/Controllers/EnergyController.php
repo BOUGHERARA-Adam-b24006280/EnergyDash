@@ -19,6 +19,13 @@ use App\Core\JsonResponse;
  */
 class EnergyController extends Controller
 {
+    private EnergyModel $energyModel;
+
+    public function __construct() {
+        parent::__construct();
+        $this->energyModel = new EnergyModel();
+    }
+
     /**
      * API : Renvoie les données énergétiques au format JSON pour le graphique.
      * Supporte le filtrage par type, ville, date et la comparaison de ville.
@@ -29,17 +36,16 @@ class EnergyController extends Controller
     public function index(): void
     {
         // Récupération des filtres
-        $type = $_GET['type'] ?? 'all';
-        $city = $_GET['city'] ?? 'all'; 
+        $type = $this->sanitize($_GET['type'] ?? 'all');
+        $city = $this->sanitize($_GET['city'] ?? 'all'); 
         // Nouveau paramètre pour la comparaison
-        $compare = !empty($_GET['compare']) ? $_GET['compare'] : null;
+        $compare = !empty($_GET['compare']) ? $this->sanitize($_GET['compare']) : null;
         
-        $from = $_GET['from'] ?? date('Y-m-01');
-        $to   = $_GET['to']   ?? date('Y-m-d');
+        $from = $this->sanitize($_GET['from'] ?? date('Y-m-01'));
+        $to   = $this->sanitize($_GET['to']   ?? date('Y-m-d'));
 
         try {
-            $model = new EnergyModel();
-            $data = $model->getEnergyData($type, $city, $from, $to, $compare);
+            $data = $this->energyModel->getEnergyData($type, $city, $from, $to, $compare);
             
             JsonResponse::send($data);
         } catch (\Exception $e) {

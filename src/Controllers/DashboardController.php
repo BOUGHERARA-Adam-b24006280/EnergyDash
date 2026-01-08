@@ -16,6 +16,13 @@ use App\Models\EnergyModel;
  * @package App\Controllers
  */
 class DashboardController extends Controller {
+    private EnergyModel $energyModel;
+
+    public function __construct() {
+        parent::__construct();
+        $this->energyModel = new EnergyModel();
+    }
+
     /**
      * Affiche la page principale du dashboard.
      * Récupère la liste des villes disponibles pour les filtres.
@@ -26,9 +33,7 @@ class DashboardController extends Controller {
     public function index(): void {
         $this->requireLogin();
 
-        $energyModel = new EnergyModel();
-
-        $cities = $energyModel->getAvailableCities();
+        $cities = $this->energyModel->getAvailableCities();
 
         $this->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',

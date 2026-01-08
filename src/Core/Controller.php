@@ -16,6 +16,16 @@ namespace App\Core;
  */
 abstract class Controller {
     /**
+     * Constructeur.
+     * Démarre la session si elle n'est pas déjà active.
+     */
+    public function __construct() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+    }
+
+    /**
      * Affiche une vue en utilisant le Layout principal.
      *
      * @param string $view Nom du fichier vue (ex: 'dashboard/dashboard')

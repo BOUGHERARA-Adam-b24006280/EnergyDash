@@ -27,10 +27,7 @@ class ProfileController extends Controller {
      * Initialise la session si nécessaire et le modèle utilisateur.
      */
     public function __construct(){
-       if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
+        parent::__construct();
         $this->userModel = new UserModel();
     }
 
@@ -43,12 +40,7 @@ class ProfileController extends Controller {
      */
     public function index(): void {
         $this->requireLogin();
-        $user = $_SESSION['user'] ?? null;
-
-        if (!is_array($user) || !isset($user['role'])) {
-            $this->redirect('/login');
-            exit;
-        }
+        $user = $_SESSION['user'];
 
         if ($user['role'] === 'admin') {
             $users = $this->userModel->getAllUsers();
