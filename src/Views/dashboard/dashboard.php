@@ -156,11 +156,11 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-sm font-medium mb-1 dark:text-white">Du</label>
-                            <input type="date" name="from" value="2023-12-01" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-400">
+                            <input type="date" name="from" value="2026-01-01" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-400">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1 dark:text-white">Au</label>
-                            <input type="date" name="to" value="2023-12-31" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-400">
+                            <input type="date" name="to" value="2026-01-08" class="py-2 px-3 block w-full border-gray-200 rounded-lg text-sm dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-400">
                         </div>
                     </div>
 

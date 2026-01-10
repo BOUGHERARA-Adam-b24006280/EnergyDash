@@ -20,7 +20,7 @@
             <div class="p-4 mx-4 sm:p-7 ">
             <div class="mb-8">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                    Profile
+                    Profil
                 </h2>
                 <p class="text-sm text-gray-600 dark:text-neutral-400">
                     Modifiez les informations de votre compte.
@@ -67,8 +67,8 @@
 
                     <div class="sm:col-span-9">
                         <div class="space-y-2">
-                            <input id="af-account-password" type="text" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre mot de passe actuel">
-                            <input id="password" type="text" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre nouveau mot de passe">
+                            <input id="af-account-password" type="password" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre mot de passe actuel">
+                            <input id="password" name="password" type="password" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre nouveau mot de passe">
                         </div>
                     </div>
                     <!-- End Col -->

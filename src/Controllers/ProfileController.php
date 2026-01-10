@@ -58,9 +58,9 @@ class ProfileController extends Controller {
     }
 
     /**
-     * Met à jour les informations du profil connecté (Non, Prénom, Email, MDP).
-     * Route: POST /profile
-     *
+     * Met à jour les informations du profil connecté (Nom, Prénom, Email, MDP).
+     * Route: POST /profile/update
+     * 
      * @return void
      */
     public function update(): void {
@@ -77,16 +77,26 @@ class ProfileController extends Controller {
             $this->redirect('/profile');
         }
 
+        // 1. On récupère et nettoie les variables AVANT de les utiliser
+        $firstName = $this->sanitize($_POST['first_name'] ?? '');
+        $lastName  = $this->sanitize($_POST['last_name'] ?? '');
+        $password  = $_POST['password'] ?? '';
+
         try {
+            // 2. Mise à jour en base de données
             $this->userModel->updateUser(
                 $id,
-                $this->sanitize($_POST['first_name'] ?? ''),
-                $this->sanitize($_POST['last_name'] ?? ''),
+                $firstName,
+                $lastName,
                 $email,
-                $_POST['password'] ?? ''
+                $password
             );
 
-            $_SESSION['user']['email'] = $email;
+            // 3. IMPORTANT : Mise à jour de la session pour l'affichage immédiat
+            $_SESSION['user']['first_name'] = $firstName;
+            $_SESSION['user']['last_name']  = $lastName;
+            $_SESSION['user']['email']      = $email;
+
             $this->flash('success', "Profil mis à jour avec succès.");
         } catch (Exception $e) {
             $this->flash('error', "Erreur lors de la mise à jour du profil.");
