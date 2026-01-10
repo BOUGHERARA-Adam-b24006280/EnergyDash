@@ -20,7 +20,7 @@
             <div class="p-4 mx-4 sm:p-7 ">
             <div class="mb-8">
                 <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
-                    Profile
+                    Profil
                 </h2>
                 <p class="text-sm text-gray-600 dark:text-neutral-400">
                     Modifiez les informations de votre compte.
