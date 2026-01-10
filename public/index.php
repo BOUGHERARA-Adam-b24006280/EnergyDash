@@ -38,8 +38,6 @@ try {
         ob_end_clean();
     }
 
-    die("L'erreur est ici : " . $e->getMessage());
-
     $errorController = new App\Controllers\ErrorController();
     $errorController->error500page();
 }
