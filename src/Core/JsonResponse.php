@@ -29,16 +29,9 @@ class JsonResponse
             ob_clean();
         }
 
-        // Définit l'en-tête pour dire au navigateur "Ceci est du JSON"
         header('Content-Type: application/json; charset=utf-8');
-        
-        // Définit le code de réponse (200 OK, 404 Not Found, etc.)
-        http_response_code($status);
-
-        // Encode les données et les affiche
+        http_response_code($status);    // Définit le code de réponse (200 OK, 404 Not Found, etc.)
         echo json_encode($data);
-        
-        // Arrête le script immédiatement pour garantir qu'rien d'autre n'est envoyé
         exit;
     }
 

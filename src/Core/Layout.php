@@ -42,14 +42,8 @@ class Layout
      */
     public function render(array $data = []): void
     {
-        // Extrait les variables pour qu'elles soient accessibles dans la vue (ex: $cities)
         extract($data);
-
-        // Rend le titre accessible
         $title = $this->title;
-
-        // Inclut les parties de la page
-        // Assurez-vous que le chemin 'shared' existe bien dans Views
         require __DIR__ . '/../Views/shared/header.php';
         require $this->viewPath;
         require __DIR__ . '/../Views/shared/footer.php';

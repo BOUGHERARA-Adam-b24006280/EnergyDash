@@ -59,8 +59,8 @@ class AuthController extends Controller {
         try {
             $this->validateCsrf();
 
-            $email = trim($_POST['email'] ?? '');
-            $password = $_POST['password'] ?? '';
+            $email = trim((string)$_POST['email'] ?? '');
+            $password = (string)$_POST['password'] ?? '';
 
             $user = $this->userModel->verifyLogin($email, $password);
 
@@ -74,11 +74,10 @@ class AuthController extends Controller {
             $this->redirect('/dashboard');
 
         } catch (Exception $e) {
-            // En cas d'erreur, on réaffiche la vue login avec l'erreur
             $this->render('auth/login', [
                 'title' => 'Connexion',
                 'errors' => [$e->getMessage()],
-                'csrf_token' => $_SESSION['csrf_token'] // On garde le token
+                'csrf_token' => $_SESSION['csrf_token']
             ]);
         }
     }
@@ -99,7 +98,7 @@ class AuthController extends Controller {
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(
-                session_name(),
+                (string)session_name(),
                 '',
                 time() - 42000,
                 $params["path"],
@@ -144,11 +143,11 @@ class AuthController extends Controller {
             $this->validateCsrf();
 
             $data = [
-                'first_name' => trim($_POST['first_name'] ?? ''),
-                'last_name' => trim($_POST['last_name'] ?? ''),
-                'email' => trim($_POST['email'] ?? ''),
-                'password' => $_POST['password'] ?? '',
-                'confirm' => $_POST['confirm_password'] ?? ''
+                'first_name' => trim((string)$_POST['first_name'] ?? ''),
+                'last_name' => trim((string)$_POST['last_name'] ?? ''),
+                'email' => trim((string)$_POST['email'] ?? ''),
+                'password' => (string)$_POST['password'] ?? '',
+                'confirm' => (string)$_POST['confirm_password'] ?? ''
             ];
 
             // Validation des champs vides, format, etc.
@@ -207,7 +206,7 @@ class AuthController extends Controller {
 
         try {
             $this->validateCsrf();
-            $email = trim($_POST['email'] ?? '');
+            $email = trim((string)$_POST['email'] ?? '');
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL))
                 throw new Exception("Email invalide.");
