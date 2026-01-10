@@ -5,7 +5,8 @@
  * Initialise la session, charge l'autoloader et dispatche la requête via le routeur.
  */
 
-ob_start();
+// Stock dans la mémoire tampon (Output Buffering) au lieu de l'envoyer directement
+ob_start(); 
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Config/config.php';
@@ -30,12 +31,14 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 // Routage des requêtes
+/** @var \App\Core\Router $router Indication pour PHPStan */
 try {
     $router->dispatch();
-    ob_end_flush();
+    ob_end_flush(); // Envoie le tampon
 } catch (Throwable $e) {
+    // Evite l'affiche d'une page incomplète
     if (ob_get_length()) {
-        ob_end_clean();
+        ob_end_clean(); // Nettoyage tampon en cas d'erreur
     }
 
     $errorController = new App\Controllers\ErrorController();

@@ -59,8 +59,11 @@ class AuthController extends Controller {
         try {
             $this->validateCsrf();
 
-            $email = trim((string)$_POST['email'] ?? '');
-            $password = (string)$_POST['password'] ?? '';
+            $rawEmail = $_POST['email'] ?? '';
+            $rawPass = $_POST['password'] ?? '';
+
+            $email = is_string($rawEmail) ? trim($rawEmail) : '';
+            $password = is_string($rawPass) ? $rawPass : '';
 
             $user = $this->userModel->verifyLogin($email, $password);
 
@@ -69,6 +72,7 @@ class AuthController extends Controller {
                 throw new Exception("Identifiants incorrects.");
             }
 
+            /** @var array{id: int|string, email: string, first_name: string, last_name: string, role?: string} $user */
             $this->createSession($user);
 
             $this->redirect('/dashboard');
@@ -142,12 +146,18 @@ class AuthController extends Controller {
         try {
             $this->validateCsrf();
 
+            $pFirstName = $_POST['first_name'] ?? '';
+            $pLastName = $_POST['last_name'] ?? '';
+            $pEmail = $_POST['email'] ?? '';
+            $pPassword = $_POST['password'] ?? '';
+            $pConfirm = $_POST['confirm_password'] ?? '';
+
             $data = [
-                'first_name' => trim((string)$_POST['first_name'] ?? ''),
-                'last_name' => trim((string)$_POST['last_name'] ?? ''),
-                'email' => trim((string)$_POST['email'] ?? ''),
-                'password' => (string)$_POST['password'] ?? '',
-                'confirm' => (string)$_POST['confirm_password'] ?? ''
+                'first_name' => is_string($pFirstName) ? trim($pFirstName) : '',
+                'last_name'  => is_string($pLastName) ? trim($pLastName) : '',
+                'email'      => is_string($pEmail) ? trim($pEmail) : '',
+                'password'   => is_string($pPassword) ? $pPassword : '',
+                'confirm'    => is_string($pConfirm) ? $pConfirm : ''
             ];
 
             // Validation des champs vides, format, etc.
@@ -206,7 +216,8 @@ class AuthController extends Controller {
 
         try {
             $this->validateCsrf();
-            $email = trim((string)$_POST['email'] ?? '');
+            $rawEmail = $_POST['email'] ?? '';
+            $email = is_string($rawEmail) ? trim($rawEmail) : '';
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL))
                 throw new Exception("Email invalide.");
@@ -214,10 +225,13 @@ class AuthController extends Controller {
             $result = $this->userModel->createResetTokenForEmail($email);
 
             if ($result) {
-                $baseUrl = defined('BASE_URL') ? BASE_URL : 'http://localhost:8000';
-                $resetLink = rtrim($baseUrl, '/') . "/reset?token=" . $result['token'];
+                $baseUrl = (defined('BASE_URL') && is_string(BASE_URL)) ? BASE_URL : 'http://localhost:8000';
+                $tokenStr = $result['token'];
+                $resetLink = rtrim($baseUrl, '/') . "/reset?token=" . $tokenStr;
 
-                $firstName = $result['user']['first_name'] ?? 'Utilisateur';
+                $userArr = $result['user'];
+                $rawName = $userArr['first_name'] ?? 'Utilisateur';
+                $firstName = is_string($rawName) ? $rawName : 'Utilisateur';
 
                 $subject = "Réinitialisation de votre mot de passe";
                 $message = "Bonjour {$firstName},\n\n" .
@@ -263,7 +277,8 @@ class AuthController extends Controller {
     public function showReset(): void {
         $this->initCsrf();
         
-        $token = $_GET['token'] ?? '';
+        $rawToken = $_GET['token'] ?? '';
+        $token = is_string($rawToken) ? $rawToken : '';
         $errors = [];
 
         // Vérification préventive pour UX
@@ -290,9 +305,14 @@ class AuthController extends Controller {
         try {
             $this->validateCsrf();
 
-            $token = $_POST['token'] ?? $_GET['token'] ?? '';
-            $password = $_POST['password'] ?? '';
-            $confirm = $_POST['confirm_password'] ?? '';
+            $tokenRaw = $_POST['token'] ?? $_GET['token'] ?? '';
+            $token = is_string($tokenRaw) ? $tokenRaw : '';
+            
+            $pPassword = $_POST['password'] ?? '';
+            $password = is_string($pPassword) ? $pPassword : '';
+            
+            $pConfirm = $_POST['confirm_password'] ?? '';
+            $confirm = is_string($pConfirm) ? $pConfirm : '';
 
             if (empty($token))
                 throw new Exception("Token manquant.");
@@ -313,9 +333,13 @@ class AuthController extends Controller {
                 throw new Exception("Le mot de passe n'est pas assez sécurisé.");
             }
 
-            $this->userModel->updatePassword($user['id'], $password);
-            // On invalide TOUS les tokens de cet utilisateur par sécurité
-            $this->userModel->deleteResetTokensForUser($user['id']);
+            $userId = $user['id'] ?? 0;
+            if (!is_numeric($userId)) {
+                 throw new Exception("ID utilisateur invalide.");
+            }
+
+            $this->userModel->updatePassword((int)$userId, $password);
+            $this->userModel->deleteResetTokensForUser((int)$userId);
 
             $this->flash('success', "Mot de passe modifié avec succès. Vous pouvez vous connecter.");
             $this->redirect('/login');
@@ -334,7 +358,7 @@ class AuthController extends Controller {
     /**
      * Crée la session utilisateur après une connexion réussie.
      *
-     * @param array $user Les données de l'utilisateur (id, email, prénon, nom, role).
+     * @param array{id: int|string, email: string, first_name: string, last_name: string, role?: string} $user
      * @return void
      */
     private function createSession(array $user): void {
@@ -367,8 +391,13 @@ class AuthController extends Controller {
      * @return void
      */
     private function validateCsrf(): void {
-        $token = $_POST['csrf_token'] ?? '';
-        if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+        $rawToken = $_POST['csrf_token'] ?? '';
+        $token = is_string($rawToken) ? $rawToken : '';
+        
+        $rawSession = $_SESSION['csrf_token'] ?? '';
+        $sessionToken = is_string($rawSession) ? $rawSession : '';
+
+        if (empty($sessionToken) || !hash_equals($sessionToken, $token)) {
             throw new Exception("Session expirée. Veuillez recharger la page.");
         }
     }
@@ -376,7 +405,7 @@ class AuthController extends Controller {
     /**
      * Valide les données d'inscription.
      *
-     * @param array $data Tableau contenant les champs (first_name, last_name, email, password, confirm).
+     * @param array{first_name: string, last_name: string, email: string, password: string, confirm: string} $data
      * @throws Exception Si une validation échoue.
      * @return void
      */

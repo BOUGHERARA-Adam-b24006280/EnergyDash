@@ -29,7 +29,7 @@ class EnergyCsvService {
         $userId = $_SESSION['user']['id'] ?? null;
         $userRole = $_SESSION['user']['role'] ?? 'user';
 
-        // Chemins des fichiers (Logique importée de votre modèle)
+        // Chemins des fichiers
         $userFile = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
         $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
 
@@ -56,7 +56,6 @@ class EnergyCsvService {
         if ($handle) {
             $line = fgets($handle); // Lit la première ligne
             fclose($handle);
-            // Si on trouve plus de points-virgules que de virgules, c'est du format Excel FR
             if (substr_count($line, ';') > substr_count($line, ',')) {
                 return ';';
             }
@@ -68,7 +67,6 @@ class EnergyCsvService {
      * Helper : Nettoie les en-têtes CSV (BOM, espaces, majuscules).
      */
     private function cleanHeaders(array $headers): array {
-        // Supprime le BOM (caractère invisible qui casse souvent les CSV Excel)
         $bom = pack('H*','EFBBBF');
         $headers[0] = preg_replace("/^$bom/", '', $headers[0]);
         
@@ -124,19 +122,15 @@ class EnergyCsvService {
                     if (count($row) !== count($headers)) continue;
                     $data = array_combine($headers, $row);
 
-                    // --- FILTRES ---
-                    // 1. Type d'énergie
                     if ($type !== 'all' && (!isset($data['type']) || strtolower(trim($data['type'])) !== strtolower($type))) {
                         continue;
                     }
 
-                    // 2. Ville (Gère la comparaison)
                     $rowCity = strtolower(trim($data['ville'] ?? ''));
                     $targetCity = strtolower($city);
                     $compCity = $compareCity ? strtolower($compareCity) : null;
 
                     if ($city !== 'all') {
-                        // On garde la ligne si c'est la ville cible OU la ville comparée
                         if ($rowCity !== $targetCity && $rowCity !== $compCity) {
                             continue;
                         }
@@ -162,7 +156,6 @@ class EnergyCsvService {
             fclose($handle);
         }
         
-        // Tri chronologique
         usort($results, function($a, $b) {
             return strtotime(str_replace('/', '-', $a['date'])) - strtotime(str_replace('/', '-', $b['date']));
         });
@@ -187,7 +180,6 @@ class EnergyCsvService {
                 if (count($row) !== count($headers)) continue;
                 $data = array_combine($headers, $row);
 
-                // On ne garde que les données significatives (Météo > 10) pour éviter les divisions par zéro ou le bruit
                 if (strtolower($data['type'] ?? '') === strtolower($type) && 
                     strtolower($data['ville'] ?? '') === strtolower($city) &&
                     (float)($data['valeur_meteo'] ?? 0) > 10) { 
@@ -212,7 +204,6 @@ class EnergyCsvService {
      * quand le CSV s'arrête.
      */
     public function simulateDataFromWeather(string $type, string $city, string $startDate, string $endDate): array {
-        // Coordonnées GPS des principales villes
         $coordinates = [
             'lyon' =>      ['lat' => 45.76, 'lon' => 4.83],
             'paris' =>     ['lat' => 48.85, 'lon' => 2.35],
@@ -224,23 +215,22 @@ class EnergyCsvService {
         $cityKey = strtolower($city);
         $coords = $coordinates[$cityKey] ?? $coordinates['lyon'];
 
-        // On calibre la simulation sur la performance réelle de l'utilisateur
         $performanceRatio = $this->getPerformanceRatio($type, $city);
         
-        // Valeurs par défaut si pas d'historique (nouvel utilisateur)
         if ($performanceRatio <= 0) {
             if ($type === 'solaire') $performanceRatio = 0.005; 
             elseif ($type === 'eolien') $performanceRatio = 0.1; 
             else $performanceRatio = 0.5;
         }
 
-        // Choix de l'API (Archive pour le passé, Forecast pour le futur)
         $today = date('Y-m-d');
-        $apiUrl = ($startDate < $today) 
-            ? "https://archive-api.open-meteo.com/v1/archive?latitude={$coords['lat']}&longitude={$coords['lon']}&start_date={$startDate}&end_date={$endDate}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis"
-            : "https://api.open-meteo.com/v1/forecast?latitude={$coords['lat']}&longitude={$coords['lon']}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis";
 
-        // --- CORRECTIF 2 : SSL ---
+        if ($endDate < $today) {
+            $apiUrl = "https://archive-api.open-meteo.com/v1/archive?latitude={$coords['lat']}&longitude={$coords['lon']}&start_date={$startDate}&end_date={$endDate}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis";
+        } else {
+            $apiUrl = "https://api.open-meteo.com/v1/forecast?latitude={$coords['lat']}&longitude={$coords['lon']}&start_date={$startDate}&end_date={$endDate}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis";
+        }
+        
         // Permet de faire fonctionner l'appel API même en local (WAMP/XAMPP) sans certificat
         $context = stream_context_create([
             "ssl" => ["verify_peer" => false, "verify_peer_name" => false],
@@ -260,10 +250,8 @@ class EnergyCsvService {
                 $dateString = str_replace('T', ' ', $isoDate) . ':00';
                 $dayOnly = substr($dateString, 0, 10); 
                 
-                // On garde uniquement la période demandée
                 if ($dayOnly < $startDate || $dayOnly > $endDate) continue;
 
-                // Récupération météo avec fallback à 0
                 $temp = $hourly['temperature_2m'][$index] ?? 0;
                 $rain = $hourly['precipitation'][$index] ?? 0;
                 $wind = $hourly['wind_speed_10m'][$index] ?? 0;
@@ -272,7 +260,6 @@ class EnergyCsvService {
                 $predictedProd = 0;
                 $meteoValueForChart = 0;
 
-                // Application des formules physiques
                 if ($type === 'solaire') {
                     $predictedProd = $sun * $performanceRatio;
                     if ($temp > 25) $predictedProd *= 0.95; // Malus chaleur
@@ -291,7 +278,7 @@ class EnergyCsvService {
                     'ville' => $city,
                     'meteo' => $meteoValueForChart,
                     'temp' => $temp,
-                    'statut' => 'prevision' // Important pour que le JS affiche les pointillés
+                    'statut' => 'prevision'
                 ];
             }
         }

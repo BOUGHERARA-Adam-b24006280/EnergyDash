@@ -40,6 +40,8 @@ class ProfileController extends Controller {
      */
     public function index(): void {
         $this->requireLogin();
+
+        /** @var array{id: int|string, role: string, first_name: string, last_name: string, email: string} $user */
         $user = $_SESSION['user'];
 
         if ($user['role'] === 'admin') {
@@ -67,23 +69,37 @@ class ProfileController extends Controller {
         
         $this->requireLogin();
 
-        assert(is_numeric($_SESSION['user']['id']));
-        $id = (int) $_SESSION['user']['id'];
-
-        $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-
-        if (!$email) {
-            $this->flash('error', "Adresse email invalide.");
-            $this->redirect('/profile');
+        if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+            $this->redirect('/login');
+            return;
         }
 
-        // 1. On récupère et nettoie les variables AVANT de les utiliser
-        $firstName = $this->sanitize($_POST['first_name'] ?? '');
-        $lastName  = $this->sanitize($_POST['last_name'] ?? '');
-        $password  = $_POST['password'] ?? '';
+        $userId = $_SESSION['user']['id'] ?? 0;
+        if (!is_numeric($userId)) {
+             $this->flash('error', "ID utilisateur invalide.");
+             $this->redirect('/logout');
+             return;
+        }
+        $id = (int)$userId;
+
+        $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        
+        if (!$rawEmail) {
+            $this->flash('error', "Adresse email invalide.");
+            $this->redirect('/profile');
+            return;
+        }
+        $email = (string)$rawEmail;
+
+        $rawFirstName = $_POST['first_name'] ?? '';
+        $rawLastName = $_POST['last_name'] ?? '';
+        $rawPassword = $_POST['password'] ?? '';
+
+        $firstName = $this->sanitize(is_string($rawFirstName) ? $rawFirstName : '');
+        $lastName  = $this->sanitize(is_string($rawLastName) ? $rawLastName : '');
+        $password  = is_string($rawPassword) ? $rawPassword : '';
 
         try {
-            // 2. Mise à jour en base de données
             $this->userModel->updateUser(
                 $id,
                 $firstName,
@@ -92,7 +108,6 @@ class ProfileController extends Controller {
                 $password
             );
 
-            // 3. IMPORTANT : Mise à jour de la session pour l'affichage immédiat
             $_SESSION['user']['first_name'] = $firstName;
             $_SESSION['user']['last_name']  = $lastName;
             $_SESSION['user']['email']      = $email;
@@ -115,12 +130,20 @@ class ProfileController extends Controller {
     public function updateRole(): void {
         $this->requireAdmin();
 
+        if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+             $this->redirect('/login');
+             return;
+        }
+
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_SPECIAL_CHARS);
+        $rawRole = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_SPECIAL_CHARS);
+        $role = is_string($rawRole) ? $rawRole : '';
 
         if ($id && in_array($role, ['user', 'editor'])) {
             
-            if ($id === $_SESSION['user']['id']) {
+            $currentUserId = $_SESSION['user']['id'] ?? null;
+
+            if ($id === $currentUserId) {
                 $this->flash('error', "Vous ne pouvez pas modifier votre propre rôle ici.");
                 $this->redirect('/profile');
                 exit;

@@ -37,7 +37,7 @@ class Layout
     /**
      * Affiche la page complète (Header + Vue + Footer).
      *
-     * @param array $data Données à extraire pour la vue.
+     * @param array<string, mixed> $data Données à extraire pour la vue.
      * @return void
      */
     public function render(array $data = []): void

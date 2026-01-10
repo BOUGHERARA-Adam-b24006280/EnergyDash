@@ -69,6 +69,12 @@ class UserModel extends Model {
     }
 
     public function updateUserRole(int $id, string $role): bool {
+        $allowedRoles = ['user', 'admin', 'editor'];
+
+        if (!in_array($role, $allowedRoles, true)) {
+            return false;
+        }
+
         try {
             $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :id");
             return $stmt->execute([':role' => $role, ':id' => $id]);
