@@ -3,57 +3,60 @@ namespace App\Services;
 
 /**
  * Classe EnergyCsvService
- * Gère l'accès aux données énergétiques stockées dans des fichiers CSV.
- * Gère le parsing, le filtrage et la détection du format CSV.
- *
- * @package App\Services
+ * Service centralisant la gestion des données CSV et la simulation IA via Open-Meteo.
+ * Fusionne la logique métier de la branche "Prévision" avec l'architecture "Amélioration du Code".
  */
 class EnergyCsvService {
     /** @var string Chemin vers le fichier CSV actuellement utilisé */
     private string $csvPath;
     
     /** @var string Délimiteur CSV détecté (',' ou ';') */
-    private string $delimiter = ','; // Par défaut
+    private string $delimiter = ','; 
 
     /**
      * Constructeur.
-     * Détermine quel fichier CSV utiliser (fichier utilisateur ou défaut) 
-     * et détecte son délimiteur.
+     * Initialise la session si besoin, détermine le fichier CSV de l'utilisateur
+     * et détecte automatiquement le séparateur.
      */
     public function __construct() {
+        // --- CORRECTIF 1 : SÉCURITÉ SESSION ---
+        // Indispensable car on accède à $_SESSION['user']. 
+        // Si la session n'est pas démarrée ailleurs, le service plantera sans ceci.
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
         $userId = $_SESSION['user']['id'] ?? null;
         $userRole = $_SESSION['user']['role'] ?? 'user';
 
-        // Chemins des fichiers
+        // Chemins des fichiers (Logique importée de votre modèle)
         $userFile = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
         $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
 
+        // Seuls les admins/éditeurs ou les utilisateurs ayant uploadé un fichier utilisent le fichier perso
         $canUpload = in_array($userRole, ['admin', 'editor']);
 
-        if ($userId && $canUpload && file_exists($userFile)) {
+        if ($userId && file_exists($userFile)) {
             $this->csvPath = $userFile;
         } else {
             $this->csvPath = $defaultFile;
         }
         
-        // Détection séparateur (Code existant...)
+        // Détection séparateur
         if (file_exists($this->csvPath)) {
             $this->delimiter = $this->detectDelimiter($this->csvPath);
         }
     }
 
     /**
-     * Regarde la première ligne pour voir si c'est du format Excel (;) ou Standard (,)
-     *
-     * @param string $file Chemin du fichier à analyser.
-     * @return string Le délimiteur détecté (';' ou ',').
+     * Helper : Détecte si le fichier utilise des virgules ou des points-virgules.
      */
     private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
         if ($handle) {
-            $line = fgets($handle); // Lit la première ligne brute
+            $line = fgets($handle); // Lit la première ligne
             fclose($handle);
-            // Si on trouve plus de points-virgules que de virgules, c'est du Excel FR
+            // Si on trouve plus de points-virgules que de virgules, c'est du format Excel FR
             if (substr_count($line, ';') > substr_count($line, ',')) {
                 return ';';
             }
@@ -62,13 +65,10 @@ class EnergyCsvService {
     }
 
     /**
-     * Nettoie les en-têtes CSV (suppression BOM, espaces, minuscules).
-     *
-     * @param array $headers Les en-têtes bruts.
-     * @return array Les en-têtes nettoyés.
+     * Helper : Nettoie les en-têtes CSV (BOM, espaces, majuscules).
      */
     private function cleanHeaders(array $headers): array {
-        // Nettoie le BOM (caractère invisible Excel)
+        // Supprime le BOM (caractère invisible qui casse souvent les CSV Excel)
         $bom = pack('H*','EFBBBF');
         $headers[0] = preg_replace("/^$bom/", '', $headers[0]);
         
@@ -78,16 +78,13 @@ class EnergyCsvService {
     }
 
     /**
-     * Récupère la liste des villes disponibles dans le fichier CSV.
-     *
-     * @return array Liste des villes triées par ordre alphabétique.
+     * Récupère la liste des villes (utile pour les filtres).
      */
     public function getAvailableCities(): array{
         if (!file_exists($this->csvPath)) return [];
         $cities = [];
         
         if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
-            // Utilise le délimiteur détecté ($this->delimiter)
             $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
             
             if ($rawHeaders) {
@@ -110,14 +107,7 @@ class EnergyCsvService {
     }
 
     /**
-     * Récupère les données énergétiques filtrées.
-     *
-     * @param string $type Type d'énergie ('all', 'eolien', 'solaire', etc.)
-     * @param string $city Ville principale à filtrer ('all' pour toutes).
-     * @param string $from Date de début (Y-m-d).
-     * @param string $to Date de fin (Y-m-d).
-     * @param string|null $compareCity Ville à comparer (optionnel).
-     * @return array Tableau contenant les métadonnées et les données filtrées.
+     * Récupère les données historiques depuis le CSV avec filtrage.
      */
     public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array{
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
@@ -135,20 +125,18 @@ class EnergyCsvService {
                     $data = array_combine($headers, $row);
 
                     // --- FILTRES ---
-                    // 1. Type
+                    // 1. Type d'énergie
                     if ($type !== 'all' && (!isset($data['type']) || strtolower(trim($data['type'])) !== strtolower($type))) {
                         continue;
                     }
 
-                    // 2. Ville (MODIFIÉ POUR LA COMPARAISON)
+                    // 2. Ville (Gère la comparaison)
                     $rowCity = strtolower(trim($data['ville'] ?? ''));
                     $targetCity = strtolower($city);
                     $compCity = $compareCity ? strtolower($compareCity) : null;
 
-                    // Si on ne veut pas "toutes les zones"
                     if ($city !== 'all') {
-                        // On garde la ligne SI c'est la ville 1 OU la ville 2
-                        // Si ce n'est ni l'une ni l'autre, on passe à la suivante
+                        // On garde la ligne si c'est la ville cible OU la ville comparée
                         if ($rowCity !== $targetCity && $rowCity !== $compCity) {
                             continue;
                         }
@@ -173,7 +161,8 @@ class EnergyCsvService {
             }
             fclose($handle);
         }
-        // On trie les résultats par date pour avoir un graphique propre
+        
+        // Tri chronologique
         usort($results, function($a, $b) {
             return strtotime(str_replace('/', '-', $a['date'])) - strtotime(str_replace('/', '-', $b['date']));
         });
@@ -182,22 +171,8 @@ class EnergyCsvService {
     }
 
     /**
-     * Formate la réponse finale.
-     *
-     * @param string $type
-     * @param string $city
-     * @param string $from
-     * @param string $to
-     * @param array $data
-     * @return array
-     */
-    private function fmt($type, $city, $from, $to, $data): array {
-        return ['type' => $type, 'city' => $city, 'from' => $from, 'to' => $to, 'data' => $data];
-    }
-
-    /**
-     * Calcule la compétence de l'installation (Ratio Historique).
-     * Retourne combien de kW sont produits pour 1 unité de météo.
+     * Calcule l'efficacité de l'installation (Ratio Historique).
+     * Utilisé par le simulateur pour calibrer les prédictions selon l'historique de l'utilisateur.
      */
     private function getPerformanceRatio(string $type, string $city): float {
         if (!file_exists($this->csvPath)) return 0;
@@ -212,6 +187,7 @@ class EnergyCsvService {
                 if (count($row) !== count($headers)) continue;
                 $data = array_combine($headers, $row);
 
+                // On ne garde que les données significatives (Météo > 10) pour éviter les divisions par zéro ou le bruit
                 if (strtolower($data['type'] ?? '') === strtolower($type) && 
                     strtolower($data['ville'] ?? '') === strtolower($city) &&
                     (float)($data['valeur_meteo'] ?? 0) > 10) { 
@@ -231,8 +207,9 @@ class EnergyCsvService {
     }
 
     /**
-     * SIMULATEUR HYBRIDE (API Météo)
-     * Utilise Open-Meteo pour générer des données futures ou combler les trous.
+     * SIMULATEUR HYBRIDE (Fonctionnalité clé)
+     * Utilise Open-Meteo pour générer des données futures (Forecast) ou passées (Archive)
+     * quand le CSV s'arrête.
      */
     public function simulateDataFromWeather(string $type, string $city, string $startDate, string $endDate): array {
         // Coordonnées GPS des principales villes
@@ -247,7 +224,7 @@ class EnergyCsvService {
         $cityKey = strtolower($city);
         $coords = $coordinates[$cityKey] ?? $coordinates['lyon'];
 
-        // On calcule le ratio basé sur l'historique CSV
+        // On calibre la simulation sur la performance réelle de l'utilisateur
         $performanceRatio = $this->getPerformanceRatio($type, $city);
         
         // Valeurs par défaut si pas d'historique (nouvel utilisateur)
@@ -263,8 +240,13 @@ class EnergyCsvService {
             ? "https://archive-api.open-meteo.com/v1/archive?latitude={$coords['lat']}&longitude={$coords['lon']}&start_date={$startDate}&end_date={$endDate}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis"
             : "https://api.open-meteo.com/v1/forecast?latitude={$coords['lat']}&longitude={$coords['lon']}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis";
 
-        // Configuration pour éviter les erreurs SSL
-        $context = stream_context_create(["ssl" => ["verify_peer" => false, "verify_peer_name" => false], "http" => ["timeout" => 5]]);
+        // --- CORRECTIF 2 : SSL ---
+        // Permet de faire fonctionner l'appel API même en local (WAMP/XAMPP) sans certificat
+        $context = stream_context_create([
+            "ssl" => ["verify_peer" => false, "verify_peer_name" => false],
+            "http" => ["timeout" => 5]
+        ]);
+
         $json = @file_get_contents($apiUrl, false, $context);
         
         if ($json === false) return $this->fmt($type, $city, $startDate, $endDate, []);
@@ -281,10 +263,11 @@ class EnergyCsvService {
                 // On garde uniquement la période demandée
                 if ($dayOnly < $startDate || $dayOnly > $endDate) continue;
 
-                $temp = $hourly['temperature_2m'][$index];
-                $rain = $hourly['precipitation'][$index];
-                $wind = $hourly['wind_speed_10m'][$index];
-                $sun  = $hourly['shortwave_radiation'][$index];
+                // Récupération météo avec fallback à 0
+                $temp = $hourly['temperature_2m'][$index] ?? 0;
+                $rain = $hourly['precipitation'][$index] ?? 0;
+                $wind = $hourly['wind_speed_10m'][$index] ?? 0;
+                $sun  = $hourly['shortwave_radiation'][$index] ?? 0;
 
                 $predictedProd = 0;
                 $meteoValueForChart = 0;
@@ -308,10 +291,17 @@ class EnergyCsvService {
                     'ville' => $city,
                     'meteo' => $meteoValueForChart,
                     'temp' => $temp,
-                    'statut' => 'prevision' // Indique au JS de faire des pointillés
+                    'statut' => 'prevision' // Important pour que le JS affiche les pointillés
                 ];
             }
         }
         return $this->fmt($type, $city, $startDate, $endDate, $predictions);
+    }
+
+    /**
+     * Helper : Formate la réponse standardisée.
+     */
+    private function fmt($type, $city, $from, $to, $data): array {
+        return ['type' => $type, 'city' => $city, 'from' => $from, 'to' => $to, 'data' => $data];
     }
 }

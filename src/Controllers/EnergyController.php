@@ -96,10 +96,8 @@ class EnergyController extends Controller
     }
 
     /**
-     * Action : Traite l'upload d'un fichier CSV.
+     * Action : Traite l'upload d'un fichier CSV avec sécurité MIME.
      * Route: POST /energy/upload
-     * 
-     * @return void
      */
     public function upload(): void
     {
@@ -108,17 +106,35 @@ class EnergyController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             $file = $_FILES['csv_file'];
 
+            // 1. Erreur technique
             if ($file['error'] !== UPLOAD_ERR_OK) {
                 $this->flash('error', "Erreur technique lors du transfert.");
                 $this->redirect('/dashboard');
             }
 
+            // 2. Vérification de l'extension
             $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
             if (strtolower($ext) !== 'csv') {
                 $this->flash('error', "Format incorrect. Veuillez envoyer un fichier .csv");
                 $this->redirect('/dashboard');
             }
 
+            // 3. (AJOUT) Vérification de sécurité du contenu réel (MIME Type)
+            // C'est la partie que vous aviez et qui est mieux !
+            $finfo = \finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = \finfo_file($finfo, $file['tmp_name']);
+            $allowedMimes = [
+                'text/csv', 'text/plain', 'application/vnd.ms-excel', 
+                'application/csv', 'text/x-csv', 'application/x-csv', 
+                'text/x-comma-separated-values', 'text/comma-separated-values'
+            ];
+
+            if (!in_array($mimeType, $allowedMimes)) {
+                $this->flash('error', "Fichier invalide détecté. Seuls les vrais CSV sont acceptés.");
+                $this->redirect('/dashboard');
+            }
+
+            // 4. Déplacement
             $userId = $_SESSION['user']['id'];
             $targetDir = __DIR__ . '/../../Storage';
             $targetPath = $targetDir . '/energy_user_' . $userId . '.csv';

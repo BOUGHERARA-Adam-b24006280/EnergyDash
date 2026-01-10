@@ -1,7 +1,7 @@
 <?php
 /**
  * Fichier : DashboardController.php
- * Rôle : Prépare et affiche la page du tableau de bord.
+ * Rôle : Affiche le tableau de bord et charge la liste des villes.
  */
 
 namespace App\Controllers;
@@ -9,12 +9,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Services\EnergyCsvService;
 
-/**
- * Contrôleur DashboardController
- * Affiche le tableau de bord principal de l'application.
- *
- * @package App\Controllers
- */
 class DashboardController extends Controller {
     private EnergyCsvService $energyService;
 
@@ -24,11 +18,7 @@ class DashboardController extends Controller {
     }
 
     /**
-     * Affiche la page principale du dashboard.
-     * Récupère la liste des villes disponibles pour les filtres.
      * Route: GET /dashboard
-     * 
-     * @return void
      */
     public function index(): void {
         $this->requireLogin();

@@ -5,6 +5,8 @@
  * Initialise la session, charge l'autoloader et dispatche la requête via le routeur.
  */
 
+ob_start();
+
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/Config/config.php';
 require_once __DIR__ . '/../src/Config/routes.php';
@@ -30,7 +32,14 @@ set_error_handler(function ($severity, $message, $file, $line) {
 // Routage des requêtes
 try {
     $router->dispatch();
+    ob_end_flush();
 } catch (Throwable $e) {
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    die("L'erreur est ici : " . $e->getMessage());
+
     $errorController = new App\Controllers\ErrorController();
     $errorController->error500page();
 }
