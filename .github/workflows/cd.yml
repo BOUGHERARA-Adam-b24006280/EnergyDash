@@ -15,7 +15,8 @@ jobs:
       - name: Deploy to AlwaysData
         uses: appleboy/ssh-action@v1.2.4
         with:
-          host: energydash@ssh-energydash.alwaysdata.net
+          host: ssh-energydash.alwaysdata.net
+          username: ${{ secrets.ALWAYSDATA_USERNAME }}
           password: ${{ secrets.ALWAYSDATA_PASSWORD }}
           port: 22
           script: |
