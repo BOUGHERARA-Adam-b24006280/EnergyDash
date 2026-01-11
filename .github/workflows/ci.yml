@@ -37,7 +37,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Create .env file
+      - name: Run PHPUnit tests
+        run: vendor/bin/phpunit tests
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
@@ -49,21 +50,3 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
-        run: |
-          cat << 'ENVEOF' > .env
-          DATABASE_HOST=${DATABASE_HOST}
-          DATABASE_NAME=${DATABASE_NAME}
-          DATABASE_USER=${DATABASE_USER}
-          DATABASE_PASSWORD="${DATABASE_PASSWORD}"
-          SMTP_HOST=${SMTP_HOST}
-          SMTP_PORT=${SMTP_PORT}
-          SMTP_USER=${SMTP_USER}
-          SMTP_PASS="${SMTP_PASS}"
-          SMTP_FROM=${SMTP_FROM}
-          SMTP_FROM_NAME="${SMTP_FROM_NAME}"
-          APP_ENV=testing
-          APP_DEBUG=true
-          ENVEOF
-
-      - name: Run PHPUnit tests
-        run: vendor/bin/phpunit tests
