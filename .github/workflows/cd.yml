@@ -1,0 +1,24 @@
+name: Deploy application to production environment
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to AlwaysData
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: energydash@ssh-energydash.alwaysdata.net
+          password: ${{ secrets.ALWAYSDATA_PASSWORD }}
+          port: 22
+          script: |
+            cd /www/
+            composer install --no-dev --optimize-autoloader
+            npm ci --production
+            git pull origin main
