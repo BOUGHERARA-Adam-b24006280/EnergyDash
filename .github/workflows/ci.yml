@@ -37,39 +37,33 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Make envfile
-        uses: SpicyPizza/create-envfile@v2.0
-        with:
-          envkey_DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
-          envkey_DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
-          envkey_DATABASE_USER: ${{ secrets.DATABASE_USER }}
-          envkey_DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          envkey_SMTP_HOST: ${{ secrets.SMTP_HOST }}
-          envkey_SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          envkey_SMTP_USER: ${{ secrets.SMTP_USER }}
-          envkey_SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          envkey_SMTP_FROM: ${{ secrets.SMTP_FROM }}
-          envkey_SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
-          file_name: .env
-          fail_on_empty: false
-
-      - name: Display .env file content (secrets masked)
-        run: cat .env
-
-      - name: Verify .env variables are loaded
-        run: |
-          echo "Checking if variables are set..."
-          if [ -z "$DATABASE_HOST" ]; then echo "❌ DATABASE_HOST is empty"; else echo "✅ DATABASE_HOST is set"; fi
-          if [ -z "$DATABASE_NAME" ]; then echo "❌ DATABASE_NAME is empty"; else echo "✅ DATABASE_NAME is set"; fi
-          if [ -z "$DATABASE_USER" ]; then echo "❌ DATABASE_USER is empty"; else echo "✅ DATABASE_USER is set"; fi
-          if [ -z "$DATABASE_PASSWORD" ]; then echo "❌ DATABASE_PASSWORD is empty"; else echo "✅ DATABASE_PASSWORD is set"; fi
-          echo "Number of lines in .env: $(wc -l < .env)"
-          echo "File size: $(stat -c%s .env) bytes"
+      - name: Create .env file
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
+        run: |
+          cat > .env << 'ENVEOF'
+          DATABASE_HOST=${DATABASE_HOST}
+          DATABASE_NAME=${DATABASE_NAME}
+          DATABASE_USER=${DATABASE_USER}
+          DATABASE_PASSWORD="${DATABASE_PASSWORD}"
+          SMTP_HOST=${SMTP_HOST}
+          SMTP_PORT=${SMTP_PORT}
+          SMTP_USER=${SMTP_USER}
+          SMTP_PASS="${SMTP_PASS}"
+          SMTP_FROM=${SMTP_FROM}
+          SMTP_FROM_NAME="${SMTP_FROM_NAME}"
+          APP_ENV=testing
+          APP_DEBUG=true
+          ENVEOF
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit tests
