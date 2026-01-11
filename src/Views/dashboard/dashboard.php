@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // On applique les règles d'interface juste avant d'envoyer (au cas où)
         handleInterfaceRules();
 
-        const url = `http://localhost:8000/api/energy?${params}`;
+        const url = `/api/energy?${params}`;
 
         try {
             const req = await fetch(url);
