@@ -9,32 +9,40 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Models\UserModel;
-use App\Core\Layout;
 use Exception;
 
-
-class ProfileController extends Controller
-{
+/**
+ * Contrôleur ProfileController
+ * Gère la consultation et la modification du profil utilisateur.
+ * Gère également l'administration des utilisateurs pour les admins.
+ *
+ * @package App\Controllers
+ */
+class ProfileController extends Controller {
+    /** @var UserModel Instance du modèle utilisateur */
     private UserModel $userModel;
 
-    public function __construct()
-    {
-       if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
+    /**
+     * Constructeur.
+     * Initialise la session si nécessaire et le modèle utilisateur.
+     */
+    public function __construct(){
+        parent::__construct();
         $this->userModel = new UserModel();
     }
 
-    public function index(): void
-    {
+    /**
+     * Affiche la page de profil.
+     * Si l'utilisateur est admin, affiche également la liste des utilisateurs.
+     * Route: GET /profile
+     *
+     * @return void
+     */
+    public function index(): void {
         $this->requireLogin();
-        $user = $_SESSION['user'] ?? null;
 
-        if (!is_array($user) || !isset($user['role'])) {
-            $this->redirect('/login');
-            exit;
-        }
+        /** @var array{id: int|string, role: string, first_name: string, last_name: string, email: string} $user */
+        $user = $_SESSION['user'];
 
         if ($user['role'] === 'admin') {
             $users = $this->userModel->getAllUsers();
@@ -51,38 +59,59 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(): void
-    {
+    /**
+     * Met à jour les informations du profil connecté (Nom, Prénom, Email, MDP).
+     * Route: POST /profile/update
+     * 
+     * @return void
+     */
+    public function update(): void {
+        
         $this->requireLogin();
 
-        if (
-            !isset($_SESSION['user']) ||
-            !is_array($_SESSION['user']) ||
-            !isset($_SESSION['user']['id'])
-        ) {
+        if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
             $this->redirect('/login');
-            exit;
+            return;
         }
-        assert(is_numeric($_SESSION['user']['id']));
-        $id = (int) $_SESSION['user']['id'];
 
-        $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        $userId = $_SESSION['user']['id'] ?? 0;
+        if (!is_numeric($userId)) {
+             $this->flash('error', "ID utilisateur invalide.");
+             $this->redirect('/logout');
+             return;
+        }
+        $id = (int)$userId;
 
-        if (!$email) {
+        $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        
+        if (!$rawEmail) {
             $this->flash('error', "Adresse email invalide.");
             $this->redirect('/profile');
+            return;
         }
+        $email = (string)$rawEmail;
+
+        $rawFirstName = $_POST['first_name'] ?? '';
+        $rawLastName = $_POST['last_name'] ?? '';
+        $rawPassword = $_POST['password'] ?? '';
+
+        $firstName = $this->sanitize(is_string($rawFirstName) ? $rawFirstName : '');
+        $lastName  = $this->sanitize(is_string($rawLastName) ? $rawLastName : '');
+        $password  = is_string($rawPassword) ? $rawPassword : '';
 
         try {
             $this->userModel->updateUser(
                 $id,
-                $this->sanitize($_POST['first_name'] ?? ''),
-                $this->sanitize($_POST['last_name'] ?? ''),
+                $firstName,
+                $lastName,
                 $email,
-                $_POST['password'] ?? ''
+                $password
             );
 
-            $_SESSION['user']['email'] = $email;
+            $_SESSION['user']['first_name'] = $firstName;
+            $_SESSION['user']['last_name']  = $lastName;
+            $_SESSION['user']['email']      = $email;
+
             $this->flash('success', "Profil mis à jour avec succès.");
         } catch (Exception $e) {
             $this->flash('error', "Erreur lors de la mise à jour du profil.");
@@ -92,16 +121,29 @@ class ProfileController extends Controller
     }
 
 
-    public function updateRole(): void
-    {
+    /**
+     * Met à jour le rôle d'un utilisateur (Admin seulement).
+     * Route: POST /profile/updateRole
+     *
+     * @return void
+     */
+    public function updateRole(): void {
         $this->requireAdmin();
 
+        if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+             $this->redirect('/login');
+             return;
+        }
+
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $role = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_SPECIAL_CHARS);
+        $rawRole = filter_input(INPUT_POST, 'role', FILTER_SANITIZE_SPECIAL_CHARS);
+        $role = is_string($rawRole) ? $rawRole : '';
 
         if ($id && in_array($role, ['user', 'editor'])) {
             
-            if ($id === $_SESSION['user']['id']) {
+            $currentUserId = $_SESSION['user']['id'] ?? null;
+
+            if ($id === $currentUserId) {
                 $this->flash('error', "Vous ne pouvez pas modifier votre propre rôle ici.");
                 $this->redirect('/profile');
                 exit;

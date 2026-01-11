@@ -24,6 +24,23 @@ class Database {
     private string $username;
     /** @var string Mot de passe associé à l'utilisateur */
     private string $password;
+    
+    /** @var PDO|null Instance unique de la connexion PDO (Singleton) */
+    private static ?PDO $instance = null;
+
+    /**
+     * Récupère l'instance unique de la connexion PDO.
+     * Crée la connexion si elle n'existe pas encore.
+     *
+     * @return PDO
+     */
+    public static function getInstance(): PDO {
+        if (self::$instance === null) {
+            $db = new self();
+            self::$instance = $db->getConnection();
+        }
+        return self::$instance;
+    }
 
     /**
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement

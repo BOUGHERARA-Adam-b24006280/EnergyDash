@@ -7,7 +7,14 @@
 
 namespace App\Core;
 
-class Layout {
+/**
+ * Classe Layout
+ * Gère le rendu de la structure globale des pages (Header, Contenu, Footer).
+ *
+ * @package App\Core
+ */
+class Layout
+{
 
     /** @var string $viewPath Chemin vers le fichier de la vue à afficher */
     private string $viewPath;
@@ -17,6 +24,9 @@ class Layout {
 
     /**
      * Constructeur
+     *
+     * @param string $viewPath Chemin absolu vers le fichier de vue.
+     * @param string $title Titre de la page (affiché dans la balise <title>).
      */
     public function __construct(string $viewPath, string $title = 'EnergyDash')
     {
@@ -25,17 +35,15 @@ class Layout {
     }
 
     /**
-     * Affiche la page complète
+     * Affiche la page complète (Header + Vue + Footer).
+     *
+     * @param array<string, mixed> $data Données à extraire pour la vue.
+     * @return void
      */
-    public function render(array $data = []): void {
-        // Extrait les variables pour qu'elles soient accessibles dans la vue (ex: $cities)
+    public function render(array $data = []): void
+    {
         extract($data);
-        
-        // Rend le titre accessible
         $title = $this->title;
-        
-        // Inclut les parties de la page
-        // Assurez-vous que le chemin 'shared' existe bien dans Views
         require __DIR__ . '/../Views/shared/header.php';
         require $this->viewPath;
         require __DIR__ . '/../Views/shared/footer.php';
@@ -43,30 +51,11 @@ class Layout {
 
     /**
      * Récupère le titre de la page
+     *
+     * @return string
      */
-    public function getTitle(): string {
-        return $this->title;
-    }
-
-    /**
-     * AJOUT CRITIQUE : Permet de récupérer les messages Flash dans les vues.
-     * C'est cette méthode qui manquait et causait votre erreur.
-     * * @param string $key La clé du message (ex: 'success', 'error')
-     * @return string|null Le message ou null s'il n'y en a pas
-     */
-    public function getFlash(string $key): ?string
+    public function getTitle(): string
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        if (isset($_SESSION[$key])) {
-            $msg = $_SESSION[$key];
-            // On supprime le message après l'avoir lu pour qu'il ne s'affiche qu'une fois
-            unset($_SESSION[$key]);
-            return $msg;
-        }
-
-        return null;
+        return $this->title;
     }
 }

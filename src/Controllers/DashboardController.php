@@ -1,38 +1,30 @@
 <?php
 /**
  * Fichier : DashboardController.php
- * Rôle : Prépare et affiche la page du tableau de bord.
- * Auteur : L'équipe EnergyDash
+ * Rôle : Affiche le tableau de bord et charge la liste des villes.
  */
 
 namespace App\Controllers;
 
-// Importation essentielle du contrôleur parent (pour utiliser $this->render et $this->requireLogin)
 use App\Core\Controller;
+use App\Services\EnergyCsvService;
 
-// Importation essentielle du modèle (pour utiliser new EnergyModel)
-use App\Models\EnergyModel;
+class DashboardController extends Controller {
+    private EnergyCsvService $energyService;
 
-class DashboardController extends Controller
-{
+    public function __construct() {
+        parent::__construct();
+        $this->energyService = new EnergyCsvService();
+    }
+
     /**
-     * Affiche la page principale du dashboard.
-     * URL : /dashboard
+     * Route: GET /dashboard
      */
-    public function index(): void
-    {
-        // 1. Vérifie si l'utilisateur est connecté
+    public function index(): void {
         $this->requireLogin();
-        
-        // 2. Instancie le modèle pour lire le CSV
-        $model = new EnergyModel();
-        
-        // 3. Récupère la liste des villes pour le menu déroulant
-        // (Assurez-vous que la méthode getAvailableCities existe bien dans EnergyModel)
-        $cities = $model->getAvailableCities();
 
-        // 4. Affiche la vue en lui passant les variables
-        // Le tableau associatif permet d'utiliser $title et $cities directement dans la vue
+        $cities = $this->energyService->getAvailableCities();
+
         $this->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',
             'cities' => $cities

@@ -13,7 +13,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Récupère les infos utilisateur si connecté
 $user = $_SESSION['user'] ?? null;
-$fullName = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) : null;
+$fullName = $user ? htmlspecialchars(($user['first_name'] ?? 'Utilisateur') . ' ' . ($user['last_name'] ?? '')) : null;
 ?>
 
 <!DOCTYPE html>
@@ -65,91 +65,31 @@ $fullName = $user ? htmlspecialchars($user['first_name'] . ' ' . $user['last_nam
                 </a>
             <?php else: ?>
                 <!-- Si un utilisateur est connecté -->
-                <div class="relative inline-block text-left">
-                    <button id="menuButton"
-                        onclick="toggleMenu()"
-                        class="py-[7px] px-2.5 inline-flex items-center font-medium text-sm rounded-lg border border-gray-200 
-                            bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-100 
-                            dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-700 
-                            dark:focus:bg-neutral-700">
-                        <?= $fullName; ?>
+                <div class="hs-dropdown relative inline-flex [--placement:top-right]">
+                    <button id="hs-dropdown-with-icons" type="button" class="hs-dropdown-toggle py-2 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 focus:outline-hidden focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" aria-haspopup="menu" aria-expanded="false" aria-label="Dropdown">
+                        <?= $fullName ?>
+                        <svg class="hs-dropdown-open:rotate-180 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
 
-                    <!-- Menu déroulant -->
-                    <div id="dropdownMenu"
-                        class="hidden absolute right-0 mt-2 w-48 origin-top-right rounded-lg bg-white shadow-lg 
-                            z-50 ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 dark:ring-neutral-700 transform 
-                            scale-95 opacity-0 transition-all duration-200">
-                        <a href="/profile" 
-                           class="block px-4 py-2 text-sm text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-700">
-                            Profil
-                        </a>
-                        <a href="/dashboard" 
-                           class="block px-4 py-2 text-sm text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-700">
-                            Tableau de bord
-                        </a>
-                        <a href="/logout" 
-                           class="block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-neutral-700">
-                            Déconnexion
-                        </a>
+                    <div class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 bg-white shadow-md rounded-lg mt-2 divide-y divide-gray-200 dark:bg-neutral-800 dark:border dark:border-neutral-700 dark:divide-neutral-700 z-50" role="menu" aria-orientation="vertical" aria-labelledby="hs-dropdown-with-icons">
+                        <div class="p-1 space-y-0.5">
+                            <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700" href="/profile">
+                                <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                Profil
+                            </a>
+                            <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700" href="/dashboard">
+                                <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16v5"/><path d="M16 14v7"/><path d="M20 10v11"/><path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15"/><path d="M4 18v3"/><path d="M8 14v7"/></svg> Tableau de bord
+                            </a>
+                            <a class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700" href="/logout">
+                                <svg class="shrink-0 mt-0.5 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>
+                                Déconnexion
+                            </a>
+                        </div>
                     </div>
                 </div>
             <?php endif; ?>
         </div>
     </nav>
 </header>
-
-<!-- Script dropdown -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const menu = document.getElementById('dropdownMenu');
-    const button = document.getElementById('menuButton');
-
-    if (menu && button) {
-        function toggleMenu() {
-            const isHidden = menu.classList.contains('hidden');
-            if (isHidden) {
-                menu.classList.remove('hidden');
-                setTimeout(() => {
-                    menu.classList.remove('opacity-0', 'scale-95');
-                    menu.classList.add('opacity-100', 'scale-100');
-                }, 10);
-            } else {
-                menu.classList.add('opacity-0', 'scale-95');
-                menu.classList.remove('opacity-100', 'scale-100');
-                setTimeout(() => menu.classList.add('hidden'), 150);
-            }
-        }
-
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleMenu();
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!button.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('opacity-0', 'scale-95');
-                menu.classList.remove('opacity-100', 'scale-100');
-                setTimeout(() => menu.classList.add('hidden'), 150);
-            }
-        });
-    }
-
-    // --- Gestion visibilité bouton "Inscription" ---
-    const registerButton = document.getElementById('registerButton');
-    if (registerButton) {
-        function toggleRegisterButton() {
-            if (window.innerWidth < 600) {
-                registerButton.style.display = 'none';
-            } else {
-                registerButton.style.display = 'inline-flex';
-            }
-        }
-
-        toggleRegisterButton(); // au chargement
-        window.addEventListener('resize', toggleRegisterButton); // à chaque redimensionnement
-    }
-});
-</script>
 
 <body class="dark:bg-neutral-900">

@@ -1,7 +1,7 @@
 <?php
 /**
  * Fichier : 500.php
- * Rôle : Affiche une page d'erreur 404 personnalisée
+ * Rôle : Affiche une page d'erreur 500 personnalisée
  * Auteur : Adam BOUGHERARA, Lucas LEPAPE
  */
 ?>
@@ -12,7 +12,7 @@
 
 <main id="content">
     <div class="text-center py-10 px-4 sm:px-6 lg:px-8">
-        <img src="/assets/images/Adam.png" class="mt-20 mx-auto size-40 grayscale-100 w-auto h-auto">
+        <img src="/assets/images/Adam.png" class="mt-20 mx-auto size-40 grayscale-100 w-80 h-auto">
         <h1 class="block text-7xl font-bold text-gray-800 sm:text-9xl dark:text-white">500</h1>
         <p class="mt-3 text-gray-600 dark:text-neutral-400">Une erreur interne est survenue sur le serveur.</p>
         <p class="text-gray-600 dark:text-neutral-400">Veuillez réessayer plus tard ou retourner à la page d’accueil.</p>

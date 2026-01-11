@@ -5,43 +5,86 @@
  * Auteur : Lucas LEPAPE,
  */
 ?>
+<?php if (!empty($_SESSION['success'])): ?>
+    <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
+<?php elseif (!empty($_SESSION['error'])): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
+<?php endif; ?>
 
-<div class="container mt-5 pt-5">
-    <h1 class="fw-bold mb-4 text-center">Information</h1>
-
-    <?php if (!empty($_SESSION['success'])): ?>
-        <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
-    <?php elseif (!empty($_SESSION['error'])): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
-    <?php endif; ?>
-
-    <form method="POST" action="/profile/update" class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
-        <div class="mb-3">
-            <label for="first_name" class="form-label">Prénom :</label>
-            <input type="text" name="first_name" id="first_name" class="form-control"
-                   value="<?= htmlspecialchars($user['first_name']); ?>" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="last_name" class="form-label">Nom :</label>
-            <input type="text" name="last_name" id="last_name" class="form-control"
-                   value="<?= htmlspecialchars($user['last_name']); ?>" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="email" class="form-label">Adresse mail :</label>
-            <input type="email" name="email" id="email" class="form-control"
-                   value="<?= htmlspecialchars($user['email']); ?>" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="password" class="form-label">Nouveau mot de passe :</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Laisser vide pour ne pas changer">
-        </div>
-
-        <div class="text-end">
-            <button type="reset" class="btn btn-outline-secondary me-2">Réinitialiser</button>
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-        </div>
-    </form>
+<div class="fixed left-0 top-0 -z-10 h-full w-full">
+    <div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
 </div>
+<main id="content" class="w-full max-w-2xl mx-auto p-6 py-20">
+    <!-- Card Section -->
+        <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-700">
+            <div class="p-4 mx-4 sm:p-7 ">
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-neutral-200">
+                    Profil
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                    Modifiez les informations de votre compte.
+                </p>
+            </div>
+
+            <form method="POST" action="/profile/update">
+                <!-- Grid -->
+                <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
+
+                    <div class="sm:col-span-3">
+                        <label for="af-account-full-name" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            Nom complet
+                        </label>
+                    </div>
+                    <!-- End Col -->
+
+                    <div class="sm:col-span-9">
+                        <div class="sm:flex">
+                            <input id="first_name" name="first_name" type="text" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg sm:text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="John" value="<?= htmlspecialchars($user['first_name']); ?>">
+                            <input id="last_name" name="last_name" type="text" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs -mt-px -ms-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-s-lg sm:mt-0 sm:first:ms-0 sm:first:rounded-se-none sm:last:rounded-es-none sm:last:rounded-e-lg sm:text-sm relative focus:z-10 focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Doe" value="<?= htmlspecialchars($user['last_name']); ?>">
+                        </div>
+                    </div>
+                    <!-- End Col -->
+
+                    <div class="sm:col-span-3">
+                        <label for="af-account-email" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            Email
+                        </label>
+                    </div>
+                    <!-- End Col -->
+
+                    <div class="sm:col-span-9">
+                        <input name="email" id="email" type="email" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs sm:text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="john.doe@gmail.com" value="<?= htmlspecialchars($user['email']); ?>">
+                    </div>
+                    <!-- End Col -->
+
+                    <div class="sm:col-span-3">
+                        <label for="af-account-password" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
+                            Mot de passe
+                        </label>
+                    </div>
+                    <!-- End Col -->
+
+                    <div class="sm:col-span-9">
+                        <div class="space-y-2">
+                            <input id="af-account-password" type="password" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre mot de passe actuel">
+                            <input id="password" name="password" type="password" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre nouveau mot de passe">
+                        </div>
+                    </div>
+                    <!-- End Col -->
+                </div>
+                <!-- End Grid -->
+
+                <div class="mt-5 flex justify-end gap-x-2">
+                    <button type="reset" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-50 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
+                        Annuler
+                    </button>
+                    <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                        Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+        </div>
+    <!-- End Card Section -->
+</main>

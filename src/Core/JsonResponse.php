@@ -7,6 +7,12 @@
 
 namespace App\Core;
 
+/**
+ * Classe JsonResponse
+ * Helper pour l'envoi de réponses API au format JSON.
+ *
+ * @package App\Core
+ */
 class JsonResponse
 {
     /**
@@ -14,6 +20,7 @@ class JsonResponse
      *
      * @param mixed $data Les données à encoder en JSON (tableau, objet, etc.)
      * @param int $status Le code HTTP (200 par défaut)
+     * @return void
      */
     public static function send(mixed $data, int $status = 200): void
     {
@@ -22,16 +29,9 @@ class JsonResponse
             ob_clean();
         }
 
-        // Définit l'en-tête pour dire au navigateur "Ceci est du JSON"
         header('Content-Type: application/json; charset=utf-8');
-        
-        // Définit le code de réponse (200 OK, 404 Not Found, etc.)
-        http_response_code($status);
-
-        // Encode les données et les affiche
+        http_response_code($status);    // Définit le code de réponse (200 OK, 404 Not Found, etc.)
         echo json_encode($data);
-        
-        // Arrête le script immédiatement pour garantir qu'rien d'autre n'est envoyé
         exit;
     }
 
@@ -41,6 +41,7 @@ class JsonResponse
      *
      * @param string $message Le message d'erreur
      * @param int $status Le code HTTP d'erreur (400, 404, 500...)
+     * @return void
      */
     public static function error(string $message, int $status = 400): void
     {

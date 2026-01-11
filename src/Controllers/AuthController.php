@@ -1,348 +1,429 @@
 <?php
-/**
- * Fichier : AuthController.php
- * Rôle : Gère les actions d'authentification (inscription, connexion, déconnexion)
- * Auteur : Mohamed-Amine HADDAD, Lucas LEPAPE
- */
-
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Core\Layout;
-use App\Core\Mailer;
 use App\Models\UserModel;
 use Exception;
 
 /**
- * Classe AuthController qui gère la gestion et les actions des différentes pages d'authentifications
+ * Contrôleur gérant l'authentification des utilisateurs.
+ *
+ * Ce contrôleur gère la connexion, la déconnexion, l'inscription,
+ * et la réinitialisation de mot de passe.
+ *
+ * @package App\Controllers
  */
 class AuthController extends Controller {
-    
-    /** @var UserModel */
+    /**
+     * Modèle pour la gestion des utilisateurs.
+     * @var UserModel
+     */
     private UserModel $userModel;
 
-    public function __construct()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
+    /**
+     * Constructeur.
+     * Initialise le modèle utilisateur.
+     */
+    public function __construct() {
+        parent::__construct();
         $this->userModel = new UserModel();
     }
 
+    // Connexion
+
     /**
-     * Affiche la page de connexion en utilisant la classe Layout pour afficher la page complète
-     * * @return void
+     * Affiche le formulaire de connexion.
+     *
+     * Initialise le token CSRF et charge la vue de connexion.
+     *
+     * @return void
      */
-    public function login(): void
-    {
-        $errors = [];
-
-        // Génération du token CSRF si nécessaire
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-
-        // Traitement du formulaire
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $csrfSession = $_SESSION['csrf_token'] ?? '';
-                $csrfPost = $_POST['csrf_token'] ?? '';
-
-                if (!hash_equals((string)$csrfSession, (string)$csrfPost)) {
-                    throw new Exception("Le formulaire est invalide (CSRF).");
-                }
-
-                $email    = $this->sanitize($_POST['email'] ?? '');
-                $password = $_POST['password'] ?? '';
-
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    throw new Exception("Adresse e-mail invalide.");
-                }
-
-                if (mb_strlen($password) < 8) {
-                    throw new Exception("Mot de passe trop court (8 caractères minimum).");
-                }
-
-                $user = $this->userModel->getUserByEmail($email);
-                if (!$user || !password_verify($password, $user['password'])) {
-                    throw new Exception("Identifiants incorrects.");
-                }
-
-                $hash = $user['password'] ?? '';
-                if (!password_verify($password, $hash)) {
-                    throw new Exception("Mot de passe incorrect.");
-                }
-
-                session_regenerate_id(true); // Empêche le vol de session (OWASP #7)
-                $_SESSION['user'] = [
-                    'id'         => $user['id'],
-                    'first_name' => $user['first_name'],
-                    'last_name'  => $user['last_name'],
-                    'email'      => $user['email'],
-                    'role'       => $user['role'] ?? 'user'
-                ];
-
-                unset($_SESSION['csrf_token']);
-                $this->redirect('/dashboard');
-                exit;
-
-            } catch (Exception $e) {
-                $errors[] = $e->getMessage();
-            }
-        }
-
+    public function showLogin(): void {
+        $this->initCsrf();
         $this->render('auth/login', [
-            'title'      => 'Connexion',
-            'errors'     => $errors,
-            'csrf_token' => $_SESSION['csrf_token'] ?? ''
+            'title' => 'Connexion',
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 
     /**
-     * Affiche la page d'inscription en utilisant la classe Layout pour afficher la page complète
-     * * @return void
+     * Traite la soumission du formulaire de connexion.
+     *
+     * Vérifie le token CSRF, valide les identifiants utilisateur,
+     * crée la session utilisateur et redirige vers le tableau de bord.
+     * En cas d'échec, réaffiche le formulaire avec les erreurs.
+     *
+     * @return void
      */
-    public function register(): void
-    {
-        $errors = [];
+    public function processLogin(): void {
+        try {
+            $this->validateCsrf();
 
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+            $rawEmail = $_POST['email'] ?? '';
+            $rawPass = $_POST['password'] ?? '';
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                $csrfSession = $_SESSION['csrf_token'] ?? '';
-                $csrfPost = $_POST['csrf_token'] ?? '';
-                if (!hash_equals((string)$csrfSession, (string)$csrfPost)) {
-                    throw new Exception("Le formulaire est invalide (CSRF).");
-                }
+            $email = is_string($rawEmail) ? trim($rawEmail) : '';
+            $password = is_string($rawPass) ? $rawPass : '';
 
-                $firstName = $this->sanitize($_POST['first_name'] ?? '');
-                $lastName  = $this->sanitize($_POST['last_name'] ?? '');
-                $email     = $this->sanitize($_POST['email'] ?? '');
-                $password  = $_POST['password'] ?? '';
-                $confirm   = $_POST['confirm_password'] ?? '';
+            $user = $this->userModel->verifyLogin($email, $password);
 
-                if ($firstName === '' || mb_strlen($firstName) > 100)
-                    throw new Exception("Le prénom est obligatoire et doit faire moins de 100 caractères.");
-                if ($lastName === '' || mb_strlen($lastName) > 100)
-                    throw new Exception("Le nom est obligatoire et doit faire moins de 100 caractères.");
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-                    throw new Exception("Adresse e-mail invalide.");
-                if (mb_strlen($password) < 8)
-                    throw new Exception("Le mot de passe doit contenir au moins 8 caractères.");
-                if ($password !== $confirm)
-                    throw new Exception("Les mots de passe ne correspondent pas.");
-                if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password))
-                    throw new Exception("Le mot de passe doit contenir une majuscule, une minuscule, un chiffre et un caractère spécial.");
-                if ($this->userModel->emailExists($email))
-                    throw new Exception("Un compte avec cette adresse e-mail existe déjà.");
-
-                // Création du compte
-                if ($this->userModel->createUser($firstName, $lastName, $email, $password)) {
-                    unset($_SESSION['csrf_token']);
-                    $this->redirect('/login?registered=1');
-                } else {
-                    throw new Exception("Une erreur est survenue lors de l’inscription.");
-                }
-
-            } catch (Exception $e) {
-                $errors[] = $e->getMessage();
+            if (!$user) {
+                usleep(500000); // 0.5 seconde de délai pour ralentir les attaques par force brute
+                throw new Exception("Identifiants incorrects.");
             }
-        }
 
-        $this->render('auth/register', [
-            'title'      => 'Inscription',
-            'errors'     => $errors,
-            'csrf_token' => $_SESSION['csrf_token'] ?? ''
-        ]);
+            /** @var array{id: int|string, email: string, first_name: string, last_name: string, role?: string} $user */
+            $this->createSession($user);
+
+            $this->redirect('/dashboard');
+
+        } catch (Exception $e) {
+            $this->render('auth/login', [
+                'title' => 'Connexion',
+                'errors' => [$e->getMessage()],
+                'csrf_token' => $_SESSION['csrf_token']
+            ]);
+        }
     }
 
+    // Déconnexion
+
     /**
-     * Déconnecte l'utilisateur actif et le redirige vers la page de connexion
-     * * @return void
+     * Déconnecte l'utilisateur.
+     *
+     * Détruit la session active et supprime le cookie de session,
+     * puis redirige vers la page de connexion.
+     *
+     * @return void
      */
-    public function logout(): void
-    {
+    public function logout(): void {
         $_SESSION = [];
+
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
+            setcookie(
+                (string)session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
             );
         }
+
         session_destroy();
+
         $this->redirect('/login');
-        exit;
     }
 
+    // Inscription
+
     /**
-     * Affiche la page de mot de passe oublié.
+     * Affiche le formulaire d'inscription.
+     *
+     * Initialise le token CSRF et charge la vue d'inscription.
+     *
+     * @return void
      */
-    public function forgot(): void
-    {
-        $this->render('auth/forgot', [
-            'title' => 'Mot de passe oublié'
+    public function showRegister(): void {
+        $this->initCsrf();
+        $this->render('auth/register', [
+            'title' => 'Inscription',
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 
     /**
-     * Index par défaut -> redirige vers /login
+     * Traite la soumission du formulaire d'inscription.
+     *
+     * Vérifie le token CSRF, valide les données saisies, vérifie l'unicité de l'email,
+     * crée le nouvel utilisateur et redirige vers la connexion.
+     *
+     * @return void
      */
-    public function index(): void
-    {
-        $this->redirect('/login');
+    public function processRegister(): void {
+        try {
+            $this->validateCsrf();
+
+            $pFirstName = $_POST['first_name'] ?? '';
+            $pLastName = $_POST['last_name'] ?? '';
+            $pEmail = $_POST['email'] ?? '';
+            $pPassword = $_POST['password'] ?? '';
+            $pConfirm = $_POST['confirm_password'] ?? '';
+
+            $data = [
+                'first_name' => is_string($pFirstName) ? trim($pFirstName) : '',
+                'last_name'  => is_string($pLastName) ? trim($pLastName) : '',
+                'email'      => is_string($pEmail) ? trim($pEmail) : '',
+                'password'   => is_string($pPassword) ? $pPassword : '',
+                'confirm'    => is_string($pConfirm) ? $pConfirm : ''
+            ];
+
+            // Validation des champs vides, format, etc.
+            $this->validateRegisterInput($data);
+
+            // Validation unicité de l'email
+            if ($this->userModel->emailExists($data['email'])) {
+                throw new Exception("Un compte avec cette adresse e-mail existe déjà.");
+            }
+
+            // Création du compte
+            if ($this->userModel->createUser($data['first_name'], $data['last_name'], $data['email'], $data['password'])) {
+                unset($_SESSION['csrf_token']);
+                $this->redirect('/login?registered=1');
+            } else {
+                throw new Exception("Erreur technique lors de l'inscription.");
+            }
+
+        } catch (Exception $e) {
+            $this->render('auth/register', [
+                'title' => 'Inscription',
+                'errors' => [$e->getMessage()],
+                'csrf_token' => $_SESSION['csrf_token'],
+                'old' => $_POST //Pour réafficher les données saisies dans le formulaire
+            ]);
+        }
+    }
+
+    // Mot de passe oublié
+
+    /**
+     * Affiche le formulaire de demande de réinitialisation de mot de passe.
+     *
+     * @return void
+     */
+    public function showForgot(): void {
+        $this->initCsrf();
+        $this->render('auth/forgot', [
+            'title' => 'Mot de passe oublié',
+            'csrf_token' => $_SESSION['csrf_token']
+        ]);
     }
 
     /**
-     * Gère la demande de réinitialisation de mot de passe.
-     * 
-     * Cette méthode :
-     * - Vérifie la validité de l'adresse e-mail.
-     * - Si l'utilisateur existe, génère un token et envoie un mail avec un lien de réinitialisation.
-     * - Dans tous les cas, affiche un message de succès neutre (pour éviter la fuite d'information).
+     * Traite la demande de réinitialisation de mot de passe.
+     *
+     * Vérifie si l'email existe, génère un token de réinitialisation,
+     * et envoie un email avec le lien de réinitialisation.
+     * Inclut une protection contre les attaques temporelles.
+     *
+     * @return void
      */
-    public function forgotPassword(): void
-    {
-        $errors = [];
+    public function processForgot(): void {
+        $start_time = microtime(true);
         $success = '';
 
-        // Si le formulaire a été soumis
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
-                // Sécurise et valide l'adresse e-mail reçue
-                $email = isset($_POST['email']) && is_scalar($_POST['email']) ? trim((string)$_POST['email']) : '';
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    throw new Exception("Adresse e-mail invalide.");
-                }
+        try {
+            $this->validateCsrf();
+            $rawEmail = $_POST['email'] ?? '';
+            $email = is_string($rawEmail) ? trim($rawEmail) : '';
 
-                // Recherche de l'utilisateur par e-mail
-                $user = $this->userModel->getUserByEmail($email);
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+                throw new Exception("Email invalide.");
 
-                // Si l'utilisateur existe, on génère et envoie le mail
-                if ($user) {
-                    // Génère un token sécurisé et son hash
-                    $token = bin2hex(random_bytes(32));
-                    $hashedToken = hash('sha256', $token);
+            $result = $this->userModel->createResetTokenForEmail($email);
 
-                    // Date d'expiration du lien (dans 30 minutes)
-                    $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
+            if ($result) {
+                $baseUrl = (defined('BASE_URL') && is_string(BASE_URL)) ? BASE_URL : 'http://localhost:8000';
+                $tokenStr = $result['token'];
+                $resetLink = rtrim($baseUrl, '/') . "/reset?token=" . $tokenStr;
 
-                    // Vérifie et force le type de l'ID utilisateur
-                    $userId = $user['id'] ?? null;
-                    if (!is_numeric($userId)) {
-                        throw new Exception("ID utilisateur invalide.");
-                    }
+                $userArr = $result['user'];
+                $rawName = $userArr['first_name'] ?? 'Utilisateur';
+                $firstName = is_string($rawName) ? $rawName : 'Utilisateur';
 
-                    // Enregistre le token dans la base
-                    $this->userModel->storeResetToken((int)$userId, $hashedToken, $expiresAt);
+                $subject = "Réinitialisation de votre mot de passe";
+                $message = "Bonjour {$firstName},\n\n" .
+                    "Vous avez demandé à réinitialiser votre mot de passe.\n" .
+                    "Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :\n" .
+                    $resetLink . "\n\n" .
+                    "Ce lien expire dans 30 minutes.\n\n" .
+                    "Si vous ne l'avez pas demandé, ignorez cet e-mail.\n" .
+                    "L'équipe Energy Dash.";
 
-                    // Génère le lien complet de réinitialisation
-                    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                    $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
-                    $resetLink = "$protocol://{$httpHost}/reset?token=$token";
-
-                    // Récupère le prénom de l'utilisateur pour personnaliser le message
-                    $firstName = $user['first_name'] ?? 'Utilisateur';
-                    if (!is_string($firstName)) {
-                        $firstName = 'Utilisateur';
-                    }
-
-                    // Prépare le contenu du mail
-                    $subject = "Réinitialisation de votre mot de passe";
-                    $message = <<<EOT
-                        Bonjour {$firstName},
-
-                        Vous avez demandé à réinitialiser votre mot de passe.
-                        Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :
-                        $resetLink
-
-                        Ce lien expirera dans 30 minutes.
-
-                        Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet e-mail.
-
-                        L'équipe Energy Dash.
-                    EOT;
-
-                    // Envoie du mail
-                    $mailer = new Mailer();
-                    $mailer->send($email, $subject, $message);
-                }
-
-                // Message neutre envoyé dans tous les cas (même si l'email n'existe pas)
-                $success = "Si un compte est associé à cette adresse e-mail, un lien de réinitialisation vous a été envoyé.";
-
-            } catch (Exception $e) {
-                // Gestion des erreurs d'envoi ou de validation
-                $errors[] = $e->getMessage();
+                $mailer = new \App\Core\Mailer();
+                $mailer->send($email, $subject, $message);
             }
+
+            $success = "Si ce compte existe, un email a été envoyé.";
+
+        } catch (Exception $e) {
+            $success = "Si ce compte existe, un email a été envoyé.";
         }
 
-        // Rendu de la page
+        // Protection contre les attaques temporelles
+        $elapsed = microtime(true) - $start_time;
+        if ($elapsed < 1.0) {
+            usleep((int) ((1.0 - $elapsed) * 1000000));
+        }
+
         $this->render('auth/forgot', [
-            'title'   => 'Mot de passe oublié',
-            'errors'  => $errors,
-            'success' => $success
+            'title' => 'Mot de passe oublié',
+            'success' => $success,
+            'csrf_token' => $_SESSION['csrf_token']
+        ]);
+    }
+
+    // Réinitialisation mot de passe
+
+    /**
+     * Affiche le formulaire de réinitialisation de mot de passe.
+     *
+     * Vérifie la validité du token fourni dans l'URL.
+     *
+     * @return void
+     */
+    public function showReset(): void {
+        $this->initCsrf();
+        
+        $rawToken = $_GET['token'] ?? '';
+        $token = is_string($rawToken) ? $rawToken : '';
+        $errors = [];
+
+        // Vérification préventive pour UX
+        if (empty($token) || !$this->userModel->getUserByToken(hash('sha256', $token))) {
+            $errors[] = "Ce lien est invalide ou a expiré.";
+        }
+
+        $this->render('auth/reset', [
+            'title' => 'Réinitialisation',
+            'errors' => $errors,
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 
     /**
-     * Page de réinitialisation du mot de passe via token
+     * Traite la réinitialisation du mot de passe.
+     *
+     * Vérifie le token, valide le nouveau mot de passe, met à jour le mot de passe
+     * de l'utilisateur et invalide tous les tokens de réinitialisation associés.
+     *
+     * @return void
      */
-    public function resetPassword(): void
-    {
-        $errors = [];
-        $success = '';
-        
-        // FIX (Ligne 247) : Assure que $token (de $_GET) est une chaîne avant hash()
-        $token = isset($_GET['token']) && is_scalar($_GET['token']) ? (string)$_GET['token'] : '';
+    public function processReset(): void {
+        try {
+            $this->validateCsrf();
 
-        if ($token === '') {
-            $errors[] = "Lien de réinitialisation invalide ou manquant.";
-        } else {
-            // On calcule le hash du token pour vérifier
+            $tokenRaw = $_POST['token'] ?? $_GET['token'] ?? '';
+            $token = is_string($tokenRaw) ? $tokenRaw : '';
+            
+            $pPassword = $_POST['password'] ?? '';
+            $password = is_string($pPassword) ? $pPassword : '';
+            
+            $pConfirm = $_POST['confirm_password'] ?? '';
+            $confirm = is_string($pConfirm) ? $pConfirm : '';
+
+            if (empty($token))
+                throw new Exception("Token manquant.");
+
             $hashedToken = hash('sha256', $token);
             $user = $this->userModel->getUserByToken($hashedToken);
 
             if (!$user) {
-                $errors[] = "Ce lien est invalide ou a expiré.";
-            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                try {
-                    // FIX (Ligne 260) : Assure que $password et $confirm sont des chaînes
-                    $password = isset($_POST['password']) && is_scalar($_POST['password']) ? (string)$_POST['password'] : '';
-                    $confirm  = isset($_POST['confirm_password']) && is_scalar($_POST['confirm_password']) ? (string)$_POST['confirm_password'] : '';
-
-                    if ($password !== $confirm) {
-                        throw new Exception("Les mots de passe ne correspondent pas.");
-                    }
-                    if (mb_strlen($password) < 8) {
-                        throw new Exception("Le mot de passe doit contenir au moins 8 caractères.");
-                    }
-
-                    // FIX (Ligne 265) : Assure que $user['id'] est un entier et $password une chaîne
-                    $userId = $user['id'] ?? null;
-                    if (!is_numeric($userId)) {
-                        throw new Exception("ID utilisateur invalide pour la mise à jour.");
-                    }
-                    
-                    // $password est déjà une chaîne grâce au fix de la Ligne 260
-                    $this->userModel->updatePassword((int)$userId, $password);
-                    $this->userModel->invalidateToken($hashedToken);
-
-                    $success = "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.";
-                } catch (Exception $e) {
-                    $errors[] = $e->getMessage();
-                }
+                usleep(500000); // 0.5s délai
+                throw new Exception("Lien invalide ou expiré.");
             }
-        }
 
-        $this->render('auth/reset', [
-            'title'   => 'Réinitialiser le mot de passe',
-            'errors'  => $errors,
-            'success' => $success
-        ]);
+            if ($password !== $confirm) {
+                throw new Exception("Les mots de passe ne correspondent pas.");
+            }
+
+            if (!UserModel::isPasswordStrong($password)) {
+                throw new Exception("Le mot de passe n'est pas assez sécurisé.");
+            }
+
+            $userId = $user['id'] ?? 0;
+            if (!is_numeric($userId)) {
+                 throw new Exception("ID utilisateur invalide.");
+            }
+
+            $this->userModel->updatePassword((int)$userId, $password);
+            $this->userModel->deleteResetTokensForUser((int)$userId);
+
+            $this->flash('success', "Mot de passe modifié avec succès. Vous pouvez vous connecter.");
+            $this->redirect('/login');
+
+        } catch (Exception $e) {
+            $this->render('auth/reset', [
+                'title' => 'Réinitialisation',
+                'errors' => [$e->getMessage()],
+                'csrf_token' => $_SESSION['csrf_token']
+            ]);
+        }
+    }
+
+    // Méthodes utilitaires
+
+    /**
+     * Crée la session utilisateur après une connexion réussie.
+     *
+     * @param array{id: int|string, email: string, first_name: string, last_name: string, role?: string} $user
+     * @return void
+     */
+    private function createSession(array $user): void {
+        session_regenerate_id(true);
+        $_SESSION['user'] = [
+            'id' => $user['id'],
+            'email' => $user['email'],
+            'first_name' => $user['first_name'],
+            'last_name' => $user['last_name'],
+            'role' => $user['role'] ?? 'user'
+        ];
+        unset($_SESSION['csrf_token']);
+    }
+
+    /**
+     * Initialise le token CSRF s'il n'existe pas déjà.
+     *
+     * @return void
+     */
+    private function initCsrf(): void {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+    }
+
+    /**
+     * Valide le token CSRF reçu en POST.
+     *
+     * @throws Exception Si le token est invalide ou manquant.
+     * @return void
+     */
+    private function validateCsrf(): void {
+        $rawToken = $_POST['csrf_token'] ?? '';
+        $token = is_string($rawToken) ? $rawToken : '';
+        
+        $rawSession = $_SESSION['csrf_token'] ?? '';
+        $sessionToken = is_string($rawSession) ? $rawSession : '';
+
+        if (empty($sessionToken) || !hash_equals($sessionToken, $token)) {
+            throw new Exception("Session expirée. Veuillez recharger la page.");
+        }
+    }
+
+    /**
+     * Valide les données d'inscription.
+     *
+     * @param array{first_name: string, last_name: string, email: string, password: string, confirm: string} $data
+     * @throws Exception Si une validation échoue.
+     * @return void
+     */
+    private function validateRegisterInput(array $data): void{
+        if (empty($data['first_name']) || mb_strlen($data['first_name']) > 100) {
+            throw new Exception("Prénom invalide.");
+        }
+        if (empty($data['last_name']) || mb_strlen($data['last_name']) > 100) {
+            throw new Exception("Nom invalide.");
+        }
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("Email invalide.");
+        }
+        if ($data['password'] !== $data['confirm']) {
+            throw new Exception("Les mots de passe ne correspondent pas.");
+        }
+        if (!UserModel::isPasswordStrong($data['password'])) {
+            throw new Exception("Le mot de passe n'est pas assez sécurisé.");
+        }
     }
 }

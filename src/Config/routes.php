@@ -1,54 +1,47 @@
 <?php
 /**
  * Fichier : routes.php
- * Rôle : Défini les routes à suivre pour les méthode lié.
- * Auteur : Lucas Lepape, Mohamed-Amine Haddad, Adam Bougherara,
+ * Rôle : Défini les routes à suivre pour les méthode liées.
  */
 
-use App\Core\Router;
-use App\Controllers\HomeController;
-use App\Controllers\AuthController;
-use App\Controllers\DashboardController;
-use App\Controllers\LegalController;
-use App\Controllers\EnergyController;
-use App\Controllers\ProfileController;
-
-$router = new Router();
+$router = new App\Core\Router();
 
 // Page d'accueil
-$router->add('GET', '/', [HomeController::class, 'index']);
-$router->add('POST', '/', [HomeController::class, 'switchTheme']);
+$router->add('GET',  '/',                   [App\Controllers\HomeController::class,      'index']);
 
-//Authentification
-$router->add('GET', '/login', [AuthController::class, 'login']);
-$router->add('GET', '/register', [AuthController::class, 'register']);
-$router->add('POST', '/login', [AuthController::class, 'login']);
-$router->add('POST', '/register', [AuthController::class, 'register']);
-$router->add('GET', '/forgot', [AuthController::class, 'forgot']);
+// Connexion
+$router->add('GET',  '/login',              [App\Controllers\AuthController::class,      'showLogin']);
+$router->add('POST', '/login',              [App\Controllers\AuthController::class,      'processLogin']);
 
-// Déconnexion
-$router->add('GET', '/logout', [AuthController::class, 'logout']);
-$router->add('POST', '/logout', [AuthController::class, 'logout']);
-
-// Dashboard
-$router->add('GET', '/dashboard', [DashboardController::class, 'index']);
-$router->add('POST', '/dashboard', [DashboardController::class, 'index']);
-
-// Mentions légales
-$router->add('GET', '/mentions', [LegalController::class, 'index']);
-
-// Profil utilisateur
-$router->add('GET', '/profile', [ProfileController::class, 'index']);
-$router->add('POST', '/profile/updateRole', [ProfileController::class, 'updateRole']);
+// Inscription
+$router->add('GET',  '/register',           [App\Controllers\AuthController::class,      'showRegister']);
+$router->add('POST', '/register',           [App\Controllers\AuthController::class,      'processRegister']);
 
 // Mot de passe oublié
-$router->add('GET', '/forgot', [AuthController::class, 'forgot']);
-$router->add('POST', '/forgot', [AuthController::class, 'forgotPassword']);
-$router->add('GET', '/reset', [AuthController::class, 'resetPassword']);
-$router->add('POST', '/reset', [AuthController::class, 'resetPassword']);
+$router->add('GET',  '/forgot',             [App\Controllers\AuthController::class,      'showForgot']);
+$router->add('POST', '/forgot',             [App\Controllers\AuthController::class,      'processForgot']);
 
-$router->add('GET', '/api/energy', [EnergyController::class, 'index']);
-$router->add('POST', '/energy/upload', [EnergyController::class, 'upload']);
+// Réinitialisation du mot de passe
+$router->add('GET',  '/reset',              [App\Controllers\AuthController::class,      'showReset']);
+$router->add('POST', '/reset',              [App\Controllers\AuthController::class,      'processReset']);
 
-// Route de test pour voir ce qui cloche avec le CSV
-$router->add('GET', '/debug-csv', [App\Controllers\EnergyController::class, 'debug']);
+// Déconnexion
+$router->add('GET',  '/logout',             [App\Controllers\AuthController::class,      'logout']);
+$router->add('POST', '/logout',             [App\Controllers\AuthController::class,      'logout']);
+
+// Dashboard
+$router->add('GET',  '/dashboard',          [App\Controllers\DashboardController::class, 'index']);
+$router->add('POST', '/dashboard',          [App\Controllers\DashboardController::class, 'index']);
+
+// Mentions légales
+$router->add('GET',  '/mentions',           [App\Controllers\LegalController::class,     'index']);
+
+// Profil utilisateur
+$router->add('GET',  '/profile',            [App\Controllers\ProfileController::class,   'index']);
+$router->add('POST', '/profile/updateRole', [App\Controllers\ProfileController::class,   'updateRole']);
+$router->add('POST', '/profile/update',     [App\Controllers\ProfileController::class,   'update']);
+
+// Energy API & Upload
+$router->add('GET',  '/api/energy',         [App\Controllers\EnergyController::class,   'index']);
+$router->add('POST', '/energy/upload',      [App\Controllers\EnergyController::class,   'upload']);
+$router->add('POST', '/energy/delete',      [App\Controllers\EnergyController::class,   'delete']);
