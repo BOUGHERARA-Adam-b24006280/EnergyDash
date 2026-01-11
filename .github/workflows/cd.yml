@@ -20,4 +20,7 @@ jobs:
           password: ${{ secrets.ALWAYSDATA_PASSWORD }}
           port: 22
           script: |
-            ls -a
+            cd www/
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            npm ci --production
