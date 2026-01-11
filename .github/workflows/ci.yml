@@ -50,7 +50,7 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
         run: |
-          cat > .env << 'ENVEOF'
+          cat > .env << ENVEOF
           DATABASE_HOST=${DATABASE_HOST}
           DATABASE_NAME=${DATABASE_NAME}
           DATABASE_USER=${DATABASE_USER}
