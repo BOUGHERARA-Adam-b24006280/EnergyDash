@@ -39,18 +39,20 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" > .env
-          echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env
-          echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
-          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
-          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
-          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
-          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
-          echo "SMTP_FROM=${{ secrets.SMTP_FROM }}" >> .env
-          echo "SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }}" >> .env
-          echo "APP_ENV=testing" >> .env
-          echo "APP_DEBUG=true" >> .env
+          {
+            echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}"
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}"
+            echo "DATABASE_USER=${{ secrets.DATABASE_USER }}"
+            echo 'DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}'
+            echo "SMTP_HOST=${{ secrets.SMTP_HOST }}"
+            echo "SMTP_PORT=${{ secrets.SMTP_PORT }}"
+            echo "SMTP_USER=${{ secrets.SMTP_USER }}"
+            echo 'SMTP_PASS=${{ secrets.SMTP_PASS }}'
+            echo "SMTP_FROM=${{ secrets.SMTP_FROM }}"
+            echo 'SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }}'
+            echo "APP_ENV=testing"
+            echo "APP_DEBUG=true"
+          } > .env
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit tests
