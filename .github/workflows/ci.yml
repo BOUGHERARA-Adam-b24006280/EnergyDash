@@ -2,7 +2,7 @@ name: PHP Composer
 
 on:
   push:
-    branches: [ "dev", "workflow-ci-cd" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "dev" ]
 
