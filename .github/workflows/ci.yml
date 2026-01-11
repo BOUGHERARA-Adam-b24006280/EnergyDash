@@ -53,8 +53,23 @@ jobs:
           file_name: .env
           fail_on_empty: false
 
-      - name: Display .env file content
+      - name: Display .env file content (secrets masked)
         run: cat .env
+
+      - name: Verify .env variables are loaded
+        run: |
+          echo "Checking if variables are set..."
+          if [ -z "$DATABASE_HOST" ]; then echo "❌ DATABASE_HOST is empty"; else echo "✅ DATABASE_HOST is set"; fi
+          if [ -z "$DATABASE_NAME" ]; then echo "❌ DATABASE_NAME is empty"; else echo "✅ DATABASE_NAME is set"; fi
+          if [ -z "$DATABASE_USER" ]; then echo "❌ DATABASE_USER is empty"; else echo "✅ DATABASE_USER is set"; fi
+          if [ -z "$DATABASE_PASSWORD" ]; then echo "❌ DATABASE_PASSWORD is empty"; else echo "✅ DATABASE_PASSWORD is set"; fi
+          echo "Number of lines in .env: $(wc -l < .env)"
+          echo "File size: $(stat -c%s .env) bytes"
+        env:
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit tests
