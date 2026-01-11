@@ -2,26 +2,28 @@
 /**
  * Fichier : LegalController.php
  * Rôle : Gère l’affichage de la page des mentions légales.
- * Auteur :  Kenji CLOT-GODARD
+ * Auteur : Kenji CLOT-GODARD
  */
 
 namespace App\Controllers;
 
-use App\Core\Layout;
+use App\Core\Controller;
 
 /**
- * Classe LegalController qui gère l'affichage des mentions légales
+ * Contrôleur LegalController
+ * Gère l'affichage des pages légales (Mentions légales, CGU, etc.).
+ *
+ * @package App\Controllers
  */
-final class LegalController
-{
+class LegalController extends Controller {
+
     /**
-     * Affiche la pge des mentions légales en utilisant la classe Layout pour afficher la page complète
-     * 
+     * Affiche les mentions légales.
+     * Route: GET /legal
+     *
      * @return void
      */
-    public function mentions(): void
-    {
-        $layout = new Layout(__DIR__ . '/../Views/Legal/Mentions.php', 'Mentions Légales');
-        $layout->render();
+    public function index(): void {
+        $this->render('legal/mentions', ['title' => 'Mentions Légales']);
     }
 }

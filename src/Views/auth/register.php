@@ -6,12 +6,15 @@
  *
  * @var array<int, string> $errors Liste des messages d'erreur
  * @var string $csrf_token Jetons CSRF unique côté serveur
+ * @var array $old Données précédemment saisies
  */
 
-// Vérifie le type avant de nettoyer avec htmlspecialchars()
-$first  = isset($_POST['first_name']) && is_string($_POST['first_name']) ? htmlspecialchars($_POST['first_name'], ENT_QUOTES, 'UTF-8') : '';
-$last   = isset($_POST['last_name'])  && is_string($_POST['last_name'])  ? htmlspecialchars($_POST['last_name'], ENT_QUOTES, 'UTF-8')  : '';
-$email  = isset($_POST['email'])      && is_string($_POST['email'])      ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8')      : '';
+$old = $old ?? []; // Assure que $old existe
+
+$first  = htmlspecialchars($old['first_name'] ?? '', ENT_QUOTES, 'UTF-8');
+$last   = htmlspecialchars($old['last_name'] ?? '',  ENT_QUOTES, 'UTF-8');
+$email  = htmlspecialchars($old['email'] ?? '',      ENT_QUOTES, 'UTF-8');
+
 $action = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
     ? htmlspecialchars($_SERVER['REQUEST_URI'], ENT_QUOTES, 'UTF-8')
     : '';

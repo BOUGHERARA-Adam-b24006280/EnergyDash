@@ -1,41 +1,33 @@
 <?php
 /**
  * Fichier : DashboardController.php
- * Rôle : 
- * Auteur : Lucas LEPAPE,
+ * Rôle : Affiche le tableau de bord et charge la liste des villes.
  */
 
 namespace App\Controllers;
 
-use App\Core\Layout;
-Use Exception;
+use App\Core\Controller;
+use App\Services\EnergyCsvService;
 
-/**
- * Classe DashboardController
- * Vérifie l'authentification et affiche le tableau de bord utilisateur
- */
-class DashboardController
-{
-    public function __construct()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+class DashboardController extends Controller {
+    private EnergyCsvService $energyService;
+
+    public function __construct() {
+        parent::__construct();
+        $this->energyService = new EnergyCsvService();
     }
 
-    public function index(): void
-    {
-        if (empty($_SESSION['user'])) {
-            header('Location: /login');
-            exit;
-        }
+    /**
+     * Route: GET /dashboard
+     */
+    public function index(): void {
+        $this->requireLogin();
 
-        $layout = new Layout(
-            __DIR__ . '/../Views/dashboard/dashboard.php',
-            'Dashboard',
-            'dashboard'
-        );
+        $cities = $this->energyService->getAvailableCities();
 
-        $layout->render(['user' => $_SESSION['user']]);
+        $this->render('dashboard/dashboard', [
+            'title'  => 'Tableau de bord - EnergyDash',
+            'cities' => $cities
+        ]);
     }
 }

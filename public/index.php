@@ -1,39 +1,46 @@
 <?php
-use App\Core\Router;
+/**
+ * Fichier : index.php
+ * Rôle : Point d'entrée unique de l'application (Front Controller).
+ * Initialise la session, charge l'autoloader et dispatche la requête via le routeur.
+ */
 
-require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../src/Config/config.php';
+// Stock dans la mémoire tampon (Output Buffering) au lieu de l'envoyer directement
+ob_start(); 
 
-$router = new Router();
-require __DIR__ . '/../src/Config/routes.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../src/Config/config.php';
+require_once __DIR__ . '/../src/Config/routes.php';
 
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$request_uri = $_SERVER['REQUEST_URI'] ?? '/';
 
-if (!is_string($method) || !is_string($request_uri)) {
-    http_response_code(400);
-    echo "Bad Request";
-    exit;
+// Configuration sécurisée de la session
+if (session_status() === PHP_SESSION_NONE) {
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'domain'   => '',                       // Utilise le domaine courant
+        'secure'   => isset($_SERVER['HTTPS']), // Sécurisé si HTTPS
+        'httponly' => true,                     // Empêche l'accès via JS
+        'samesite' => 'Strict'                  // Protection CSRF
+    ]);
 }
 
-$uri = parse_url($request_uri, PHP_URL_PATH);
-if ($uri === false || $uri === null) {
-    $uri = '/';
-}
-$uri = rtrim($uri, '/');
-$uri = preg_replace('#/+#', '/', $uri);
-if ($uri === '' || $uri === null) {
-    $uri = '/';
-}
+// Transforme les erreurs en Exception
+set_error_handler(function ($severity, $message, $file, $line) {
+    throw new \ErrorException($message, 0, $severity, $file, $line);
+});
 
+// Routage des requêtes
+/** @var \App\Core\Router $router Indication pour PHPStan */
 try {
-    $router->dispatch($method, $uri);
-}catch(Exception $e) {
-    error_log("Erreur 500 : " . $e->getMessage());
-    http_response_code(500);
+    $router->dispatch();
+    ob_end_flush(); // Envoie le tampon
+} catch (Throwable $e) {
+    // Evite l'affiche d'une page incomplète
+    if (ob_get_length()) {
+        ob_end_clean(); // Nettoyage tampon en cas d'erreur
+    }
 
-    require __DIR__ . '/../src/Views/Shared/Header.php';
-    require __DIR__ . '/../src/Views/error/500.php';
-    require __DIR__ . '/../src/Views/Shared/Footer.php';
-    exit;
+    $errorController = new App\Controllers\ErrorController();
+    $errorController->error500page();
 }
