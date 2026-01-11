@@ -21,6 +21,8 @@ class DatabaseTest extends TestCase
     /** Initialise une nouvelle instance de Database. */
     protected function setUp(): void
     {
+        $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->load();
         $this->database = new Database();
     }
 
