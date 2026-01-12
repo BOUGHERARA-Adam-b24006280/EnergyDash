@@ -28,8 +28,8 @@ abstract class Controller {
     /**
      * Affiche une vue en utilisant le Layout principal.
      *
-     * @param string $view Nom du fichier vue (ex: 'dashboard/dashboard')
-     * @param array $data Données à passer à la vue (ex: ['cities' => $cities])
+     * @param string $view Nom du fichier vue 
+     * @param array<string, mixed> $data Données à passer à la vue
      * @return void
      */
     protected function render(string $view, array $data = []): void {
@@ -38,6 +38,9 @@ abstract class Controller {
 
         $viewPath = __DIR__ . '/../Views/' . $view . '.php';
         $title = $data['title'] ?? 'EnergyDash';
+        if (!is_string($title)) {
+            $title = 'EnergyDash';
+        }
         $layout = new Layout($viewPath, $title);
         $layout->render($data);
     }
@@ -63,7 +66,9 @@ abstract class Controller {
     protected function requireAdmin(): void {
         $this->requireLogin();
 
-        if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+        $user = $_SESSION['user'] ?? null;
+
+        if (!is_array($user) || ($user['role'] ?? '') !== 'admin') {
             $this->redirect('/profile');
         }
     }
@@ -111,7 +116,7 @@ abstract class Controller {
         if (isset($_SESSION[$type])) {
             $msg = $_SESSION[$type];
             unset($_SESSION[$type]);
-            return $msg;
+            return is_string($msg) ? $msg : null;
         }
         return null;
     }

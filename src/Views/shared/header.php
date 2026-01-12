@@ -13,7 +13,25 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Récupère les infos utilisateur si connecté
 $user = $_SESSION['user'] ?? null;
-$fullName = $user ? htmlspecialchars(($user['first_name'] ?? 'Utilisateur') . ' ' . ($user['last_name'] ?? '')) : null;
+$fullName = null;
+
+// Correction PHPStan : On vérifie que $user est un tableau
+if (is_array($user)) {
+    // On récupère et valide le prénom
+    $firstName = $user['first_name'] ?? 'Utilisateur';
+    if (!is_string($firstName)) {
+        $firstName = 'Utilisateur';
+    }
+
+    // On récupère et valide le nom
+    $lastName = $user['last_name'] ?? '';
+    if (!is_string($lastName)) {
+        $lastName = '';
+    }
+
+    // Concaténation sécurisée maintenant que tout est typé string
+    $fullName = htmlspecialchars($firstName . ' ' . $lastName);
+}
 ?>
 
 <!DOCTYPE html>
