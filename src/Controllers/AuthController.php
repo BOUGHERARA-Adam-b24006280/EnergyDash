@@ -195,9 +195,17 @@ class AuthController extends Controller {
      */
     public function showForgot(): void {
         $this->initCsrf();
+        
+        // Message de succès après redirection PRG
+        $success = '';
+        if (isset($_GET['sent']) && $_GET['sent'] === '1') {
+            $success = "Si ce compte existe, un email a été envoyé.";
+        }
+        
         $this->render('auth/forgot', [
             'title' => 'Mot de passe oublié',
-            'csrf_token' => $_SESSION['csrf_token']
+            'csrf_token' => $_SESSION['csrf_token'],
+            'success' => $success
         ]);
     }
 
@@ -258,11 +266,8 @@ class AuthController extends Controller {
             usleep((int) ((1.0 - $elapsed) * 1000000));
         }
 
-        $this->render('auth/forgot', [
-            'title' => 'Mot de passe oublié',
-            'success' => $success,
-            'csrf_token' => $_SESSION['csrf_token']
-        ]);
+        // Redirection PRG pour éviter la re-soumission lors d'un refresh
+        $this->redirect('/forgot?sent=1');
     }
 
     // Réinitialisation mot de passe
