@@ -19,22 +19,23 @@ class EnergyCsvService {
      * et détecte automatiquement le séparateur.
      */
     public function __construct() {
-        // --- CORRECTIF 1 : SÉCURITÉ SESSION ---
-        // Indispensable car on accède à $_SESSION['user']. 
-        // Si la session n'est pas démarrée ailleurs, le service plantera sans ceci.
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
-        $userId = $_SESSION['user']['id'] ?? null;
-        $userRole = $_SESSION['user']['role'] ?? 'user';
+        $user = $_SESSION['user'] ?? null;
+        $userId = null;
+        $userRole = 'user';
+
+        if (is_array($user)) {
+            $userId = (isset($user['id']) && is_scalar($user['id'])) ? (string)$user['id'] : null;
+            $userRole = (isset($user['role']) && is_string($user['role'])) ? $user['role'] : 'user';
+        }
 
         // Chemins des fichiers
-        $userFile = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
+        $idSuffix = $userId ?? 'default';
+        $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
         $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
-
-        // Seuls les admins/éditeurs ou les utilisateurs ayant uploadé un fichier utilisent le fichier perso
-        $canUpload = in_array($userRole, ['admin', 'editor']);
 
         if ($userId && file_exists($userFile)) {
             $this->csvPath = $userFile;
@@ -56,7 +57,7 @@ class EnergyCsvService {
         if ($handle) {
             $line = fgets($handle); // Lit la première ligne
             fclose($handle);
-            if (substr_count($line, ';') > substr_count($line, ',')) {
+            if ($line !== false && substr_count($line, ';') > substr_count($line, ',')) {
                 return ';';
             }
         }
@@ -64,19 +65,31 @@ class EnergyCsvService {
     }
 
     /**
-     * Helper : Nettoie les en-têtes CSV (BOM, espaces, majuscules).
+     * Helper : Nettoie les en-têtes CSV.
+     * 
+     * @param array<int, string> $headers
+     * @return array<int, string>
      */
     private function cleanHeaders(array $headers): array {
+        if (empty($headers)) {
+            return [];
+        }
+        
+        // On convertit tout en string pour rassurer PHPStan (list<string|null> -> array<string>)
+        $headersString = array_map('strval', $headers);
+
         $bom = pack('H*','EFBBBF');
-        $headers[0] = preg_replace("/^$bom/", '', $headers[0]);
+        $first = preg_replace("/^$bom/", '', $headersString[0]);
+        $headersString[0] = $first ?? $headersString[0];
         
         return array_map(function($h) {
             return strtolower(trim($h));
-        }, $headers);
+        }, $headersString);
     }
 
     /**
      * Récupère la liste des villes (utile pour les filtres).
+     * @return array<int, string>
      */
     public function getAvailableCities(): array{
         if (!file_exists($this->csvPath)) return [];
@@ -85,14 +98,16 @@ class EnergyCsvService {
         if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
             $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
             
-            if ($rawHeaders) {
+            // On vérifie simplement que ce n'est pas false.
+            if ($rawHeaders !== false) {
                 $headers = $this->cleanHeaders($rawHeaders);
                 $cityIndex = array_search('ville', $headers);
 
                 if ($cityIndex !== false) {
                     while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
-                        if (isset($row[$cityIndex])) {
-                            $cities[] = trim($row[$cityIndex]);
+                        // row est array|false|null.
+                        if (is_array($row) && isset($row[$cityIndex])) {
+                            $cities[] = trim((string)$row[$cityIndex]);
                         }
                     }
                 }
@@ -106,6 +121,7 @@ class EnergyCsvService {
 
     /**
      * Récupère les données historiques depuis le CSV avec filtrage.
+     * @return array<string, mixed>
      */
     public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array{
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
@@ -115,37 +131,44 @@ class EnergyCsvService {
         if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
             $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
             
-            if ($rawHeaders) {
+            if ($rawHeaders !== false) {
                 $headers = $this->cleanHeaders($rawHeaders);
 
                 while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
-                    if (count($row) !== count($headers)) continue;
+                    // Si pas un tableau ou nombre de colonnes incorrect, on saute
+                    if (!is_array($row) || count($row) !== count($headers)) continue;
+                    
+                    // PHPStan sait que count est égal, array_combine renverra un tableau
                     $data = array_combine($headers, $row);
 
-                    if ($type !== 'all' && (!isset($data['type']) || strtolower(trim($data['type'])) !== strtolower($type))) {
+                    $dataType = isset($data['type']) ? strtolower(trim((string)$data['type'])) : '';
+                    $dataVille = isset($data['ville']) ? strtolower(trim((string)$data['ville'])) : '';
+
+                    if ($type !== 'all' && $dataType !== strtolower($type)) {
                         continue;
                     }
 
-                    $rowCity = strtolower(trim($data['ville'] ?? ''));
                     $targetCity = strtolower($city);
                     $compCity = $compareCity ? strtolower($compareCity) : null;
 
                     if ($city !== 'all') {
-                        if ($rowCity !== $targetCity && $rowCity !== $compCity) {
+                        if ($dataVille !== $targetCity && $dataVille !== $compCity) {
                             continue;
                         }
                     }
 
-                    // 3. Date
                     if (isset($data['date_heure'])) {
-                        $cleanDate = str_replace('/', '-', $data['date_heure']);
-                        $d = date('Y-m-d', strtotime($cleanDate));
+                        $cleanDate = str_replace('/', '-', (string)$data['date_heure']);
+                        $ts = strtotime($cleanDate);
+                        if ($ts === false) continue;
+
+                        $d = date('Y-m-d', $ts);
                         
                         if ($d >= $from && $d <= $to) {
                             $results[] = [
-                                'date' => $data['date_heure'],
+                                'date' => (string)$data['date_heure'],
                                 'production' => (float)($data['production_kw'] ?? 0),
-                                'ville' => $data['ville'],
+                                'ville' => (string)($data['ville'] ?? ''),
                                 'meteo'      => (float)($data['valeur_meteo'] ?? 0),
                                 'temp'       => (float)($data['temperature_c'] ?? 0)
                             ];
@@ -157,7 +180,9 @@ class EnergyCsvService {
         }
         
         usort($results, function($a, $b) {
-            return strtotime(str_replace('/', '-', $a['date'])) - strtotime(str_replace('/', '-', $b['date']));
+            $tA = strtotime(str_replace('/', '-', (string)$a['date']));
+            $tB = strtotime(str_replace('/', '-', (string)$b['date']));
+            return ($tA ?: 0) - ($tB ?: 0);
         });
 
         return $this->fmt($type, $city, $from, $to, $results);
@@ -174,22 +199,28 @@ class EnergyCsvService {
         $count = 0;
 
         if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
-            $headers = $this->cleanHeaders(fgetcsv($handle, 1000, $this->delimiter, "\"", "\\"));
-            
-            while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
-                if (count($row) !== count($headers)) continue;
-                $data = array_combine($headers, $row);
+            $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
+            if ($rawHeaders !== false) {
+                $headers = $this->cleanHeaders($rawHeaders);
+                
+                while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
+                    if (!is_array($row) || count($row) !== count($headers)) continue;
+                    $data = array_combine($headers, $row);
 
-                if (strtolower($data['type'] ?? '') === strtolower($type) && 
-                    strtolower($data['ville'] ?? '') === strtolower($city) &&
-                    (float)($data['valeur_meteo'] ?? 0) > 10) { 
-                    
-                    $prod = (float)($data['production_kw'] ?? 0);
-                    $meteo = (float)($data['valeur_meteo'] ?? 0);
-                    
-                    if ($meteo > 0) {
-                        $totalRatio += ($prod / $meteo);
-                        $count++;
+                    $dataType = strtolower((string)($data['type'] ?? ''));
+                    $dataVille = strtolower((string)($data['ville'] ?? ''));
+                    $dataMeteo = (float)($data['valeur_meteo'] ?? 0);
+
+                    if ($dataType === strtolower($type) && 
+                        $dataVille === strtolower($city) &&
+                        $dataMeteo > 10) { 
+                        
+                        $prod = (float)($data['production_kw'] ?? 0);
+                        
+                        if ($dataMeteo > 0) {
+                            $totalRatio += ($prod / $dataMeteo);
+                            $count++;
+                        }
                     }
                 }
             }
@@ -202,6 +233,7 @@ class EnergyCsvService {
      * SIMULATEUR HYBRIDE (Fonctionnalité clé)
      * Utilise Open-Meteo pour générer des données futures (Forecast) ou passées (Archive)
      * quand le CSV s'arrête.
+     * @return array<string, mixed>
      */
     public function simulateDataFromWeather(string $type, string $city, string $startDate, string $endDate): array {
         $coordinates = [
@@ -242,6 +274,11 @@ class EnergyCsvService {
         if ($json === false) return $this->fmt($type, $city, $startDate, $endDate, []);
 
         $apiData = json_decode($json, true);
+
+        if (!is_array($apiData) || !isset($apiData['hourly']) || !is_array($apiData['hourly'])) {
+            return $this->fmt($type, $city, $startDate, $endDate, []);
+        }
+
         $hourly = $apiData['hourly'] ?? [];
         $predictions = [];
 
@@ -252,10 +289,10 @@ class EnergyCsvService {
                 
                 if ($dayOnly < $startDate || $dayOnly > $endDate) continue;
 
-                $temp = $hourly['temperature_2m'][$index] ?? 0;
-                $rain = $hourly['precipitation'][$index] ?? 0;
-                $wind = $hourly['wind_speed_10m'][$index] ?? 0;
-                $sun  = $hourly['shortwave_radiation'][$index] ?? 0;
+                $temp = isset($hourly['temperature_2m'][$index]) ? (float)$hourly['temperature_2m'][$index] : 0.0;
+                $rain = isset($hourly['precipitation'][$index]) ? (float)$hourly['precipitation'][$index] : 0.0;
+                $wind = isset($hourly['wind_speed_10m'][$index]) ? (float)$hourly['wind_speed_10m'][$index] : 0.0;
+                $sun  = isset($hourly['shortwave_radiation'][$index]) ? (float)$hourly['shortwave_radiation'][$index] : 0.0;
 
                 $predictedProd = 0;
                 $meteoValueForChart = 0;
@@ -287,6 +324,12 @@ class EnergyCsvService {
 
     /**
      * Helper : Formate la réponse standardisée.
+     * @param string $type
+     * @param string $city
+     * @param string $from
+     * @param string $to
+     * @param array<int, array<string, mixed>> $data
+     * @return array<string, mixed>
      */
     private function fmt($type, $city, $from, $to, $data): array {
         return ['type' => $type, 'city' => $city, 'from' => $from, 'to' => $to, 'data' => $data];
