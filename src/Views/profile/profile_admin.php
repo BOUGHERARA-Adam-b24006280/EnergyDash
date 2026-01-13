@@ -1,3 +1,13 @@
+<?php
+/**
+ * Fichier : profile_admin.php
+ * Rôle : Vue du profil administrateur (gestion du compte et des utilisateurs).
+ *
+ * @var array{id: int, first_name: string, last_name: string, email: string, role: string} $user L'utilisateur connecté
+ * @var array<int, array{id: int, first_name: string, last_name: string, email: string, role: string}> $users Liste complète des utilisateurs
+ */
+?>
+
 <div class="fixed left-0 top-0 -z-10 h-full w-full">
     <div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
 </div>

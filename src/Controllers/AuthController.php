@@ -21,12 +21,18 @@ class AuthController extends Controller {
     private UserModel $userModel;
 
     /**
+     * @var ErrorController
+     */
+    private ErrorController $errorController;
+
+    /**
      * Constructeur.
      * Initialise le modèle utilisateur.
      */
     public function __construct() {
         parent::__construct();
         $this->userModel = new UserModel();
+        $this->errorController = new ErrorController();
     }
 
     // Connexion
@@ -285,16 +291,19 @@ class AuthController extends Controller {
         $rawToken = $_GET['token'] ?? '';
         $token = is_string($rawToken) ? $rawToken : '';
         $errors = [];
+        $isTokenValid = true;
 
-        // Vérification préventive pour UX
+        // Pré-validation du token : s'il est invalide ou expiré, rediriger vers 404
         if (empty($token) || !$this->userModel->getUserByToken(hash('sha256', $token))) {
-            $errors[] = "Ce lien est invalide ou a expiré.";
+            $this->errorController->error404page();
+            return;
         }
 
         $this->render('auth/reset', [
             'title' => 'Réinitialisation',
             'errors' => $errors,
-            'csrf_token' => $_SESSION['csrf_token']
+            'csrf_token' => $_SESSION['csrf_token'],
+            'isTokenValid' => $isTokenValid
         ]);
     }
 
@@ -307,6 +316,7 @@ class AuthController extends Controller {
      * @return void
      */
     public function processReset(): void {
+        $isTokenValid = true;
         try {
             $this->validateCsrf();
 
@@ -326,8 +336,9 @@ class AuthController extends Controller {
             $user = $this->userModel->getUserByToken($hashedToken);
 
             if (!$user) {
-                usleep(500000); // 0.5s délai
-                throw new Exception("Lien invalide ou expiré.");
+                // Si le token est invalide lors du traitement, afficher une 404
+                $this->errorController->error404page();
+                return;
             }
 
             if ($password !== $confirm) {
@@ -353,7 +364,8 @@ class AuthController extends Controller {
             $this->render('auth/reset', [
                 'title' => 'Réinitialisation',
                 'errors' => [$e->getMessage()],
-                'csrf_token' => $_SESSION['csrf_token']
+                'csrf_token' => $_SESSION['csrf_token'],
+                'isTokenValid' => $isTokenValid
             ]);
         }
     }

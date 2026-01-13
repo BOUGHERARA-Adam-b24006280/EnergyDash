@@ -1,13 +1,15 @@
 <?php
 /**
  * Fichier : profile.php
- * Rôle : 
+ * Rôle : Vue du profil utilisateur standard.
  * Auteur : Lucas LEPAPE,
+ *
+ * @var array{first_name: string, last_name: string, email: string} $user Informations de l'utilisateur
  */
 ?>
-<?php if (!empty($_SESSION['success'])): ?>
+<?php if (!empty($_SESSION['success']) && is_string($_SESSION['success'])): ?>
     <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
-<?php elseif (!empty($_SESSION['error'])): ?>
+<?php elseif (!empty($_SESSION['error']) && is_string($_SESSION['error'])): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?></div>
 <?php endif; ?>
 

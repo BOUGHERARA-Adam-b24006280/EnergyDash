@@ -6,7 +6,7 @@
  *
  * @var array<int, string> $errors Liste des messages d'erreur
  * @var string $csrf_token Jetons CSRF unique côté serveur
- * @var array $old Données précédemment saisies
+ * @var array<string, string> $old Données précédemment saisies
  */
 
 $old = $old ?? []; // Assure que $old existe

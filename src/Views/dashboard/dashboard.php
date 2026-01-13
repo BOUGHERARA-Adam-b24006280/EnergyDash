@@ -2,15 +2,19 @@
 /**
  * Fichier : dashboard.php
  * Rôle : Vue principale du tableau de bord.
- * Contient :
- * 1. Formulaire d'upload CSV (avec bouton Submit).
- * 2. Formulaire de filtres (Type, Ville, Date).
- * 3. Graphique Chart.js interactif.
- *
- * Auteur : L'équipe EnergyDash
+ * 
+ * @var array<int, string> $cities Liste des villes disponibles
+ * @var string|null $success Message de succès
+ * @var string|null $error Message d'erreur
  */
 
-    $userId = $_SESSION['user']['id'];
+    $user = $_SESSION['user'] ?? null;
+    $userId = 0;
+
+    if (is_array($user) && isset($user['id']) && is_numeric($user['id'])) {
+        $userId = (int) $user['id'];
+    }
+
     $userFilePath = __DIR__ . '/../../../Storage/energy_user_' . $userId . '.csv';
     $fileExists = file_exists($userFilePath);
 ?>
@@ -44,7 +48,7 @@
         <div class="lg:col-span-4 space-y-6">
             
         <?php 
-        $userRole = $_SESSION['user']['role'] ?? 'user';
+        $userRole = (is_array($user) && isset($user['role']) && is_string($user['role'])) ? $user['role'] : 'user';
         ?>
 
         <?php if (in_array($userRole, ['admin', 'editor'])): ?>
@@ -92,7 +96,11 @@
                                         Fichier actif
                                     </span>
                                     <p class="text-xs text-gray-500 mt-1">
-                                        Modifié le : <?= date("d/m/Y H:i", filemtime($userFilePath)) ?>
+                                        <?php 
+                                            $mtime = filemtime($userFilePath);
+                                            $dateStr = ($mtime !== false) ? date("d/m/Y H:i", $mtime) : 'Inconnue';
+                                        ?>
+                                        Modifié le : <?= htmlspecialchars($dateStr) ?>
                                     </p>
                                 <?php else: ?>
                                     <span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-white/10 dark:text-white">
@@ -268,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = formData.get('type');
         const city = formData.get('city');
 
-        // On applique les règles d'interface juste avant d'envoyer (au cas où)
+        // On applique les règles d'interface juste avant d'envoyer
         handleInterfaceRules();
 
         const url = `/api/energy?${params}`;

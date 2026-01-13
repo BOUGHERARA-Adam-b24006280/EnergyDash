@@ -18,6 +18,11 @@ use PDOException;
 class UserModel extends Model {
     protected string $table = 'users';
 
+
+    /**
+     * Constructeur.
+     * Initialise la connexion à la base de données.
+     */
     public function __construct(){
         $db = Database::getInstance();
         parent::__construct($db);
@@ -25,6 +30,9 @@ class UserModel extends Model {
 
     /**
      * Vérifie si une adresse mail est déjà utilisée
+     * 
+     * @param string $email L'adresse email à vérifier.
+     * @return bool true si l'email existe déjà, false sinon.
      */
     public function emailExists(string $email): bool {
         return $this->findOneBy('email', $email) !== null;
@@ -32,6 +40,12 @@ class UserModel extends Model {
 
     /**
      * Crée un nouvel utilisateur.
+     * 
+     * @param string $firstName Prénom de l'utilisateur.
+     * @param string $lastName Nom de l'utilisateur.
+     * @param string $email Adresse email de l'utilisateur.
+     * @param string $password Mot de passe (haché avant stockage).
+     * @return bool true en cas de succès, false sinon.
      */
     public function createUser(string $firstName, string $lastName, string $email, string $password): bool {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -47,13 +61,23 @@ class UserModel extends Model {
     /**
      * Récupère un utilisateur par son adresse e-mail.
      *
-     * @param string $email
-     * @return array<string, mixed>|null
+     * @param string $email L'adresse email de l'utilisateur.
+     * @return array<string, mixed>|null Les données de l'utilisateur ou null si introuvable.
      */
     public function getUserByEmail(string $email): ?array {
         return $this->findOneBy('email', $email);
     }
 
+    /**
+     * Met à jour les informations d'un utilisateur.
+     * 
+     * @param int $id Identifiant de l'utilisateur.
+     * @param string $firstName nouveau prénom.
+     * @param string $lastName Nouveau nom.
+     * @param string $email Nouvel email.
+     * @param string $password (Optionnel) Nouveau mot de passe.
+     * @return bool true en cas de succès. 
+     */
     public function updateUser(int $id, string $firstName, string $lastName, string $email, string $password = ''): bool {
         $data = [
             'first_name' => $firstName,
@@ -68,6 +92,13 @@ class UserModel extends Model {
         return $this->update($id, $data);
     }
 
+    /**
+     * Modifie le rôle d'un utilisateur.
+     * 
+     * @param int $id Identifiant de l'utilisateur.
+     * @param string $role Nouveau rôle ('user', 'admin', 'editor').
+     * @return bool true en cas de succès, false si le rôle est invalide ou erreur SQL.
+     */
     public function updateUserRole(int $id, string $role): bool {
         $allowedRoles = ['user', 'admin', 'editor'];
 
@@ -87,7 +118,7 @@ class UserModel extends Model {
     /**
      * Récupère tous les utilisateurs.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>> La liste des utliisateurs.
      */
     public function getAllUsers(): array {
         try {
@@ -110,6 +141,14 @@ class UserModel extends Model {
         }
     }
 
+    /**
+     * Stocke un token de réintialisation de mot de passe en base.
+     * 
+     * @param int $userId Identifiant de l'utilisateur.
+     * @param string $hashedToken Le token haché.
+     * @param string $expiresAt Date d'expiration.
+     * @return bool true en cas de succès.
+     */
     public function storeResetToken(int $userId, string $hashedToken, string $expiresAt): bool {
         try {
             $stmt = $this->db->prepare("
@@ -131,8 +170,8 @@ class UserModel extends Model {
     /**
      * Récupère un utilisateur associé à un token de réinitialisation.
      *
-     * @param string $token Token haché (SHA-256)
-     * @return array<string, mixed>|null Retourne les infos de l'utilisateur ou null si invalide/expiré
+     * @param string $token Token haché (SHA-256).
+     * @return array<string, mixed>|null Retourne les infos de l'utilisateur ou null si invalide/expiré.
      */
     public function getUserByToken(string $token): ?array {
         try {
@@ -158,6 +197,13 @@ class UserModel extends Model {
         }
     }
 
+    /**
+     * Met à jour le mot de passe d'un utilisateur.
+     *
+     * @param int $userId Identifiant de l'utilisateur.
+     * @param string $newPassword Nouveau mot de passe.
+     * @return bool true en cas de succès.
+     */
     public function updatePassword(int $userId, string $newPassword): bool{
         try {
             $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -169,6 +215,12 @@ class UserModel extends Model {
         }
     }
 
+    /**
+     * Invalide (supprime) un token de réinitialisation.
+     *
+     * @param string $token Le token à supprimer.
+     * @return bool true en cas de succès.
+     */
     public function invalidateToken(string $token): bool {
         try {
             $stmt = $this->db->prepare("DELETE FROM password_resets WHERE token = :token");
@@ -179,6 +231,12 @@ class UserModel extends Model {
         }
     }
 
+    /**
+     * Supprime tous les tokens de réinitialisation d'un utilisateur spécifique.
+     *
+     * @param int $userId Identifiant de l'utilisateur.
+     * @return bool true en cas de succès.
+     */
     public function deleteResetTokensForUser(int $userId): bool {
         try {
             $stmt = $this->db->prepare("DELETE FROM password_resets WHERE user_id = :user_id");
@@ -190,18 +248,25 @@ class UserModel extends Model {
     }
 
     /**
-     * Vérifie les identifiants et retourne l'user si OK, sinon null
+     * Vérifie les identifiants et retourne l'utilisateur si OK.
+     *
+     * @param string $email Email fourni.
+     * @param string $password Mot de passe fourni.
+     * @return array<string, mixed>|null Le tableau utilisateur si valide, null sinon.
      */
     public function verifyLogin(string $email, string $password): ?array {
         $user = $this->getUserByEmail($email);
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && isset($user['password']) && is_string($user['password']) && password_verify($password, $user['password'])) {
             return $user;
         }
         return null;
     }
 
     /**
-     * Logique centralisée de validation de mot de passe
+     * Logique centralisée de validation de la force du mot de passe.
+     *
+     * @param string $password Mot de passe à analyser.
+     * @return bool Vrai si le mot de passe respecte les critères de sécurité.
      */
     public static function isPasswordStrong(string $password): bool {
         return mb_strlen($password) >= 8 
@@ -210,6 +275,8 @@ class UserModel extends Model {
 
     /**
      * Génère un token de réinitialisation pour l'email donné.
+     *
+     * @param string $email L'email de l'utilisateur concerné.
      * @return array{token: string, user: array<string, mixed>}|null Retourne le token (clair) et l'user, ou null si introuvable.
      */
     public function createResetTokenForEmail(string $email): ?array
@@ -223,8 +290,15 @@ class UserModel extends Model {
         $hashedToken = hash('sha256', $token);
         $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
-        $this->deleteResetTokensForUser($user['id']);
-        $this->storeResetToken($user['id'], $hashedToken, $expiresAt);
+        $idRaw = $user['id'] ?? 0;
+        if (!is_numeric($idRaw)) {
+            return null;
+        }
+
+        $userId = (int) $idRaw;
+
+        $this->deleteResetTokensForUser($userId);
+        $this->storeResetToken($userId, $hashedToken, $expiresAt);
 
         return ['token' => $token, 'user' => $user];
     }
