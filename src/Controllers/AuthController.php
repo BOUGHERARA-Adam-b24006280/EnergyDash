@@ -285,16 +285,19 @@ class AuthController extends Controller {
         $rawToken = $_GET['token'] ?? '';
         $token = is_string($rawToken) ? $rawToken : '';
         $errors = [];
+        $isTokenValid = true;
 
         // Vérification préventive pour UX
         if (empty($token) || !$this->userModel->getUserByToken(hash('sha256', $token))) {
             $errors[] = "Ce lien est invalide ou a expiré.";
+            $isTokenValid = false;
         }
 
         $this->render('auth/reset', [
             'title' => 'Réinitialisation',
             'errors' => $errors,
-            'csrf_token' => $_SESSION['csrf_token']
+            'csrf_token' => $_SESSION['csrf_token'],
+            'isTokenValid' => $isTokenValid
         ]);
     }
 
@@ -307,6 +310,7 @@ class AuthController extends Controller {
      * @return void
      */
     public function processReset(): void {
+        $isTokenValid = true;
         try {
             $this->validateCsrf();
 
@@ -326,6 +330,7 @@ class AuthController extends Controller {
             $user = $this->userModel->getUserByToken($hashedToken);
 
             if (!$user) {
+                $isTokenValid = false;
                 usleep(500000); // 0.5s délai
                 throw new Exception("Lien invalide ou expiré.");
             }
@@ -353,7 +358,8 @@ class AuthController extends Controller {
             $this->render('auth/reset', [
                 'title' => 'Réinitialisation',
                 'errors' => [$e->getMessage()],
-                'csrf_token' => $_SESSION['csrf_token']
+                'csrf_token' => $_SESSION['csrf_token'],
+                'isTokenValid' => $isTokenValid
             ]);
         }
     }
