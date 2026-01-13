@@ -16,7 +16,7 @@ class Router {
      *
      * @var array<int, array{
      *     method: string,
-     *     path: string,
+     *     uri: string,
      *     action: array{0: class-string, 1: string}
      * }>
      */
@@ -26,7 +26,7 @@ class Router {
      * Ajoute une route à la liste.
      *
      * @param string $method Méthode HTTP (GET, POST, etc.)
-     * @param string $path URI de la route
+     * @param string $uri URI de la route
      * @param array{0: class-string, 1: string} $action Contrôleur et méthode associés
      */
     public function add(string $method, string $uri, array $action): void{
@@ -48,19 +48,28 @@ class Router {
      * @throws \LogicException Si le contrôleur ou la méthode sont introuvables.
      */
     public function dispatch(): void {
-        $method = $_SERVER['REQUEST_METHOD']; // Récupère la méthode HTTP réelle
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET'; // Récupère la méthode HTTP réelle
+        if (!is_string($method)) {
+            $method = 'GET';
+        }
         $method = strtoupper($method); // Met en majuscules pour uniformité
 
-        $uri = $_SERVER['REQUEST_URI']; // Récupère l'URI réelle
-        $uri = parse_url($uri, PHP_URL_PATH); // Extrait le chemin sans les paramètres de requête
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '/'; // Récupère l'URI réelle
+        if (!is_string($requestUri)) {
+            $requestUri = '/';
+        }
+        $uriPath = parse_url($requestUri, PHP_URL_PATH); // Extrait le chemin sans les paramètres de requête
+        if (!is_string($uriPath)) {
+            $uriPath = '/';
+        }
         
-        if ($uri !== '/') {
-            $uri = rtrim($uri, '/'); // Supprime le slash final si l'URI ne vaut pas '/' (page d'accueil)
+        if ($uriPath !== '/') {
+            $uriPath = rtrim($uriPath, '/'); // Supprime le slash final si l'URI ne vaut pas '/' (page d'accueil)
         }
         
         foreach ($this->routes as $route) {
             
-            if ($route['method'] === $method && $route['uri'] === $uri) {
+            if ($route['method'] === $method && $route['uri'] === $uriPath) {
                 [$controller, $action] = $route['action'];
                 if (!class_exists($controller)) {
                     throw new \LogicException("Unable to load class: $controller");

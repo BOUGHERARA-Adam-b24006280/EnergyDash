@@ -58,7 +58,7 @@ $uri = $_SERVER['REQUEST_URI'] ?? '';
 </div>
 <?php endif; ?>
 
-<?php if (empty($success)): ?>
+<?php if (empty($success) && ($isTokenValid ?? true)): ?>
 <div class="fixed left-0 top-0 -z-10 h-full w-full">
     <div class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#444445_1px,transparent_1px)]  [background-size:16px_16px]"></div>
 </div>
@@ -75,8 +75,16 @@ $uri = $_SERVER['REQUEST_URI'] ?? '';
 
             <div class="mt-5">
                 <form method="post">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                    <input type="hidden" name="token" value="<?= htmlspecialchars($_GET['token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
+
+                    <?php 
+                        $token = $_GET['token'] ?? '';
+                        if (!is_string($token)) {
+                            $token = '';
+                        }
+                    ?>
+
+                    <input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="grid gap-y-4">
                         <!-- Password Group -->

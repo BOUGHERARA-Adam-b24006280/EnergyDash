@@ -47,7 +47,8 @@ class EnergyController extends Controller
         try {
             // 2. On récupère d'abord les données RÉELLES (CSV) via le Service
             $realData = $this->energyService->getEnergyData($type, $city, $from, $to, $compare);
-            $finalData = $realData['data']; // Les données brutes
+            /** @var array<int, array<string, mixed>> $finalData */
+            $finalData = isset($realData['data']) && is_array($realData['data']) ? $realData['data'] : []; // Les données brutes
 
             // --- TA LOGIQUE HYBRIDE (Le retour de l'IA) ---
             
@@ -78,8 +79,10 @@ class EnergyController extends Controller
                     $simulated = $this->energyService->simulateDataFromWeather($targetType, $city, $simStart, $simEnd);
                     
                     // Fusion : CSV + IA
-                    if (!empty($simulated['data'])) {
-                        $finalData = array_merge($finalData, $simulated['data']);
+                    if (isset($simulated['data']) && is_array($simulated['data']) && !empty($simulated['data'])) {
+                        /** @var array<int, array<string, mixed>> $simData */
+                        $simData = $simulated['data'];
+                        $finalData = array_merge($finalData, $simData);
                     }
                 }
             }
@@ -106,9 +109,14 @@ class EnergyController extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             $file = $_FILES['csv_file'];
 
+            $error = isset($file['error']) ? (int)$file['error'] : UPLOAD_ERR_NO_FILE;
+            $name = isset($file['name']) ? (string)$file['name'] : '';
+            $tmpName = isset($file['tmp_name']) ? (string)$file['tmp_name'] : '';
+
             // 1. Erreur technique
-            if ($file['error'] !== UPLOAD_ERR_OK) {
-                $this->flash('error', "Erreur technique lors du transfert.");
+            $ext = pathinfo($name, PATHINFO_EXTENSION);
+            if (strtolower($ext) !== 'csv') {
+                $this->flash('error', "Format incorrect. Veuillez envoyer un fichier .csv");
                 $this->redirect('/dashboard');
             }
 
@@ -120,8 +128,13 @@ class EnergyController extends Controller
             }
 
             // 3. (AJOUT) Vérification de sécurité du contenu réel (MIME Type)
-            // C'est la partie que vous aviez et qui est mieux !
             $finfo = \finfo_open(FILEINFO_MIME_TYPE);
+
+            if ($finfo === false) {
+                $this->flash('error', "Erreur interne lors de l'analyse du fichier.");
+                $this->redirect('/dashboard');
+            }
+
             $mimeType = \finfo_file($finfo, $file['tmp_name']);
             $allowedMimes = [
                 'text/csv', 'text/plain', 'application/vnd.ms-excel', 
@@ -129,13 +142,17 @@ class EnergyController extends Controller
                 'text/x-comma-separated-values', 'text/comma-separated-values'
             ];
 
-            if (!in_array($mimeType, $allowedMimes)) {
+            if ($mimeType === false || !in_array($mimeType, $allowedMimes)) {
                 $this->flash('error', "Fichier invalide détecté. Seuls les vrais CSV sont acceptés.");
                 $this->redirect('/dashboard');
             }
 
             // 4. Déplacement
-            $userId = $_SESSION['user']['id'];
+            $user = $_SESSION['user'] ?? null;
+            if (!is_array($user) || !isset($user['id'])) {
+                $this->redirect('/login');
+            }
+            $userId = (int)$user['id'];
             $targetDir = __DIR__ . '/../../Storage';
             $targetPath = $targetDir . '/energy_user_' . $userId . '.csv';
 
@@ -160,7 +177,11 @@ class EnergyController extends Controller
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $userId = $_SESSION['user']['id'];
+            $user = $_SESSION['user'] ?? null;
+            if (!is_array($user) || !isset($user['id'])) {
+                $this->redirect('/login');
+            }
+            $userId = (int)$user['id'];
             $targetPath = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
 
             if (file_exists($targetPath)) {
