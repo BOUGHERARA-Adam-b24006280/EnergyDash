@@ -55,8 +55,6 @@ class EnergyController extends Controller
             $realData = $this->energyService->getEnergyData($type, $city, $from, $to, $compare);
             /** @var array<int, array<string, mixed>> $finalData */
             $finalData = isset($realData['data']) && is_array($realData['data']) ? $realData['data'] : []; // Les données brutes
-
-            // --- TA LOGIQUE HYBRIDE (Le retour de l'IA) ---
             
             // On cherche la dernière date connue dans le CSV
             $lastDateFound = $from; 
@@ -71,7 +69,6 @@ class EnergyController extends Controller
                 $lastDateFound = date('Y-m-d', (int)strtotime($from . ' -1 day'));
             }
 
-            // Si l'utilisateur demande une date plus loin que le CSV, on lance l'IA
             if ($lastDateFound < $to) {
                 $simStart = date('Y-m-d', (int)strtotime($lastDateFound . ' +1 day'));
                 $simEnd = $to;
@@ -84,7 +81,6 @@ class EnergyController extends Controller
                     // On détermine le type principal pour la simulation
                     $targetType = ($type === 'all') ? 'solaire' : $type;
                     
-                    // APPEL DU SERVICE pour la prévision (la fonction que tu as ajoutée tout à l'heure)
                     $simulated = $this->energyService->simulateDataFromWeather($targetType, $city, $simStart, $simEnd);
                     
                     // Fusion : CSV + IA
