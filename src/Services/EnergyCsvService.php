@@ -1,9 +1,13 @@
 <?php
+/**
+ * Fichier : EnergyCsvService.php
+ * Rôle : Service centralisant la gestion des données CSV et la simulation IA via Open-Meteo.
+ */
+
 namespace App\Services;
 
 /**
  * Classe EnergyCsvService
- * Service centralisant la gestion des données CSV et la simulation IA via Open-Meteo.
  * Fusionne la logique métier de la branche "Prévision" avec l'architecture "Amélioration du Code".
  */
 class EnergyCsvService {
@@ -51,6 +55,8 @@ class EnergyCsvService {
 
     /**
      * Helper : Détecte si le fichier utilise des virgules ou des points-virgules.
+     * @param string $file Le chemin du fichier à analyser.
+     * @return string Le délimiteur détecté (';' ou ',').
      */
     private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
@@ -67,8 +73,8 @@ class EnergyCsvService {
     /**
      * Helper : Nettoie les en-têtes CSV.
      * 
-     * @param array<int, string|null> $headers
-     * @return array<int, string>
+     * @param array<int, string|null> $headers Les en-têtes bruts lus depuis le CSV.
+     * @return array<int, string> Les en-têtes nettoyés.
      */
     private function cleanHeaders(array $headers): array {
         if (empty($headers)) {
@@ -89,7 +95,7 @@ class EnergyCsvService {
 
     /**
      * Récupère la liste des villes (utile pour les filtres).
-     * @return array<int, string>
+     * @return array<int, string> Liste alphabétique des villes.
      */
     public function getAvailableCities(): array{
         if (!file_exists($this->csvPath)) return [];
@@ -121,7 +127,13 @@ class EnergyCsvService {
 
     /**
      * Récupère les données historiques depuis le CSV avec filtrage.
-     * @return array<string, mixed>
+     * 
+     * @param string $type Type d'énergie ('solaire', 'eolien', 'hydraulique' ou 'all').
+     * @param string $city Nom de la ville ('Paris', 'Lyon', etc. ou 'all').
+     * @param string $from Date de début au format Y-m-d.
+     * @param string $to Date de fin au format Y-m-d.
+     * @param string|null $compareCity (Optionnel) Nom d'une seconde ville pour comparaison.
+     * @return array<string, mixed> Tableau contenant les métadonnées et la liste des relevés.
      */
     public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array{
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
@@ -191,6 +203,10 @@ class EnergyCsvService {
     /**
      * Calcule l'efficacité de l'installation (Ratio Historique).
      * Utilisé par le simulateur pour calibrer les prédictions selon l'historique de l'utilisateur.
+     * 
+     * @param string $type Le type d'énergie à analyser.
+     * @param string $city La ville concernée.
+     * @return float Le ratio moyen (Production / Valeur Météo) calculé sur l'historique.
      */
     private function getPerformanceRatio(string $type, string $city): float {
         if (!file_exists($this->csvPath)) return 0;
@@ -233,7 +249,12 @@ class EnergyCsvService {
      * SIMULATEUR HYBRIDE (Fonctionnalité clé)
      * Utilise Open-Meteo pour générer des données futures (Forecast) ou passées (Archive)
      * quand le CSV s'arrête.
-     * @return array<string, mixed>
+     * 
+     * @param string $type Type d'énergie.
+     * @param string $city Ville cible pour la météo.
+     * @param string $startDate Date de début de simulation (Y-m-d).
+     * @param string $endDate Date de fin de simulation (Y-m-d).
+     * @return array<string, mixed> Données simulées formatées pour le frontend.
      */
     public function simulateDataFromWeather(string $type, string $city, string $startDate, string $endDate): array {
         $coordinates = [
@@ -329,11 +350,11 @@ class EnergyCsvService {
 
     /**
      * Helper : Formate la réponse standardisée.
-     * @param string $type
-     * @param string $city
-     * @param string $from
-     * @param string $to
-     * @param array<int, array<string, mixed>> $data
+     * @param string $type Type d'énergie.
+     * @param string $city Ville.
+     * @param string $from Date début.
+     * @param string $to Date fin.
+     * @param array<int, array<string, mixed>> $data Données brutes.
      * @return array<string, mixed>
      */
     private function fmt($type, $city, $from, $to, $data): array {
