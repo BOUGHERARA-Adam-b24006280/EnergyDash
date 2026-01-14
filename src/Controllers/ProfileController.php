@@ -146,7 +146,7 @@ class ProfileController extends Controller {
             if ($id === $currentUserId) {
                 $this->flash('error', "Vous ne pouvez pas modifier votre propre rôle ici.");
                 $this->redirect('/profile');
-                exit;
+                return;
             }
 
             $this->userModel->updateUserRole($id, $role);
