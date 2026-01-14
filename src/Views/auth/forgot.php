@@ -1,3 +1,10 @@
+<?php
+/**
+ * Fichier : forgot.php
+ * Rôle : Vue du formulaire de demande de réinitialisation de mot de passe (oubli de mot de passe).
+ */
+?>
+
 <?php if (!empty($errors)): ?>
     <div class="bg-red-50 border border-red-200 text-sm text-red-800 rounded-lg p-4 dark:bg-red-800/10 dark:border-red-900 dark:text-red-500 mx-2"
         role="alert" tabindex="-1" aria-labelledby="hs-with-list-label">

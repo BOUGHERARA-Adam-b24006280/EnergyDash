@@ -6,23 +6,16 @@ use App\Models\UserModel;
 use Exception;
 
 /**
- * Contrôleur gérant l'authentification des utilisateurs.
- *
- * Ce contrôleur gère la connexion, la déconnexion, l'inscription,
- * et la réinitialisation de mot de passe.
+ * Contrôleur AuthController
+ * Centralise la logique de sécurité liée aux utilisateurs.
  *
  * @package App\Controllers
  */
 class AuthController extends Controller {
-    /**
-     * Modèle pour la gestion des utilisateurs.
-     * @var UserModel
-     */
+    /** @var UserModel Modèle pour la gestion des utilisateurs. */
     private UserModel $userModel;
 
-    /**
-     * @var ErrorController
-     */
+    /** @var ErrorController Contrôleur pour gérer les redirections d'erreur */
     private ErrorController $errorController;
 
     /**
@@ -39,8 +32,8 @@ class AuthController extends Controller {
 
     /**
      * Affiche le formulaire de connexion.
-     *
      * Initialise le token CSRF et charge la vue de connexion.
+     * Route: GET /login
      *
      * @return void
      */
@@ -54,10 +47,9 @@ class AuthController extends Controller {
 
     /**
      * Traite la soumission du formulaire de connexion.
-     *
-     * Vérifie le token CSRF, valide les identifiants utilisateur,
-     * crée la session utilisateur et redirige vers le tableau de bord.
-     * En cas d'échec, réaffiche le formulaire avec les erreurs.
+     * Vérifie le CSRF, valide les identifiants et crée la session.
+     * Intègre une protection (délai) contre les attaques par force brute.
+     * Route: POST /login
      *
      * @return void
      */
@@ -96,9 +88,8 @@ class AuthController extends Controller {
 
     /**
      * Déconnecte l'utilisateur.
-     *
-     * Détruit la session active et supprime le cookie de session,
-     * puis redirige vers la page de connexion.
+     * Détruit la session côté serveur et supprime le cookie de session côté client.
+     * Route: GET/POST /logout
      *
      * @return void
      */
@@ -127,8 +118,7 @@ class AuthController extends Controller {
 
     /**
      * Affiche le formulaire d'inscription.
-     *
-     * Initialise le token CSRF et charge la vue d'inscription.
+     * Route: GET /register
      *
      * @return void
      */
@@ -145,6 +135,7 @@ class AuthController extends Controller {
      *
      * Vérifie le token CSRF, valide les données saisies, vérifie l'unicité de l'email,
      * crée le nouvel utilisateur et redirige vers la connexion.
+     * Route: POST /register
      *
      * @return void
      */
@@ -196,6 +187,7 @@ class AuthController extends Controller {
 
     /**
      * Affiche le formulaire de demande de réinitialisation de mot de passe.
+     * Route: GET /forgot
      *
      * @return void
      */
@@ -216,11 +208,10 @@ class AuthController extends Controller {
     }
 
     /**
-     * Traite la demande de réinitialisation de mot de passe.
-     *
-     * Vérifie si l'email existe, génère un token de réinitialisation,
-     * et envoie un email avec le lien de réinitialisation.
-     * Inclut une protection contre les attaques temporelles.
+     * Traite la demande de réinitialisation.
+     * Génère un token unique, l'enregistre en base et envoie un email.
+     * Inclut une protection contre les attaques temporelles pour ne pas révéler l'existence d'un email.
+     * Route: POST /forgot
      *
      * @return void
      */
@@ -279,9 +270,9 @@ class AuthController extends Controller {
     // Réinitialisation mot de passe
 
     /**
-     * Affiche le formulaire de réinitialisation de mot de passe.
-     *
-     * Vérifie la validité du token fourni dans l'URL.
+     * Affiche le formulaire de définition du nouveau mot de passe.
+     * Vérifie la validité du token avant d'afficher la page.
+     * Route: GET /reset
      *
      * @return void
      */
@@ -308,10 +299,9 @@ class AuthController extends Controller {
     }
 
     /**
-     * Traite la réinitialisation du mot de passe.
-     *
-     * Vérifie le token, valide le nouveau mot de passe, met à jour le mot de passe
-     * de l'utilisateur et invalide tous les tokens de réinitialisation associés.
+     * Traite le changement de mot de passe.
+     * Vérifie le token, la complexité du mot de passe, puis met à jour la base de données.
+     * Route: POST /reset
      *
      * @return void
      */

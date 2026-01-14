@@ -1,7 +1,7 @@
 <?php
 /**
  * Fichier : ProfileController.php
- * Rôle : 
+ * Rôle : Gère l'affichage et la modification du profil utilisateur ainsi que l'administration des rôles.
  */
 
 namespace App\Controllers;

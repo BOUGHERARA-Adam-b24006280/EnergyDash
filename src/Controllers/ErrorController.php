@@ -1,4 +1,8 @@
 <?php
+/**
+ * Fichier : ErrorController.php
+ * Rôle : Gère l'affichage des pages d'erreur globales (404, 500) de l'application.
+ */
 
 namespace App\Controllers;
 

@@ -14,7 +14,6 @@
 
 <main>
     <div id="content" class="w-full max-w-2xl mx-auto p-6 py-20">
-        <!-- Card Section -->
         <div class="mt-7 bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-700">
             <div class="p-4 mx-4 sm:p-7 ">
                 <div class="mb-8">
@@ -27,7 +26,6 @@
                 </div>
 
                 <form method="POST" action="/profile/update">
-                    <!-- Grid -->
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
                         <div class="sm:col-span-3">
@@ -35,7 +33,6 @@
                                 Nom complet
                             </label>
                         </div>
-                        <!-- End Col -->
 
                         <div class="sm:col-span-9">
                             <div class="sm:flex">
@@ -47,28 +44,24 @@
                                 ) ?>">
                             </div>
                         </div>
-                        <!-- End Col -->
 
                         <div class="sm:col-span-3">
                             <label for="af-account-email" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Email
                             </label>
                         </div>
-                        <!-- End Col -->
 
                         <div class="sm:col-span-9">
                             <input name="email" id="email" type="email" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs sm:text-sm rounded-lg focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="john.doe@gmail.com" value="<?= htmlspecialchars(
                                     $user["email"]
                             ) ?>">
                         </div>
-                        <!-- End Col -->
 
                         <div class="sm:col-span-3">
                             <label for="af-account-password" class="inline-block text-sm text-gray-800 mt-2.5 dark:text-neutral-200">
                                 Mot de passe
                             </label>
                         </div>
-                        <!-- End Col -->
 
                         <div class="sm:col-span-9">
                             <div class="space-y-2">
@@ -76,9 +69,7 @@
                                 <input id="password" type="text" class="py-1.5 sm:py-2 px-3 pe-11 block w-full border-gray-200 shadow-2xs rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 checked:border-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" placeholder="Entrez votre nouveau mot de passe">
                             </div>
                         </div>
-                        <!-- End Col -->
                     </div>
-                    <!-- End Grid -->
 
                     <div class="mt-5 flex justify-end gap-x-2">
                         <button type="reset" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-50 dark:bg-transparent dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800">
@@ -91,7 +82,6 @@
                 </form>
             </div>
         </div>
-        <!-- End Card Section -->
     </div>
 
     <!--- Table Users Admin --->
@@ -109,7 +99,6 @@
                                 Configurez les droits des utilisateurs de la plateforme.
                             </p>
                         </div>
-                        <!-- End Header -->
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
                             <thead>
                             <tr>
