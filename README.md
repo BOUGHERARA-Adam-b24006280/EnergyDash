@@ -12,11 +12,11 @@ L'application combine l'import de données réelles (CSV) avec un **moteur de pr
 
 ## ✨ Fonctionnalités Clés
 
-- **📊 Visualisation Interactive :** Graphiques dynamiques (ApexCharts) pour le suivi de production.
-- **🔄 Mode Hybride Intelligent :** Fusionne vos données historiques (CSV) avec des prévisions météorologiques en temps réel.
-- **📂 Gestion de Données :** Upload sécurisé de fichiers CSV avec détection automatique du format.
-- **🔐 Espace Membre :** Authentification sécurisée, gestion de profil et isolation des données par utilisateur.
-- **🌍 Multi-Villes :** Comparaison de production entre différentes zones géographiques.
+- **Visualisation Interactive :** Graphiques dynamiques (ApexCharts) pour le suivi de production.
+- **Mode Hybride Intelligent :** Fusionne vos données historiques (CSV) avec des prévisions météorologiques en temps réel.
+- **Gestion de Données :** Upload sécurisé de fichiers CSV avec détection automatique du format.
+- **Espace Membre :** Authentification sécurisée, gestion de profil et isolation des données par utilisateur.
+- **Multi-Villes :** Comparaison de production entre différentes zones géographiques.
 
 ---
 
