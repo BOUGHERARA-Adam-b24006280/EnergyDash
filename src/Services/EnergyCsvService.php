@@ -8,7 +8,6 @@ namespace App\Services;
 
 /**
  * Classe EnergyCsvService
- * Fusionne la logique métier de la branche "Prévision" avec l'architecture "Amélioration du Code".
  */
 class EnergyCsvService {
     /** @var string Chemin vers le fichier CSV actuellement utilisé */
@@ -61,7 +60,7 @@ class EnergyCsvService {
     private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
         if ($handle) {
-            $line = fgets($handle); // Lit la première ligne
+            $line = fgets($handle);
             fclose($handle);
             if ($line !== false && substr_count($line, ';') > substr_count($line, ',')) {
                 return ';';
@@ -81,7 +80,6 @@ class EnergyCsvService {
             return [];
         }
         
-        // On convertit tout en string pour rassurer PHPStan (list<string|null> -> array<string>)
         $headersString = array_map('strval', $headers);
 
         $bom = pack('H*','EFBBBF');
@@ -104,7 +102,6 @@ class EnergyCsvService {
         if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
             $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
             
-            // On vérifie simplement que ce n'est pas false.
             if ($rawHeaders !== false) {
                 $headers = $this->cleanHeaders($rawHeaders);
                 $cityIndex = array_search('ville', $headers);
@@ -246,7 +243,6 @@ class EnergyCsvService {
     }
 
     /**
-     * SIMULATEUR HYBRIDE (Fonctionnalité clé)
      * Utilise Open-Meteo pour générer des données futures (Forecast) ou passées (Archive)
      * quand le CSV s'arrête.
      * 

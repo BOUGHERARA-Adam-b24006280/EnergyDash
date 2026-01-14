@@ -225,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = document.getElementById('energyChart').getContext('2d');
     const titleEl = document.getElementById('chartTitle');
     
-    // Éléments du DOM pour l'interactivité
     const compareSelect = document.querySelector('select[name="compare"]');
     const secondaryRadios = document.querySelectorAll('input[name="secondaryView"]');
     const noneRadio = document.querySelector('input[value="none"]');
@@ -239,17 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
         hydraulique: { color: '#10b981', bg: 'rgba(16, 185, 129, 0.2)' }
     };
 
-    // --- NOUVEAU : Fonction qui gère les règles d'interface ---
     function handleInterfaceRules() {
         const isComparing = compareSelect.value !== "";
         
-        // Règle : Si on compare une ville, on désactive Météo et Température
         secondaryRadios.forEach(radio => {
             if (radio.value !== 'none') {
-                // On désactive le bouton
                 radio.disabled = isComparing;
                 
-                // Visuellement, on grise le parent pour bien montrer que c'est inactif
                 const label = radio.parentElement;
                 if (isComparing) {
                     label.classList.add('opacity-50', 'cursor-not-allowed');
@@ -259,16 +254,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Si on est en mode comparaison, on force la sélection sur "Aucune"
         if (isComparing) {
             noneRadio.checked = true;
         }
     }
 
-    // On écoute le changement sur le menu "Comparer"
     compareSelect.addEventListener('change', handleInterfaceRules);
 
-    // ---------------------------------------------------------
 
     async function refreshChart() {
         const formData = new FormData(form);
@@ -276,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = formData.get('type');
         const city = formData.get('city');
 
-        // On applique les règles d'interface juste avant d'envoyer
         handleInterfaceRules();
 
         const url = `/api/energy?${params}`;
@@ -299,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateChart(jsonData, type) {
-        // 1. Nettoyage de l'ancien graphique
         if (chartInstance) chartInstance.destroy();
 
         const rawData = jsonData.data;
@@ -307,83 +297,64 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(document.getElementById('energyForm'));
         const compareCity = formData.get('compare');
         
-        // On récupère le mode d'affichage secondaire (Météo ou Température)
         const secondaryMode = document.querySelector('input[name="secondaryView"]:checked').value;
         const theme = themes[type] || themes['all'];
 
-        // --- NOUVEAU : DÉTECTION DU FUTUR ---
-        // On regarde si la première ligne de données possède le statut 'prevision'
         const isPrediction = rawData.length > 0 && rawData[0].statut === 'prevision';
 
-        // 2. Préparation des données
         let dates = [];
         let dataCity1 = [], dataSecondary = [], dataCity2 = [];
 
-        // Extraction des dates uniques
         rawData.forEach(item => {
             if (!dates.includes(item.date)) dates.push(item.date);
         });
         dates.sort();
 
-        // Remplissage des tableaux de données
         dates.forEach(date => {
-            // --- Ville Principale ---
             const points1 = rawData.filter(d => d.date === date && d.ville.toLowerCase() === mainCity.toLowerCase());
             const totalProd1 = points1.reduce((sum, p) => sum + parseFloat(p.production), 0);
             dataCity1.push(totalProd1);
 
-            // --- Données Secondaires (Météo / Temp) ---
             let secValue = 0;
             if (points1.length > 0) {
                 if (secondaryMode === 'meteo') {
-                    // On prend la valeur max (utile si plusieurs sources d'énergie)
                     const maxMeteo = points1.reduce((max, p) => Math.max(max, parseFloat(p.meteo || 0)), 0);
                     secValue = maxMeteo;
                 } 
                 else if (secondaryMode === 'temp') {
-                    // On cherche une température valide
                     const pWithTemp = points1.find(p => p.temp !== 0 && p.temp !== null); 
                     secValue = pWithTemp ? parseFloat(pWithTemp.temp) : 0;
                 }
             }
             dataSecondary.push(secValue);
 
-            // --- Ville de Comparaison ---
             if (compareCity) {
                 const points2 = rawData.filter(d => d.date === date && d.ville.toLowerCase() === compareCity.toLowerCase());
                 const total2 = points2.reduce((sum, p) => sum + parseFloat(p.production), 0);
                 dataCity2.push(total2);
             }
         });
-
-        // 3. Construction des Datasets (Couches du graphique)
-        
-        // --- Dataset 1 : Ville Principale ---
+    
         let datasets = [{
-            // Le titre change si c'est une prévision
             label: isPrediction ? `Prévision ${mainCity} (IA)` : `Production ${mainCity}`,
             data: dataCity1,
             borderColor: theme.color,
             backgroundColor: theme.bg,
             yAxisID: 'y',
-            tension: 0.4, // Courbe un peu plus douce
+            tension: 0.4,
             fill: true,
             
-            // --- STYLE VISUEL DU FUTUR ---
-            // Pointillés [10px plein, 5px vide] si prévision, sinon ligne continue
             borderDash: isPrediction ? [10, 5] : [],
-            // Pas de points sur les prévisions (pour ne pas surcharger), sinon points normaux
             pointRadius: isPrediction ? 0 : 3,
             pointHoverRadius: 6
         }];
 
-        // --- Dataset 2 : Axe Secondaire (Météo ou Temp) ---
         if (secondaryMode === 'meteo') {
             datasets.push({
                 label: 'Indice Météo (Vent/Soleil/Pluie)',
                 data: dataSecondary,
-                borderColor: '#fbbf24', // Jaune
-                borderDash: [5, 5],     // Pointillés fins
+                borderColor: '#fbbf24',
+                borderDash: [5, 5],
                 pointRadius: 0,
                 yAxisID: 'y1',
                 tension: 0.1,
@@ -393,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             datasets.push({
                 label: 'Température (°C)',
                 data: dataSecondary,
-                borderColor: '#ef4444', // Rouge
+                borderColor: '#ef4444',
                 borderWidth: 2,
                 borderDash: [5, 5],
                 pointRadius: 0,
@@ -403,22 +374,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- Dataset 3 : Comparaison ---
         if (compareCity && compareCity !== "") {
             datasets.push({
                 label: `Production ${compareCity}`,
                 data: dataCity2,
-                borderColor: '#9ca3af', // Gris
+                borderColor: '#9ca3af',
                 borderWidth: 2,
                 yAxisID: 'y',
                 tension: 0.3,
                 fill: false,
-                // On met aussi des pointillés si la comparaison est aussi une prévision (optionnel)
                 borderDash: isPrediction ? [5, 5] : [] 
             });
         }
 
-        // 4. Création du Graphique
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: { labels: dates, datasets: datasets },
@@ -429,7 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: {
                     tooltip: {
                         callbacks: {
-                            // Petit bonus : Ajout de l'unité dans l'infobulle
                             label: function(context) {
                                 let label = context.dataset.label || '';
                                 if (label) label += ': ';
@@ -451,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     y1: {
                         type: 'linear', position: 'right',
                         display: (secondaryMode !== 'none'),
-                        grid: { drawOnChartArea: false }, // Cache la grille pour ne pas surcharger
+                        grid: { drawOnChartArea: false },
                         title: { display: true, text: secondaryMode === 'temp' ? 'Température (°C)' : 'Indice Météo' }
                     }
                 }
@@ -464,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshChart();
     });
 
-    // Appel initial
     handleInterfaceRules();
     refreshChart();
 });
