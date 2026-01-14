@@ -67,7 +67,7 @@ class EnergyCsvService {
     /**
      * Helper : Nettoie les en-têtes CSV.
      * 
-     * @param array<int, string> $headers
+     * @param array<int, string|null> $headers
      * @return array<int, string>
      */
     private function cleanHeaders(array $headers): array {
@@ -106,7 +106,7 @@ class EnergyCsvService {
                 if ($cityIndex !== false) {
                     while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
                         // row est array|false|null.
-                        if (is_array($row) && isset($row[$cityIndex])) {
+                        if (isset($row[$cityIndex])) {
                             $cities[] = trim((string)$row[$cityIndex]);
                         }
                     }
@@ -136,7 +136,7 @@ class EnergyCsvService {
 
                 while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
                     // Si pas un tableau ou nombre de colonnes incorrect, on saute
-                    if (!is_array($row) || count($row) !== count($headers)) continue;
+                    if (count($row) !== count($headers)) continue;
                     
                     // PHPStan sait que count est égal, array_combine renverra un tableau
                     $data = array_combine($headers, $row);
@@ -204,7 +204,7 @@ class EnergyCsvService {
                 $headers = $this->cleanHeaders($rawHeaders);
                 
                 while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
-                    if (!is_array($row) || count($row) !== count($headers)) continue;
+                    if (count($row) !== count($headers)) continue;
                     $data = array_combine($headers, $row);
 
                     $dataType = strtolower((string)($data['type'] ?? ''));
@@ -279,13 +279,18 @@ class EnergyCsvService {
             return $this->fmt($type, $city, $startDate, $endDate, []);
         }
 
-        $hourly = $apiData['hourly'] ?? [];
+        $hourly = $apiData['hourly'];
         $predictions = [];
 
-        if (isset($hourly['time'])) {
+        if (isset($hourly['time']) && is_array($hourly['time'])) {
             foreach ($hourly['time'] as $index => $isoDate) {
-                $dateString = str_replace('T', ' ', $isoDate) . ':00';
-                $dayOnly = substr($dateString, 0, 10); 
+                
+                if (!is_string($isoDate)) {
+                    continue;
+                }
+
+                $dateString = str_replace('T', ' ', (string)$isoDate) . ':00';
+                $dayOnly = substr($dateString, 0, 10);
                 
                 if ($dayOnly < $startDate || $dayOnly > $endDate) continue;
 
