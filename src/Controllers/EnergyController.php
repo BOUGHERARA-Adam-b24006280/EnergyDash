@@ -2,7 +2,6 @@
 /**
  * Fichier : EnergyController.php
  * Rôle : API JSON et Upload CSV.
- * Auteur : Lucas LEPAPE, Adam Bougherara
  */
 
 namespace App\Controllers;

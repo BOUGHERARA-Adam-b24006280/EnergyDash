@@ -2,7 +2,6 @@
 /**
  * Fichier : Layout.php
  * Rôle : Gère l'affichage global (Header + Vue + Footer) et les outils de vue (Flash messages).
- * Auteur : Lucas LEPAPE, Gustin MAILHE
  */
 
 namespace App\Core;

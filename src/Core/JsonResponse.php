@@ -2,7 +2,6 @@
 /**
  * Fichier : JsonResponse.php
  * Rôle : Helper pour envoyer des réponses au format JSON (utilisé par les API).
- * Auteur : L'équipe EnergyDash
  */
 
 namespace App\Core;

@@ -2,7 +2,6 @@
 /**
  * Fichier : profile.php
  * Rôle : Vue du profil utilisateur standard.
- * Auteur : Lucas LEPAPE,
  *
  * @var array{first_name: string, last_name: string, email: string} $user Informations de l'utilisateur
  */

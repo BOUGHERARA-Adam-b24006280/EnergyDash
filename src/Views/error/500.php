@@ -2,7 +2,6 @@
 /**
  * Fichier : 500.php
  * Rôle : Affiche une page d'erreur 500 personnalisée
- * Auteur : Adam BOUGHERARA, Lucas LEPAPE
  */
 ?>
 

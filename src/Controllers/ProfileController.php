@@ -2,7 +2,6 @@
 /**
  * Fichier : ProfileController.php
  * Rôle : 
- * Auteur : Lucas LEPAPE,
  */
 
 namespace App\Controllers;
