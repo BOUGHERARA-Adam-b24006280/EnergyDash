@@ -2,7 +2,6 @@
 /**
  * Fichier : JsonResponse.php
  * Rôle : Helper pour envoyer des réponses au format JSON (utilisé par les API).
- * Auteur : L'équipe EnergyDash
  */
 
 namespace App\Core;
@@ -15,6 +14,10 @@ namespace App\Core;
  */
 class JsonResponse
 {
+
+    //** Nécessaire pour les tests */
+    public static bool $exitAfterSend = true;
+
     /**
      * Envoie une réponse JSON standard avec un code HTTP.
      *
@@ -32,7 +35,9 @@ class JsonResponse
         header('Content-Type: application/json; charset=utf-8');
         http_response_code($status);    // Définit le code de réponse (200 OK, 404 Not Found, etc.)
         echo json_encode($data);
-        exit;
+        if (self::$exitAfterSend) {
+            exit;
+        }
     }
 
     /**

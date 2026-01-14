@@ -1,10 +1,13 @@
 <?php
+/**
+ * Fichier : EnergyCsvService.php
+ * Rôle : Service centralisant la gestion des données CSV et la simulation IA via Open-Meteo.
+ */
+
 namespace App\Services;
 
 /**
  * Classe EnergyCsvService
- * Service centralisant la gestion des données CSV et la simulation IA via Open-Meteo.
- * Fusionne la logique métier de la branche "Prévision" avec l'architecture "Amélioration du Code".
  */
 class EnergyCsvService {
     /** @var string Chemin vers le fichier CSV actuellement utilisé */
@@ -51,11 +54,13 @@ class EnergyCsvService {
 
     /**
      * Helper : Détecte si le fichier utilise des virgules ou des points-virgules.
+     * @param string $file Le chemin du fichier à analyser.
+     * @return string Le délimiteur détecté (';' ou ',').
      */
     private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
         if ($handle) {
-            $line = fgets($handle); // Lit la première ligne
+            $line = fgets($handle);
             fclose($handle);
             if ($line !== false && substr_count($line, ';') > substr_count($line, ',')) {
                 return ';';
@@ -67,15 +72,14 @@ class EnergyCsvService {
     /**
      * Helper : Nettoie les en-têtes CSV.
      * 
-     * @param array<int, string> $headers
-     * @return array<int, string>
+     * @param array<int, string|null> $headers Les en-têtes bruts lus depuis le CSV.
+     * @return array<int, string> Les en-têtes nettoyés.
      */
     private function cleanHeaders(array $headers): array {
         if (empty($headers)) {
             return [];
         }
         
-        // On convertit tout en string pour rassurer PHPStan (list<string|null> -> array<string>)
         $headersString = array_map('strval', $headers);
 
         $bom = pack('H*','EFBBBF');
@@ -89,7 +93,7 @@ class EnergyCsvService {
 
     /**
      * Récupère la liste des villes (utile pour les filtres).
-     * @return array<int, string>
+     * @return array<int, string> Liste alphabétique des villes.
      */
     public function getAvailableCities(): array{
         if (!file_exists($this->csvPath)) return [];
@@ -98,7 +102,6 @@ class EnergyCsvService {
         if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
             $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
             
-            // On vérifie simplement que ce n'est pas false.
             if ($rawHeaders !== false) {
                 $headers = $this->cleanHeaders($rawHeaders);
                 $cityIndex = array_search('ville', $headers);
@@ -106,7 +109,7 @@ class EnergyCsvService {
                 if ($cityIndex !== false) {
                     while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
                         // row est array|false|null.
-                        if (is_array($row) && isset($row[$cityIndex])) {
+                        if (isset($row[$cityIndex])) {
                             $cities[] = trim((string)$row[$cityIndex]);
                         }
                     }
@@ -121,7 +124,13 @@ class EnergyCsvService {
 
     /**
      * Récupère les données historiques depuis le CSV avec filtrage.
-     * @return array<string, mixed>
+     * 
+     * @param string $type Type d'énergie ('solaire', 'eolien', 'hydraulique' ou 'all').
+     * @param string $city Nom de la ville ('Paris', 'Lyon', etc. ou 'all').
+     * @param string $from Date de début au format Y-m-d.
+     * @param string $to Date de fin au format Y-m-d.
+     * @param string|null $compareCity (Optionnel) Nom d'une seconde ville pour comparaison.
+     * @return array<string, mixed> Tableau contenant les métadonnées et la liste des relevés.
      */
     public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array{
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
@@ -136,7 +145,7 @@ class EnergyCsvService {
 
                 while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
                     // Si pas un tableau ou nombre de colonnes incorrect, on saute
-                    if (!is_array($row) || count($row) !== count($headers)) continue;
+                    if (count($row) !== count($headers)) continue;
                     
                     // PHPStan sait que count est égal, array_combine renverra un tableau
                     $data = array_combine($headers, $row);
@@ -191,6 +200,10 @@ class EnergyCsvService {
     /**
      * Calcule l'efficacité de l'installation (Ratio Historique).
      * Utilisé par le simulateur pour calibrer les prédictions selon l'historique de l'utilisateur.
+     * 
+     * @param string $type Le type d'énergie à analyser.
+     * @param string $city La ville concernée.
+     * @return float Le ratio moyen (Production / Valeur Météo) calculé sur l'historique.
      */
     private function getPerformanceRatio(string $type, string $city): float {
         if (!file_exists($this->csvPath)) return 0;
@@ -204,7 +217,7 @@ class EnergyCsvService {
                 $headers = $this->cleanHeaders($rawHeaders);
                 
                 while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
-                    if (!is_array($row) || count($row) !== count($headers)) continue;
+                    if (count($row) !== count($headers)) continue;
                     $data = array_combine($headers, $row);
 
                     $dataType = strtolower((string)($data['type'] ?? ''));
@@ -230,10 +243,14 @@ class EnergyCsvService {
     }
 
     /**
-     * SIMULATEUR HYBRIDE (Fonctionnalité clé)
      * Utilise Open-Meteo pour générer des données futures (Forecast) ou passées (Archive)
      * quand le CSV s'arrête.
-     * @return array<string, mixed>
+     * 
+     * @param string $type Type d'énergie.
+     * @param string $city Ville cible pour la météo.
+     * @param string $startDate Date de début de simulation (Y-m-d).
+     * @param string $endDate Date de fin de simulation (Y-m-d).
+     * @return array<string, mixed> Données simulées formatées pour le frontend.
      */
     public function simulateDataFromWeather(string $type, string $city, string $startDate, string $endDate): array {
         $coordinates = [
@@ -279,13 +296,18 @@ class EnergyCsvService {
             return $this->fmt($type, $city, $startDate, $endDate, []);
         }
 
-        $hourly = $apiData['hourly'] ?? [];
+        $hourly = $apiData['hourly'];
         $predictions = [];
 
-        if (isset($hourly['time'])) {
+        if (isset($hourly['time']) && is_array($hourly['time'])) {
             foreach ($hourly['time'] as $index => $isoDate) {
-                $dateString = str_replace('T', ' ', $isoDate) . ':00';
-                $dayOnly = substr($dateString, 0, 10); 
+                
+                if (!is_string($isoDate)) {
+                    continue;
+                }
+
+                $dateString = str_replace('T', ' ', (string)$isoDate) . ':00';
+                $dayOnly = substr($dateString, 0, 10);
                 
                 if ($dayOnly < $startDate || $dayOnly > $endDate) continue;
 
@@ -324,11 +346,11 @@ class EnergyCsvService {
 
     /**
      * Helper : Formate la réponse standardisée.
-     * @param string $type
-     * @param string $city
-     * @param string $from
-     * @param string $to
-     * @param array<int, array<string, mixed>> $data
+     * @param string $type Type d'énergie.
+     * @param string $city Ville.
+     * @param string $from Date début.
+     * @param string $to Date fin.
+     * @param array<int, array<string, mixed>> $data Données brutes.
      * @return array<string, mixed>
      */
     private function fmt($type, $city, $from, $to, $data): array {

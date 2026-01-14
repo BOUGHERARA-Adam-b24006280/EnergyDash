@@ -2,7 +2,6 @@
 /**
  * Fichier : 404.php
  * Rôle : Affiche une page d'erreur 404 personnalisée
- * Auteur : Adam BOUGHERARA, Lucas LEPAPE
  */
 ?>
 

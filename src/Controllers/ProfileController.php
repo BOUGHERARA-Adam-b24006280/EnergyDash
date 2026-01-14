@@ -1,8 +1,7 @@
 <?php
 /**
  * Fichier : ProfileController.php
- * Rôle : 
- * Auteur : Lucas LEPAPE,
+ * Rôle : Gère l'affichage et la modification du profil utilisateur ainsi que l'administration des rôles.
  */
 
 namespace App\Controllers;
@@ -146,7 +145,7 @@ class ProfileController extends Controller {
             if ($id === $currentUserId) {
                 $this->flash('error', "Vous ne pouvez pas modifier votre propre rôle ici.");
                 $this->redirect('/profile');
-                exit;
+                return;
             }
 
             $this->userModel->updateUserRole($id, $role);

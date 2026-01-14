@@ -2,7 +2,6 @@
 /**
  * Fichier : register.php
  * Rôle : View de la page d'inscription.
- * Auteur : Lucas LEPAPE, Adam Bougherara
  *
  * @var array<int, string> $errors Liste des messages d'erreur
  * @var string $csrf_token Jetons CSRF unique côté serveur

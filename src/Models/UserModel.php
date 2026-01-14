@@ -2,7 +2,6 @@
 /**
  * Fichier : UserModel.php
  * Rôle : Gère les interactions avec la table 'users'
- * Auteur : Mohamed-Amine Haddad, Lucas LEPAPE
  */
 
 namespace App\Models;

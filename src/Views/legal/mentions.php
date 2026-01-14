@@ -2,7 +2,6 @@
 /**
  * Fichier : Mentions.php
  * Rôle : Vue affichant les mentions légales du site EnergyDash.
- * Auteur : Kenji CLOT-GODARD
  *
  * @package App\Views\Legal
  * @see https://energydash.alwaysdata.net

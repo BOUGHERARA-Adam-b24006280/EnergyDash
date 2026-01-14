@@ -2,7 +2,6 @@
 /**
  * Fichier : Database.php
  * Rôle : Fournit une connexion unique à la BDD avec PDO
- * Auteur : Lucas LEPAPE
  */
 
 namespace App\Core;

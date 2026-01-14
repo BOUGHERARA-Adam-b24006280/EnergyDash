@@ -2,7 +2,6 @@
 /**
  * Fichier : LegalController.php
  * Rôle : Gère l’affichage de la page des mentions légales.
- * Auteur : Kenji CLOT-GODARD
  */
 
 namespace App\Controllers;

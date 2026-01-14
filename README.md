@@ -1,8 +1,36 @@
-# 🌱 Tableau de Bord Énergie Renouvelable
+# EnergyDash - Tableau de Bord Énergie Renouvelable
 
-Dépôt contenant le code source du **tableau de bord interactif** pour le suivi en temps réel de la production d'énergie renouvelable (solaire, éolien, etc.).  
-Le dashboard centralise les données, analyse les performances (KPIs, tendances, comparaisons aux prévisions) et alerte en cas d'écarts ou d'anomalies.  
-Il offre une vue unifiée pour l'exploitation, l'ingénierie et le management, avec export et partage simplifiés.
+![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=flat&logo=php&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Development-orange)
+
+**EnergyDash** est une solution de monitoring énergétique interactive permettant le suivi, l'analyse et la prévision de la production d'énergie renouvelable (solaire, éolien, hydraulique).
+
+L'application combine l'import de données réelles (CSV) avec un **moteur de prédiction météorologique** (basé sur l'API Open-Meteo) pour combler les données manquantes et anticiper la production future.
+
+---
+
+## Fonctionnalités Clés
+
+- **Visualisation Interactive :** Graphiques dynamiques (ApexCharts) pour le suivi de production.
+- **Mode Hybride Intelligent :** Fusionne vos données historiques (CSV) avec des prévisions météorologiques en temps réel.
+- **Gestion de Données :** Upload sécurisé de fichiers CSV avec détection automatique du format.
+- **Espace Membre :** Authentification sécurisée, gestion de profil et isolation des données par utilisateur.
+- **Multi-Villes :** Comparaison de production entre différentes zones géographiques.
+
+---
+
+## 🛠️ Stack Technique
+
+Ce projet est construit sans framework lourd, selon une architecture **MVC (Modèle-Vue-Contrôleur)** propre.
+
+| Domaine | Technologies |
+| :--- | :--- |
+| **Backend** | PHP 7.4+, Composer (Autoloading PSR-4) |
+| **Frontend** | HTML5, Tailwind CSS (via Preline UI), JavaScript |
+| **Visualisation** | Charts.js |
+| **Base de données** | MySQL |
+| **API Externe** | Open-Meteo |
 
 ---
 
@@ -10,28 +38,21 @@ Il offre une vue unifiée pour l'exploitation, l'ingénierie et le management, a
 
 ```
 EnergyDash/
-├── assets/
-├── config/
-├── includes/
-├── models/
-├── views/
-├── index.php
-└── README.md
+├── public/              # Racine Web (Assets, index.php)
+│   ├── assets/          # CSS, JS, Images (Preline, Tailwind)
+│   └── index.php        # Point d'entrée
+├── src/                 # Code Source (MVC)
+│   ├── Config/          # Routes et configuration DB
+│   ├── Controllers/     # Logique de contrôle
+│   ├── Core/            # Noyau (Router, Database, Model)
+│   ├── Models/          # Accès aux données (SQL)
+│   ├── Services/        # Services (Parser CSV, API Météo)
+│   └── Views/           # Templates HTML/PHP
+├── Storage/             # Stockage des fichiers CSV utilisateurs
+├── tests/               # Tests unitaires (PHPUnit)
+├── vendor/              # Dépendances Composer
+└── .env.example         # Template de configuration
 ```
-
-### 📦 Dossiers et fichiers
-
-| Dossier/Fichier      | Rôle                                                                                   |
-|----------------------|----------------------------------------------------------------------------------------|
-| **assets/**          | 🎨 Fichiers statiques : CSS, JavaScript, images, icônes, polices, etc.                |
-| **config/**          | ⚙️ Fichiers de configuration                                                          |
-| **includes/**        | 🧩 Éléments réutilisables : headers, footers, fonctions utilitaires                    |
-| **models/**          | 🗂️ Logique métier : gestion des données, classes et modèles                            |
-| **views/**           | 🖥️ Fichiers de présentation : pages HTML/PHP                                           |
-| **index.php**        | 🚪 Point d'entrée principal de l'application                                           |
-| **README.md**        | 📚 Documentation du projet                                                             |
-
----
 
 ## � Prérequis
 

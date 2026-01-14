@@ -2,7 +2,6 @@
 /**
  * Fichier : EnergyController.php
  * Rôle : API JSON et Upload CSV.
- * Auteur : Lucas LEPAPE, Adam Bougherara
  */
 
 namespace App\Controllers;
@@ -36,46 +35,52 @@ class EnergyController extends Controller
     public function index(): void
     {
         // 1. Récupération des filtres
-        $type = isset($_GET['type']) ? $this->sanitize($_GET['type']) : 'all';
-        $city = isset($_GET['city']) ? $this->sanitize($_GET['city']) : 'all'; 
-        $compare = !empty($_GET['compare']) ? $this->sanitize($_GET['compare']) : null;
+        $rawType = $_GET['type'] ?? null;
+        $type = is_string($rawType) ? $this->sanitize($rawType) : 'all';
+
+        $rawCity = $_GET['city'] ?? null;
+        $city = is_string($rawCity) ? $this->sanitize($rawCity) : 'all'; 
+
+        $rawCompare = $_GET['compare'] ?? null;
+        $compare = (!empty($rawCompare) && is_string($rawCompare)) ? $this->sanitize($rawCompare) : null;
         
-        $from = isset($_GET['from']) ? $this->sanitize($_GET['from']) : date('Y-m-01');
+        $rawFrom = $_GET['from'] ?? null;
+        $from = (is_string($rawFrom)) ? $this->sanitize($rawFrom) : date('Y-m-01');
         
-        $to = !empty($_GET['to']) ? $this->sanitize($_GET['to']) : $from;
+        $rawTo = $_GET['to'] ?? null;
+        $to = (!empty($rawTo) && is_string($rawTo)) ? $this->sanitize($rawTo) : $from;
 
         try {
             // 2. On récupère d'abord les données RÉELLES (CSV) via le Service
             $realData = $this->energyService->getEnergyData($type, $city, $from, $to, $compare);
             /** @var array<int, array<string, mixed>> $finalData */
             $finalData = isset($realData['data']) && is_array($realData['data']) ? $realData['data'] : []; // Les données brutes
-
-            // --- TA LOGIQUE HYBRIDE (Le retour de l'IA) ---
             
             // On cherche la dernière date connue dans le CSV
             $lastDateFound = $from; 
             if (!empty($finalData)) {
                 $lastItem = end($finalData);
-                $lastDateFound = substr($lastItem['date'], 0, 10);
+                $dateVal = $lastItem['date'] ?? null;
+                if (is_string($dateVal)) {
+                    $lastDateFound = substr($dateVal, 0, 10);
+                }
             } else {
                 // Si CSV vide, on simule depuis le début - 1 jour
-                $lastDateFound = date('Y-m-d', strtotime($from . ' -1 day'));
+                $lastDateFound = date('Y-m-d', (int)strtotime($from . ' -1 day'));
             }
 
-            // Si l'utilisateur demande une date plus loin que le CSV, on lance l'IA
             if ($lastDateFound < $to) {
-                $simStart = date('Y-m-d', strtotime($lastDateFound . ' +1 day'));
+                $simStart = date('Y-m-d', (int)strtotime($lastDateFound . ' +1 day'));
                 $simEnd = $to;
                 
                 // Sécurité : Max 3 jours de prévision pour ne pas surcharger l'API
-                $maxSimDate = date('Y-m-d', strtotime($simStart . ' +3 days'));
+                $maxSimDate = date('Y-m-d', (int)strtotime($simStart . ' +3 days'));
                 if ($simEnd > $maxSimDate) $simEnd = $maxSimDate; 
 
                 if ($simStart <= $simEnd) {
                     // On détermine le type principal pour la simulation
                     $targetType = ($type === 'all') ? 'solaire' : $type;
                     
-                    // APPEL DU SERVICE pour la prévision (la fonction que tu as ajoutée tout à l'heure)
                     $simulated = $this->energyService->simulateDataFromWeather($targetType, $city, $simStart, $simEnd);
                     
                     // Fusion : CSV + IA
@@ -107,17 +112,25 @@ class EnergyController extends Controller
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+            /** @var array{name: string, type: string, tmp_name: string, error: int, size: int} $file */
             $file = $_FILES['csv_file'];
 
-            $error = isset($file['error']) ? (int)$file['error'] : UPLOAD_ERR_NO_FILE;
-            $name = isset($file['name']) ? (string)$file['name'] : '';
-            $tmpName = isset($file['tmp_name']) ? (string)$file['tmp_name'] : '';
+            $error = (int)$file['error'];
+            $name = (string)$file['name'];
+            $tmpName = (string)$file['tmp_name'];
+
+            if ($error !== UPLOAD_ERR_OK) {
+                 $this->flash('error', "Erreur lors du transfert du fichier (Code: $error)");
+                 $this->redirect('/dashboard');
+                 return;
+            }
 
             // 1. Erreur technique
             $ext = pathinfo($name, PATHINFO_EXTENSION);
             if (strtolower($ext) !== 'csv') {
                 $this->flash('error', "Format incorrect. Veuillez envoyer un fichier .csv");
                 $this->redirect('/dashboard');
+                return;
             }
 
             // 2. Vérification de l'extension
@@ -125,6 +138,7 @@ class EnergyController extends Controller
             if (strtolower($ext) !== 'csv') {
                 $this->flash('error', "Format incorrect. Veuillez envoyer un fichier .csv");
                 $this->redirect('/dashboard');
+                return;
             }
 
             // 3. (AJOUT) Vérification de sécurité du contenu réel (MIME Type)
@@ -133,6 +147,7 @@ class EnergyController extends Controller
             if ($finfo === false) {
                 $this->flash('error', "Erreur interne lors de l'analyse du fichier.");
                 $this->redirect('/dashboard');
+                return; 
             }
 
             $mimeType = \finfo_file($finfo, $file['tmp_name']);
@@ -148,10 +163,14 @@ class EnergyController extends Controller
             }
 
             // 4. Déplacement
+            /** @var array{id: int|string}|null $user */
             $user = $_SESSION['user'] ?? null;
-            if (!is_array($user) || !isset($user['id'])) {
+
+            if (!is_array($user)) {
                 $this->redirect('/login');
+                return;
             }
+
             $userId = (int)$user['id'];
             $targetDir = __DIR__ . '/../../Storage';
             $targetPath = $targetDir . '/energy_user_' . $userId . '.csv';
@@ -177,10 +196,14 @@ class EnergyController extends Controller
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            /** @var array{id: int|string}|null $user */
             $user = $_SESSION['user'] ?? null;
-            if (!is_array($user) || !isset($user['id'])) {
+
+            if (!is_array($user)) {
                 $this->redirect('/login');
+                return;
             }
+            
             $userId = (int)$user['id'];
             $targetPath = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
 
