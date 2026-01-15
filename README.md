@@ -1,6 +1,6 @@
 # EnergyDash - Tableau de Bord Énergie Renouvelable
 
-![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=flat&logo=php&logoColor=white)
+![PHP Version](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Development-orange)
 
@@ -26,7 +26,7 @@ Ce projet est construit sans framework lourd, selon une architecture **MVC (Mod�
 
 | Domaine | Technologies |
 | :--- | :--- |
-| **Backend** | PHP 7.4+, Composer (Autoloading PSR-4) |
+| **Backend** | PHP 8.4, Composer (Autoloading PSR-4) |
 | **Frontend** | HTML5, Tailwind CSS (via Preline UI), JavaScript |
 | **Visualisation** | Charts.js |
 | **Base de données** | MySQL |
