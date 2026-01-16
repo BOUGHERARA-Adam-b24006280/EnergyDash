@@ -56,7 +56,7 @@ EnergyDash/
 
 ## � Prérequis
 
-- PHP 7.4 ou supérieur
+- PHP 8.4 ou supérieur
 - Composer
 - Serveur web (Apache, Nginx) ou XAMPP/WAMP
 - Base de données MySQL/MariaDB
