@@ -23,6 +23,6 @@ class LegalController extends Controller {
      * @return void
      */
     public function index(): void {
-        $this->render('legal/mentions', ['title' => 'Mentions Légales']);
+        $this->view->render('legal/mentions', ['title' => 'Mentions Légales']);
     }
 }

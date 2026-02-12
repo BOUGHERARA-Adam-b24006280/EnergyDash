@@ -41,7 +41,7 @@ class DashboardController extends Controller {
 
         $cities = $this->energyService->getAvailableCities();
 
-        $this->render('dashboard/dashboard', [
+        $this->view->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',
             'cities' => $cities
         ]);

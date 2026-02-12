@@ -51,7 +51,7 @@ class ProfileController extends Controller {
             $viewPath = 'profile/profile';
         }
 
-        $this->render($viewPath, [
+        $this->view->render($viewPath, [
             'title' => 'Mon Profil',
             'user'  => $user,
             'users' => $users
@@ -75,9 +75,9 @@ class ProfileController extends Controller {
 
         $userId = $_SESSION['user']['id'] ?? 0;
         if (!is_numeric($userId)) {
-             $this->flash('error', "ID utilisateur invalide.");
-             $this->redirect('/logout');
-             return;
+            $this->flash('error', "ID utilisateur invalide.");
+            $this->redirect('/logout');
+            return;
         }
         $id = (int)$userId;
 
