@@ -20,11 +20,6 @@ class TestableController extends Controller
         $this->flash($type, $message);
     }
 
-    public function publicGetFlash(string $type): ?string
-    {
-        return $this->getFlash($type);
-    }
-
     public function publicRequireLogin(): void
     {
         $this->requireLogin();
@@ -69,11 +64,6 @@ class ControllerTest extends TestCase
         $controller->publicFlash('success', 'Bravo !');
 
         $this->assertEquals('Bravo !', $_SESSION['success']);
-
-        $msg = $controller->publicGetFlash('success');
-        $this->assertEquals('Bravo !', $msg);
-
-        $this->assertNull($controller->publicGetFlash('success'));
     }
 
     /**

@@ -39,7 +39,7 @@ class AuthController extends Controller {
      */
     public function showLogin(): void {
         $this->initCsrf();
-        $this->render('auth/login', [
+        $this->view->render('auth/login', [
             'title' => 'Connexion',
             'csrf_token' => $_SESSION['csrf_token']
         ]);
@@ -76,7 +76,7 @@ class AuthController extends Controller {
             $this->redirect('/dashboard');
 
         } catch (Exception $e) {
-            $this->render('auth/login', [
+            $this->view->render('auth/login', [
                 'title' => 'Connexion',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token']
@@ -124,7 +124,7 @@ class AuthController extends Controller {
      */
     public function showRegister(): void {
         $this->initCsrf();
-        $this->render('auth/register', [
+        $this->view->render('auth/register', [
             'title' => 'Inscription',
             'csrf_token' => $_SESSION['csrf_token']
         ]);
@@ -174,7 +174,7 @@ class AuthController extends Controller {
             }
 
         } catch (Exception $e) {
-            $this->render('auth/register', [
+            $this->view->render('auth/register', [
                 'title' => 'Inscription',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token'],
@@ -200,7 +200,7 @@ class AuthController extends Controller {
             $success = "Si ce compte existe, un email a été envoyé.";
         }
         
-        $this->render('auth/forgot', [
+        $this->view->render('auth/forgot', [
             'title' => 'Mot de passe oublié',
             'csrf_token' => $_SESSION['csrf_token'],
             'success' => $success
@@ -290,7 +290,7 @@ class AuthController extends Controller {
             return;
         }
 
-        $this->render('auth/reset', [
+        $this->view->render('auth/reset', [
             'title' => 'Réinitialisation',
             'errors' => $errors,
             'csrf_token' => $_SESSION['csrf_token'],
@@ -351,7 +351,7 @@ class AuthController extends Controller {
             $this->redirect('/login');
 
         } catch (Exception $e) {
-            $this->render('auth/reset', [
+            $this->view->render('auth/reset', [
                 'title' => 'Réinitialisation',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token'],

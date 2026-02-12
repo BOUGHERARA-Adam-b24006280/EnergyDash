@@ -5,12 +5,14 @@ namespace Tests\Controllers;
 use PHPUnit\Framework\TestCase;
 use App\Controllers\DashboardController;
 use App\Services\EnergyCsvService;
+use App\Core\View;
 use ReflectionClass;
 
 class DashboardControllerTest extends TestCase
 {
     private $controller;
     private $energyServiceMock;
+    private $viewMock;
 
     protected function setUp(): void
     {
@@ -20,16 +22,22 @@ class DashboardControllerTest extends TestCase
         $_SESSION = [];
 
         $this->energyServiceMock = $this->createMock(EnergyCsvService::class);
+        $this->viewMock = $this->createMock(View::class);
 
         $this->controller = $this->getMockBuilder(DashboardController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['render', 'requireLogin'])
+            ->onlyMethods(['requireLogin'])
             ->getMock();
 
         $reflection = new ReflectionClass(DashboardController::class);
+
         $property = $reflection->getProperty('energyService');
         $property->setAccessible(true);
         $property->setValue($this->controller, $this->energyServiceMock);
+
+        $property = $reflection->getProperty('view');
+        $property->setAccessible(true);
+        $property->setValue($this->controller, $this->viewMock);
     }
 
     /**
@@ -46,7 +54,7 @@ class DashboardControllerTest extends TestCase
         $this->controller->expects($this->once())
             ->method('requireLogin');
 
-        $this->controller->expects($this->once())
+        $this->viewMock->expects($this->once())
             ->method('render')
             ->with(
                 'dashboard/dashboard',

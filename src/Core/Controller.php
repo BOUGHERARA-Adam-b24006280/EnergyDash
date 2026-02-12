@@ -2,7 +2,7 @@
 /**
  * Fichier : Controller.php
  * Rôle : Classe parente de tous les contrôleurs.
- * Elle fait le lien entre le DashboardController et le Layout.
+ * Elle fait le lien entre le DashboardController et la View.
  */
 
 namespace App\Core;
@@ -15,34 +15,17 @@ namespace App\Core;
  * @package App\Core
  */
 abstract class Controller {
+    /** @var View Instance de la View pour le rendu des vues */
+    protected View $view;
+
     /**
      * Constructeur.
      * Démarre la session si elle n'est pas déjà active.
+     * Initialise la View.
      */
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
-
-    /**
-     * Affiche une vue en utilisant le Layout principal.
-     *
-     * @param string $view Nom du fichier vue 
-     * @param array<string, mixed> $data Données à passer à la vue
-     * @return void
-     */
-    protected function render(string $view, array $data = []): void {
-        $data['success'] = $data['success'] ?? $this->getFlash('success');
-        $data['error'] = $data['error'] ?? $this->getFlash('error');
-
-        $viewPath = __DIR__ . '/../Views/' . $view . '.php';
-        $title = $data['title'] ?? 'EnergyDash';
-        if (!is_string($title)) {
-            $title = 'EnergyDash';
-        }
-        $layout = new Layout($viewPath, $title);
-        $layout->render($data);
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->view = new View();
     }
 
     /**
@@ -52,9 +35,7 @@ abstract class Controller {
      * @return void
      */
     protected function requireLogin(): void {
-        if (!isset($_SESSION['user'])) {
-            $this->redirect('/login');
-        }
+        if (!isset($_SESSION['user'])) $this->redirect('/login');
     }
 
     /**
@@ -68,9 +49,7 @@ abstract class Controller {
 
         $user = $_SESSION['user'] ?? null;
 
-        if (!is_array($user) || ($user['role'] ?? '') !== 'admin') {
-            $this->redirect('/profile');
-        }
+        if (!is_array($user) || ($user['role'] ?? '') !== 'admin') $this->redirect('/profile');
     }
 
     /**
@@ -104,20 +83,5 @@ abstract class Controller {
      */
     protected function flash(string $type, string $message): void {
         $_SESSION[$type] = $message;
-    }
-
-    /**
-     * Récupère un message Flash et le supprime de la session.
-     *
-     * @param string $type Le type de message à récupérer.
-     * @return string|null Le message ou null s'il n'existe pas.
-     */
-    protected function getFlash(string $type): ?string {
-        if (isset($_SESSION[$type])) {
-            $msg = $_SESSION[$type];
-            unset($_SESSION[$type]);
-            return is_string($msg) ? $msg : null;
-        }
-        return null;
     }
 }

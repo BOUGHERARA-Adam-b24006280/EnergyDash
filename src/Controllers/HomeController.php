@@ -23,6 +23,6 @@ class HomeController extends Controller {
      * @return void
      */
     public function index(): void{
-        $this->render('home/index', ['title' => 'Accueil']);
+        $this->view->render('home/index', ['title' => 'Accueil']);
     }
 }

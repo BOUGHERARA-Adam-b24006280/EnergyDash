@@ -23,7 +23,7 @@ class ErrorController extends Controller {
      */
     public function error404page(): void {
         http_response_code(404);
-        $this->render('error/404', ['title' => 'Page non trouvée']);
+        $this->view->render('error/404', ['title' => 'Page non trouvée']);
     }
 
     /**
@@ -34,7 +34,7 @@ class ErrorController extends Controller {
      */
     public function error500page(): void {
         http_response_code(500);
-        $this->render('error/500', ['title' => 'Erreur interne du serveur']);
+        $this->view->render('error/500', ['title' => 'Erreur interne du serveur']);
         exit;
     }
 }

@@ -31,12 +31,14 @@ namespace Tests\Controllers;
 use PHPUnit\Framework\TestCase;
 use App\Controllers\ProfileController;
 use App\Models\UserModel;
+use App\Core\View;
 use ReflectionClass;
 
 class ProfileControllerTest extends TestCase
 {
     private $controller;
     private $userModelMock;
+    private $viewMock;
 
     protected function setUp(): void
     {
@@ -47,18 +49,22 @@ class ProfileControllerTest extends TestCase
         $_POST = [];
 
         $this->userModelMock = $this->createMock(UserModel::class);
+        $this->viewMock = $this->createMock(View::class);
 
         $this->controller = $this->getMockBuilder(ProfileController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['render', 'redirect', 'flash', 'requireLogin', 'requireAdmin'])
+            ->onlyMethods(['redirect', 'flash', 'requireLogin', 'requireAdmin'])
             ->getMock();
 
         $reflection = new ReflectionClass(ProfileController::class);
         
         $property = $reflection->getProperty('userModel');
         $property->setAccessible(true);
-
         $property->setValue($this->controller, $this->userModelMock);
+
+        $property = $reflection->getProperty('view');
+        $property->setAccessible(true);
+        $property->setValue($this->controller, $this->viewMock);
     }
 
     /**
@@ -70,7 +76,7 @@ class ProfileControllerTest extends TestCase
 
         $this->userModelMock->expects($this->never())->method('getAllUsers');
 
-        $this->controller->expects($this->once())
+        $this->viewMock->expects($this->once())
             ->method('render')
             ->with(
                 'profile/profile',
@@ -94,7 +100,7 @@ class ProfileControllerTest extends TestCase
             ->method('getAllUsers')
             ->willReturn([['id' => 1, 'name' => 'Alice'], ['id' => 2, 'name' => 'Bob']]);
 
-        $this->controller->expects($this->once())
+        $this->viewMock->expects($this->once())
             ->method('render')
             ->with('profile/profile_admin', $this->anything());
 
