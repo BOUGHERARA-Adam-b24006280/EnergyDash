@@ -95,7 +95,7 @@ class EnergyCsvService {
      * Récupère la liste des villes (utile pour les filtres).
      * @return array<int, string> Liste alphabétique des villes.
      */
-    public function getAvailableCities(): array{
+    public function getAvailableCities(): array {
         if (!file_exists($this->csvPath)) return [];
         $cities = [];
         
@@ -132,7 +132,7 @@ class EnergyCsvService {
      * @param string|null $compareCity (Optionnel) Nom d'une seconde ville pour comparaison.
      * @return array<string, mixed> Tableau contenant les métadonnées et la liste des relevés.
      */
-    public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array{
+    public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array {
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
 
         $results = [];

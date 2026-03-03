@@ -25,7 +25,7 @@ class ProfileController extends Controller {
      * Constructeur.
      * Initialise la session si nécessaire et le modèle utilisateur.
      */
-    public function __construct(){
+    public function __construct() {
         parent::__construct();
         $this->userModel = new UserModel();
     }

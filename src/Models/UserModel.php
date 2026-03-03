@@ -17,7 +17,6 @@ use PDOException;
 class UserModel extends Model {
     protected string $table = 'users';
 
-
     /**
      * Constructeur.
      * Initialise la connexion à la base de données.
@@ -203,7 +202,7 @@ class UserModel extends Model {
      * @param string $newPassword Nouveau mot de passe.
      * @return bool true en cas de succès.
      */
-    public function updatePassword(int $userId, string $newPassword): bool{
+    public function updatePassword(int $userId, string $newPassword): bool {
         try {
             $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = $this->db->prepare("UPDATE users SET password = :pass WHERE id = :id");
