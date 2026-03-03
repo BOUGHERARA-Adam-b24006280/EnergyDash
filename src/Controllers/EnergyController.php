@@ -32,8 +32,7 @@ class EnergyController extends Controller
      * 
      * @return void
      */
-    public function index(): void
-    {
+    public function index(): void {
         // 1. Récupération des filtres
         $rawType = $_GET['type'] ?? null;
         $type = is_string($rawType) ? $this->sanitize($rawType) : 'all';
@@ -107,8 +106,7 @@ class EnergyController extends Controller
      * Action : Traite l'upload d'un fichier CSV avec sécurité MIME.
      * Route: POST /energy/upload
      */
-    public function upload(): void
-    {
+    public function upload(): void {
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {

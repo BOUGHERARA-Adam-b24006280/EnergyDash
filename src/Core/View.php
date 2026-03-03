@@ -12,9 +12,7 @@ namespace App\Core;
  *
  * @package App\Core
  */
-class View
-{
-
+class View {
     /**
      * Affiche la page complète (Header + Vue + Footer).
      *

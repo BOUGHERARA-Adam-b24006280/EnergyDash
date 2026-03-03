@@ -12,8 +12,7 @@ use PHPMailer\PHPMailer\Exception;
  *
  * @package App\Core
  */
-class Mailer
-{
+class Mailer {
     /** @var PHPMailer Instance de PHPMailer */
     private PHPMailer $mail;
 
@@ -21,8 +20,7 @@ class Mailer
      * Constructeur.
      * Configure le serveur SMTP avec les paramètres de l'application.
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->mail = new PHPMailer(true);
 
         /** @var array{smtp: array{host: string, port: int, username: string, password: string, from: string, from_name: string}, env?: string} $config*/
@@ -55,8 +53,7 @@ class Mailer
      * @param string $body    Contenu du message (texte brut)
      * @return bool           True si envoyé, false sinon
      */
-    public function send(string $to, string $subject, string $body): bool
-    {
+    public function send(string $to, string $subject, string $body): bool {
         try {
             $this->mail->clearAddresses();
             $this->mail->addAddress($to);

@@ -44,8 +44,7 @@ class Database {
     /**
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement
      */
-    public function __construct()
-    {
+    public function __construct() {
         // Récupération sécurisée des variables d'environnement
         $host = $_ENV['DATABASE_HOST'] ?? NULL;
         $dbname = $_ENV['DATABASE_NAME'] ?? NULL;
