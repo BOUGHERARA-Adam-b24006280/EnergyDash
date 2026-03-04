@@ -156,4 +156,92 @@ class ProfileController extends Controller {
 
         $this->redirect('/profile');
     }
+
+    /**
+     * Crée un nouvel utilisateur (Admin seulement).
+     * Route : POST /profile/createUser
+     * 
+     * @return void
+     */
+    public function createUser(): void {
+        $this->requireAdmin();
+
+        $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        if (!$rawEmail) {
+            $this->flash('error', "Adresse email invalide.");
+            $this->redirect('/profile');
+            return;
+        }
+        $email = (string)$rawEmail;
+
+        if($this->userModel->getUserByEmail($email)) {
+            $this->flash('error', "Un compte avec cette adresse e-mail existe déjà.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        $rawFirstName = $_POST['first_name'] ?? '';
+        $rawLastName = $_POST['last_name'] ?? '';
+        $rawPassword = $_POST['password'] ?? '';
+
+        $firstName = $this->sanitize(is_string($rawFirstName) ? $rawFirstName : '');
+        $lastName  = $this->sanitize(is_string($rawLastName) ? $rawLastName : '');
+        $password  = is_string($rawPassword) ? $rawPassword : '';
+
+        if (empty($firstName) || empty($lastName) || empty($password)) {
+            $this->flash('error', "Veuillez remplir tous les champs.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        if (!UserModel::isPasswordStrong($password)) {
+            $this->flash('error', "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        if ($this->userModel->createUser($firstName, $lastName, $email, $password)) {
+            $this->flash('success', "Utilisateur créé avec succès.");
+        } else {
+            $this->flash('error', "Erreur lors de la création de l'utilisateur.");
+        }
+
+        $this->redirect('/profile');
+    }
+
+    /**
+     * Supprime un utilisateur (Admin suelement).
+     * Route : /profile/deleteUser
+     * 
+     * @return void
+     */
+    public function deleteUser(): void {
+        $this->requireAdmin();
+
+
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+
+        if (!$id) {
+            $this->flash('error', "ID utilisateur invalide.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        $currentUserId = $_SESSION['user']['id'] ?? null;
+
+        if ($id === $currentUserId) {
+            $this->flash('error', "Vous ne pouvez pas supprimer votre propre compte.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        if ($this->userModel->deleteUser($id)) {
+            $this->flash('success', "Utilisateur supprimé avec succès.");
+        } else {
+            $this->flash('error', "Erreur lors de la suppression de l'utilisateur.");
+        }
+
+        $this->redirect('/profile');
+    }
+
 }
