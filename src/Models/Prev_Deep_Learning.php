@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use Rubix\ML\Datasets\Unlabeled;
+use Rubix\ML\NeuralNet\ActivationFunctions\ReLU;
 use Rubix\ML\NeuralNet\Layers\Dense;
 use Rubix\ML\NeuralNet\Layers\Activation;
 use Rubix\ML\NeuralNet\Optimizers\Adam;
@@ -68,8 +70,6 @@ class Prev_Deep_Learning
     }
 
     /**
-     * @param int $start            The begenning of the period to predict (format: 'Y-m-d')
-     * @param int $end              The end of the period to predict (format: 'Y-m-d')
      * @param array $meteoType      Type of energy to predict (ex : 'sun', 'rain', 'wind')
      * @param array $temp           Temperature data to use for the prediction (format : [temp, ...])
      * @param array $meteoData      Data to use for the prediction (format : [meteoData, ...])
@@ -77,8 +77,40 @@ class Prev_Deep_Learning
      *
      * @brief Predict the energy production for the given meteo data
      */
-    public function predict(int $start, int $end, array $meteoType, array $temp, array $meteoData)
+    public function predict(array $meteoType, array $temp, array $meteoData, array $dateString, string $city) : array
     {
+        /*
+         * Formatage des donné pour la prévision
+         */
+        $samples = [];
+        for($i = 0; $i < count($meteoType); $i++) {
+            $samples[$i][0] = [$meteoType[$i], $temp[$i], $meteoData[$i]];
+        }
+        $dataset = new Unlabeled($this->samples);
 
+        /*
+         * Prédiction de la production
+         */
+        $previewData = $this->estimator->predict($dataset);
+
+        /*
+         * Formatage des données revoyé pour faciliter l'incertion au projet
+         */
+        $prediction = [];
+        for ($i = 0; $i < count($samples); $i++) {
+            $prediction[$i] = [
+                'date' => $dateString[$i],
+                'production' => $previewData[$i],
+                'ville' => $city,
+                'meteo' => $meteoData[$i],
+                'temp' => $temp[$i],
+                'statut' => 'prevision'
+            ];
+        }
+
+        /*
+         * Renvoie des données
+         */
+        return $prediction;
     }
 }
