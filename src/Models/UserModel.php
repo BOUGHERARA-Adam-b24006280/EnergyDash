@@ -300,4 +300,23 @@ class UserModel extends Model {
 
         return ['token' => $token, 'user' => $user];
     }
+
+    /**
+     * Supprime un utilisateur par son ID.
+     * 
+     * @param int $id Identifiant de l'utilisateur à supprimer.
+     * @return bool true en cas de succès, dale sinon.
+     */
+    public function deleteUser(int $id): bool {
+        try {
+            $this->deleteResetTokensForUser($id);
+            
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
+            return $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            error_log("Erreur lors de la suppression de l'utilisateur : " . $e->getMessage());
+            return false;
+        }
+    }
+
 }

@@ -84,6 +84,47 @@
         </div>
     </div>
 
+    <div class="max-w-[85rem] px-4 sm:px-6 lg:px-8 mx-auto mb-8">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-2xs dark:bg-neutral-900 dark:border-neutral-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-neutral-700">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                    Ajouter un utilisateur
+                </h2>
+                <p class="text-sm text-gray-600 dark:text-neutral-400">
+                    Créez un nouveau compte manuellement. Son rôle par défaut sera "Utilisateur".
+                </p>
+            </div>
+            
+            <div class="p-4 sm:p-6">
+                <form method="POST" action="/profile/createUser">
+                    <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="new_first_name" class="block text-sm font-medium mb-2 dark:text-white">Prénom</label>
+                            <input type="text" id="new_first_name" name="first_name" required class="py-2.5 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500">
+                        </div>
+                        <div>
+                            <label for="new_last_name" class="block text-sm font-medium mb-2 dark:text-white">Nom</label>
+                            <input type="text" id="new_last_name" name="last_name" required class="py-2.5 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500">
+                        </div>
+                        <div>
+                            <label for="new_email" class="block text-sm font-medium mb-2 dark:text-white">Email</label>
+                            <input type="email" id="new_email" name="email" required class="py-2.5 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500">
+                        </div>
+                        <div>
+                            <label for="new_password" class="block text-sm font-medium mb-2 dark:text-white">Mot de passe temporaire</label>
+                            <input type="text" id="new_password" name="password" required class="py-2.5 px-3 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-x-2">
+                        <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700">
+                            Créer l'utilisateur
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!--- Table Users Admin --->
     <div class="max-w-[85rem] px-4 sm:px-6 lg:px-8 lg:py-14 mx-auto">
         <div class="flex flex-col">
@@ -151,8 +192,15 @@
                                             </select>
                                         </form>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                                        <button form="edit-<?= $u['id'] ?>" type="submit" class="inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-hidden focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-400 dark:focus:text-blue-400">Modifier</button>
+                                    <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium flex justify-end items-center gap-x-3">
+                                        <button form="edit-<?= $u['id'] ?>" type="submit" class="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 focus:outline-hidden focus:text-blue-800 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-400 dark:focus:text-blue-400">Modifier</button>
+                                        
+                                        <form method="POST" action="/profile/deleteUser" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ? Cette action est irréversible.');" class="inline-block m-0 p-0">
+                                            <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                            <button type="submit" class="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:text-red-800 focus:outline-hidden focus:text-red-800 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:text-red-400 dark:focus:text-red-400">
+                                                Supprimer
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
