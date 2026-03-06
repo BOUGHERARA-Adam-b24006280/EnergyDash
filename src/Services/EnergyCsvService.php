@@ -22,9 +22,7 @@ class EnergyCsvService {
      * et détecte automatiquement le séparateur.
      */
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        if (session_status() === PHP_SESSION_NONE) session_start();
 
         $user = $_SESSION['user'] ?? null;
         $userId = null;
@@ -47,9 +45,7 @@ class EnergyCsvService {
         }
         
         // Détection séparateur
-        if (file_exists($this->csvPath)) {
-            $this->delimiter = $this->detectDelimiter($this->csvPath);
-        }
+        if (file_exists($this->csvPath)) $this->delimiter = $this->detectDelimiter($this->csvPath);
     }
 
     /**
@@ -62,9 +58,7 @@ class EnergyCsvService {
         if ($handle) {
             $line = fgets($handle);
             fclose($handle);
-            if ($line !== false && substr_count($line, ';') > substr_count($line, ',')) {
-                return ';';
-            }
+            if ($line !== false && substr_count($line, ';') > substr_count($line, ',')) return ';';
         }
         return ',';
     }
@@ -76,9 +70,7 @@ class EnergyCsvService {
      * @return array<int, string> Les en-têtes nettoyés.
      */
     private function cleanHeaders(array $headers): array {
-        if (empty($headers)) {
-            return [];
-        }
+        if (empty($headers)) return [];
         
         $headersString = array_map('strval', $headers);
 
@@ -89,6 +81,40 @@ class EnergyCsvService {
         return array_map(function($h) {
             return strtolower(trim($h));
         }, $headersString);
+    }
+
+    /**
+     * Récupère la cartographie des énergies disponibles par ville.
+     * @return array<string, array<int, string>> Tableau [nom_ville => [type1, type2...]]
+     */
+    public function getCityEnergyMapping(): array {
+        if (!file_exists($this->csvPath)) return [];
+        $mapping = [];
+        
+        if (($handle = fopen($this->csvPath, "r")) !== FALSE) {
+            $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
+            
+            if ($rawHeaders !== false) {
+                $headers = $this->cleanHeaders($rawHeaders);
+                $cityIndex = array_search('ville', $headers);
+                $typeIndex = array_search('type', $headers);
+
+                if ($cityIndex !== false && $typeIndex !== false) {
+                    while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
+                        if (isset($row[$cityIndex]) && isset($row[$typeIndex])) {
+                            $city = trim((string)$row[$cityIndex]);
+                            $type = strtolower(trim((string)$row[$typeIndex]));
+                            
+                            if (!isset($mapping[$city])) $mapping[$city] = [];
+                            if (!in_array($type, $mapping[$city])) $mapping[$city][] = $type;
+                        }
+                    }
+                }
+            }
+            fclose($handle);
+        }
+        ksort($mapping);
+        return $mapping;
     }
 
     /**

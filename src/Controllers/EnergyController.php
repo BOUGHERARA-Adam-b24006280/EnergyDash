@@ -6,23 +6,19 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Services\EnergyCsvService;
-use App\Core\JsonResponse;
-
 /**
  * Contrôleur EnergyController
  * Gère les données énergétiques (API pour graphiques) et l'import de données (CSV).
  *
  * @package App\Controllers
  */
-class EnergyController extends Controller
+class EnergyController extends \App\Core\Controller
 {
-    private EnergyCsvService $energyService;
+    private \App\Services\EnergyCsvService $energyService;
 
     public function __construct() {
         parent::__construct();
-        $this->energyService = new EnergyCsvService();
+        $this->energyService = new \App\Services\EnergyCsvService();
     }
 
     /**
@@ -95,10 +91,10 @@ class EnergyController extends Controller
             $response = $realData;
             $response['data'] = $finalData;
             
-            JsonResponse::send($response);
+            \App\Core\JsonResponse::send($response);
 
         } catch (\Exception $e) {
-            JsonResponse::error($e->getMessage(), 500);
+            \App\Core\JsonResponse::error($e->getMessage(), 500);
         }
     }
 

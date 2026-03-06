@@ -6,15 +6,10 @@
 
 namespace App\Models;
 
-use App\Core\Model;
-use App\Core\Database;
-use PDO;
-use PDOException;
-
 /**
  * Classe UserModel qui gère les interactions avec la table 'users'
  */
-class UserModel extends Model {
+class UserModel extends \App\Core\Model {
     protected string $table = 'users';
 
     /**
@@ -22,7 +17,7 @@ class UserModel extends Model {
      * Initialise la connexion à la base de données.
      */
     public function __construct(){
-        $db = Database::getInstance();
+        $db = \App\Core\Database::getInstance();
         parent::__construct($db);
     }
 
@@ -107,7 +102,7 @@ class UserModel extends Model {
         try {
             $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :id");
             return $stmt->execute([':role' => $role, ':id' => $id]);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log("Erreur mise à jour rôle : " . $e->getMessage());
             return false;
         }
@@ -131,9 +126,9 @@ class UserModel extends Model {
             }
 
             /** @var array<int, array<string, mixed>> $results */
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
             return $results;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log("Erreur lors de la récupération de tous les utilisateurs : " . $e->getMessage());
             return [];
         }
@@ -159,7 +154,7 @@ class UserModel extends Model {
                 ':created_at'=> date('Y-m-d H:i:s'),
                 ':expires_at'=> $expiresAt
             ]);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log('Erreur storeResetToken : ' . $e->getMessage());
             return false;
         }
@@ -186,10 +181,10 @@ class UserModel extends Model {
             ]);
 
             /** @var array<string, mixed>|false $result */
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             return $result !== false ? $result : null;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log('Erreur getUserByToken : ' . $e->getMessage());
             return null;
         }
@@ -207,7 +202,7 @@ class UserModel extends Model {
             $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = $this->db->prepare("UPDATE users SET password = :pass WHERE id = :id");
             return $stmt->execute([':pass' => $hashed, ':id' => $userId]);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log('Erreur updatePassword : ' . $e->getMessage());
             return false;
         }
@@ -223,7 +218,7 @@ class UserModel extends Model {
         try {
             $stmt = $this->db->prepare("DELETE FROM password_resets WHERE token = :token");
             return $stmt->execute([':token' => $token]);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log('Erreur invalidateToken : ' . $e->getMessage());
             return false;
         }
@@ -239,7 +234,7 @@ class UserModel extends Model {
         try {
             $stmt = $this->db->prepare("DELETE FROM password_resets WHERE user_id = :user_id");
             return $stmt->execute([':user_id' => $userId]);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             error_log('Erreur deleteResetTokensForUser : ' . $e->getMessage());
             return false;
         }

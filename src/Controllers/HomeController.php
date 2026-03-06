@@ -6,15 +6,13 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-
 /**
  * Contrôleur HomeController
  * Gère l'affichage de la page d'accueil publique.
  *
  * @package App\Controllers
  */
-class HomeController extends Controller {
+class HomeController extends \App\Core\Controller {
 
     /**
      * Affiche la page d'accueil.

@@ -6,15 +6,13 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-
 /**
  * Contrôleur ErrorController
  * Gère l'affichage des pages d'erreur (404, 500).
  *
  * @package App\Controllers
  */
-class ErrorController extends Controller {
+class ErrorController extends \App\Core\Controller {
     
     /**
      * Affiche la page d'erreur 404 (Non trouvé).

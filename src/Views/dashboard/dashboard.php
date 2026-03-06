@@ -4,6 +4,7 @@
  * Rôle : Vue principale du tableau de bord.
  * 
  * @var array<int, string> $cities Liste des villes disponibles
+ * @var array<string, array<int, string>> $energyMapping Cartographie Ville -> Énergies
  * @var string|null $success Message de succès
  * @var string|null $error Message d'erreur
  */
@@ -11,9 +12,7 @@
     $user = $_SESSION['user'] ?? null;
     $userId = 0;
 
-    if (is_array($user) && isset($user['id']) && is_numeric($user['id'])) {
-        $userId = (int) $user['id'];
-    }
+    if (is_array($user) && isset($user['id']) && is_numeric($user['id'])) $userId = (int) $user['id'];
 
     $userFilePath = __DIR__ . '/../../../Storage/energy_user_' . $userId . '.csv';
     $fileExists = file_exists($userFilePath);
@@ -225,11 +224,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = document.getElementById('energyChart').getContext('2d');
     const titleEl = document.getElementById('chartTitle');
     
+    const citySelect = document.querySelector('select[name="city"]');
+    const typeSelect = document.querySelector('select[name="type"]');
     const compareSelect = document.querySelector('select[name="compare"]');
     const secondaryRadios = document.querySelectorAll('input[name="secondaryView"]');
     const noneRadio = document.querySelector('input[value="none"]');
 
+    const energyMapping = <?= json_encode($energyMapping ?? []) ?>;
+
     let chartInstance = null;
+
+    function updateTypeOptions() {
+        const selectedCity = citySelect.value;
+        const availableEnergies = (energyMapping[selectedCity] || []).map(e => e.toLowerCase());
+        
+        const typeOptions = typeSelect.querySelectorAll('option');
+        let firstAvailable = null;
+
+        typeOptions.forEach(option => {
+            if (option.value === 'all') {
+                option.hidden = (availableEnergies.length <= 1);
+                return;
+            }
+            
+            const isAvailable = availableEnergies.includes(option.value.toLowerCase());
+            option.hidden = !isAvailable;
+            
+            if (isAvailable && !firstAvailable) firstAvailable = option.value;
+        });
+
+        const currentOption = typeSelect.querySelector(`option[value="${typeSelect.value}"]`);
+        if (currentOption && currentOption.hidden) {
+            typeSelect.value = (availableEnergies.length > 1) ? 'all' : (firstAvailable || 'all');
+        }
+    }
 
     const themes = {
         all:         { color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.2)' },
@@ -260,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     compareSelect.addEventListener('change', handleInterfaceRules);
+    citySelect.addEventListener('change', updateTypeOptions);
 
 
     async function refreshChart() {
@@ -432,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     handleInterfaceRules();
+    updateTypeOptions();
     refreshChart();
 });
 </script>

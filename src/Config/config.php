@@ -7,10 +7,8 @@
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-use Dotenv\Dotenv;
-
 // Chargement du fichier .env
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+$dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->load();
 // Ne démarre pas si la BDD n'est pas configuré
 $dotenv->required(['DATABASE_HOST', 'DATABASE_NAME', 'DATABASE_USER', 'DATABASE_PASSWORD'])->notEmpty();
