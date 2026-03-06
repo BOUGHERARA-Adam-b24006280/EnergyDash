@@ -2,34 +2,26 @@
 
 namespace Tests\Controllers;
 
-use PHPUnit\Framework\TestCase;
-use App\Controllers\DashboardController;
-use App\Services\EnergyCsvService;
-use App\Core\View;
-use ReflectionClass;
-
-class DashboardControllerTest extends TestCase
-{
+class DashboardControllerTest extends \PHPUnit\Framework\TestCase {
     private $controller;
     private $energyServiceMock;
     private $viewMock;
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         $_SESSION = [];
 
-        $this->energyServiceMock = $this->createMock(EnergyCsvService::class);
-        $this->viewMock = $this->createMock(View::class);
+        $this->energyServiceMock = $this->createMock(\App\Services\EnergyCsvService::class);
+        $this->viewMock = $this->createMock(\App\Core\View::class);
 
-        $this->controller = $this->getMockBuilder(DashboardController::class)
+        $this->controller = $this->getMockBuilder(\App\Controllers\DashboardController::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['requireLogin'])
             ->getMock();
 
-        $reflection = new ReflectionClass(DashboardController::class);
+        $reflection = new \ReflectionClass(\App\Controllers\DashboardController::class);
 
         $property = $reflection->getProperty('energyService');
         $property->setAccessible(true);
@@ -43,8 +35,7 @@ class DashboardControllerTest extends TestCase
     /**
      * Test : index() récupère les villes et affiche la vue dashboard.
      */
-    public function testIndexLoadsCitiesAndRendersView(): void
-    {
+    public function testIndexLoadsCitiesAndRendersView(): void {
         $fakeCities = ['Paris', 'Lyon', 'Marseille'];
 
         $this->energyServiceMock->expects($this->once())

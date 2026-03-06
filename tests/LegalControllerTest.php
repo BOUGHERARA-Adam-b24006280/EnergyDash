@@ -1,15 +1,11 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use App\Controllers\LegalController;
-use App\Core\View;
-
-class LegalControllerTest extends TestCase {
+class LegalControllerTest extends \PHPUnit\Framework\TestCase {
 
     public function testIndexAfficheLesMentionsLegales() {
-        $controller = $this->getMockBuilder(LegalController::class)->disableOriginalConstructor()->getMock();
+        $controller = (new ReflectionClass(\App\Controllers\LegalController::class))->newInstanceWithoutConstructor();
 
-        $viewMock = $this->createMock(View::class);
+        $viewMock = $this->createMock(\App\Core\View::class);
         $viewMock->expects($this->once())->method('render')->with(
                        $this->equalTo('legal/mentions'),
                        $this->callback(function($data) {
@@ -19,7 +15,7 @@ class LegalControllerTest extends TestCase {
                        })
                    );
 
-        $reflection = new ReflectionClass(LegalController::class);
+        $reflection = new ReflectionClass(\App\Controllers\LegalController::class);
         $property = $reflection->getProperty('view');
         $property->setAccessible(true);
         $property->setValue($controller, $viewMock);

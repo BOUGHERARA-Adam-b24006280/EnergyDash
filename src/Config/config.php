@@ -33,11 +33,11 @@ return [
     ],
 
     'smtp' => [
-        'host' => $_ENV['SMTP_HOST'] ?? 'localhost',
-        'port' => isset($_ENV['SMTP_PORT']) && is_numeric($_ENV['SMTP_PORT']) ? (int)$_ENV['SMTP_PORT'] : 1025, // on force le port à être un entier
+        'host' => !empty($_ENV['SMTP_HOST']) ? $_ENV['SMTP_HOST'] : 'localhost',
+        'port' => isset($_ENV['SMTP_PORT']) && is_numeric($_ENV['SMTP_PORT']) ? (int)$_ENV['SMTP_PORT'] : 1025,
         'username' => $_ENV['SMTP_USER'] ?? '',
         'password' => $_ENV['SMTP_PASS'] ?? '',
-        'from' => $_ENV['SMTP_FROM'] ?? 'no-reply@localhost',
-        'from_name' => $_ENV['SMTP_FROM_NAME'] ?? 'EnergyDash',
+        'from' => !empty($_ENV['SMTP_FROM']) ? $_ENV['SMTP_FROM'] : 'no-reply@localhost',
+        'from_name' => !empty($_ENV['SMTP_FROM_NAME']) ? $_ENV['SMTP_FROM_NAME'] : 'EnergyDash',
     ],
 ];
