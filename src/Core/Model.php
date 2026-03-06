@@ -1,11 +1,9 @@
 <?php
 namespace App\Core;
 
-use PDO;
-
 abstract class Model {
-    /** @var PDO Instance de connexion à la base de données via PDO */
-    protected PDO $db;
+    /** @var \PDO Instance de connexion à la base de données via PDO */
+    protected \PDO $db;
     
     /** @var string Nom de la table associée au modèle */
     protected string $table;
@@ -13,9 +11,9 @@ abstract class Model {
     /**
      * Constructeur.
      *
-     * @param PDO $db Instance de connexion PDO.
+     * @param \PDO $db Instance de connexion PDO.
      */
-    public function __construct(PDO $db) {
+    public function __construct(\PDO $db) {
         $this->db = $db;
     }
 
@@ -33,7 +31,7 @@ abstract class Model {
         }
 
         /** @var array<int, array<string, mixed>> */
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -48,7 +46,7 @@ abstract class Model {
         $stmt->execute(['id' => $id]);
 
         /** @var array<string, mixed>|false $row */
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return $row ?: null;
     }
@@ -66,7 +64,7 @@ abstract class Model {
         $stmt->execute(['value' => $value]);
 
         /** @var array<string, mixed>|false $row */
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return $row ?: null;
     }

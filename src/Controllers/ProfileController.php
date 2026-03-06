@@ -6,10 +6,6 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Models\UserModel;
-use Exception;
-
 /**
  * Contrôleur ProfileController
  * Gère la consultation et la modification du profil utilisateur.
@@ -17,9 +13,9 @@ use Exception;
  *
  * @package App\Controllers
  */
-class ProfileController extends Controller {
-    /** @var UserModel Instance du modèle utilisateur */
-    private UserModel $userModel;
+class ProfileController extends \App\Core\Controller {
+    /** @var \App\Models\UserModel Instance du modèle utilisateur */
+    private \App\Models\UserModel $userModel;
 
     /**
      * Constructeur.
@@ -27,7 +23,7 @@ class ProfileController extends Controller {
      */
     public function __construct() {
         parent::__construct();
-        $this->userModel = new UserModel();
+        $this->userModel = new \App\Models\UserModel();
     }
 
     /**
@@ -112,7 +108,7 @@ class ProfileController extends Controller {
             $_SESSION['user']['email']      = $email;
 
             $this->flash('success', "Profil mis à jour avec succès.");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->flash('error', "Erreur lors de la mise à jour du profil.");
         }
 
