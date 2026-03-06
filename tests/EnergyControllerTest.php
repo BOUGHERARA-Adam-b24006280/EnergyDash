@@ -7,22 +7,19 @@ $mockUnlink = true;
 $mockFileExists = null;
 
 // Simule le déplacement du fichier
-function move_uploaded_file(string $from, string $to): bool
-{
+function move_uploaded_file(string $from, string $to): bool {
     global $mockMoveUploadedFile;
     return (bool)$mockMoveUploadedFile;
 }
 
 // Simule la suppression
-function unlink(string $filename): bool
-{
+function unlink(string $filename): bool {
     global $mockUnlink;
     return (bool)$mockUnlink;
 }
 
 // Simule l'existence d'un fichier (pour testDeleteSuccess)
-function file_exists(string $filename): bool
-{
+function file_exists(string $filename): bool {
     global $mockFileExists;
     if ($mockFileExists !== null) {
         return (bool)$mockFileExists;
@@ -33,20 +30,12 @@ function file_exists(string $filename): bool
 
 namespace Tests\Controllers;
 
-use PHPUnit\Framework\TestCase;
-use App\Controllers\EnergyController;
-use App\Services\EnergyCsvService;
-use App\Core\JsonResponse;
-use ReflectionClass;
-
-class EnergyControllerTest extends TestCase
-{
+class EnergyControllerTest extends \PHPUnit\Framework\TestCase {
     private $controller;
     private $serviceMock;
     private string $tempUploadFile;
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         global $mockMoveUploadedFile, $mockUnlink, $mockFileExists;
         $mockMoveUploadedFile = true;
         $mockUnlink = true;
@@ -60,15 +49,15 @@ class EnergyControllerTest extends TestCase
         $_POST = [];
         $_FILES = [];
 
-        JsonResponse::$exitAfterSend = false;
+        \App\Core\JsonResponse::$exitAfterSend = false;
 
-        $this->serviceMock = $this->createMock(EnergyCsvService::class);
+        $this->serviceMock = $this->createMock(\App\Services\EnergyCsvService::class);
 
-        $this->controller = $this->getMockBuilder(EnergyController::class)
+        $this->controller = $this->getMockBuilder(\App\Controllers\EnergyController::class)
             ->onlyMethods(['redirect', 'flash', 'requireLogin'])
             ->getMock();
 
-        $reflection = new ReflectionClass(EnergyController::class);
+        $reflection = new \ReflectionClass(\App\Controllers\EnergyController::class);
         $property = $reflection->getProperty('energyService');
         $property->setAccessible(true);
         $property->setValue($this->controller, $this->serviceMock);
@@ -77,8 +66,7 @@ class EnergyControllerTest extends TestCase
         file_put_contents($this->tempUploadFile, "date,valeur\n2023-01-01,100");
     }
 
-    protected function tearDown(): void
-    {
+    protected function tearDown(): void {
         if (file_exists($this->tempUploadFile)) {
             @unlink($this->tempUploadFile);
         }
@@ -87,8 +75,7 @@ class EnergyControllerTest extends TestCase
     /**
      * Test : Index renvoie le JSON combiné (CSV + Simulation IA).
      */
-    public function testIndexReturnsCombinedData(): void
-    {
+    public function testIndexReturnsCombinedData(): void {
         $_GET['type'] = 'solaire';
         $_GET['city'] = 'Paris';
         $_GET['from'] = '2023-01-01';
@@ -126,8 +113,7 @@ class EnergyControllerTest extends TestCase
     /**
      * Test : Upload refuse une mauvaise extension.
      */
-    public function testUploadFailsWithWrongExtension(): void
-    {
+    public function testUploadFailsWithWrongExtension(): void {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_FILES['csv_file'] = [
             'name' => 'image.jpg',
@@ -147,8 +133,7 @@ class EnergyControllerTest extends TestCase
     /**
      * Test : Upload réussit avec un bon CSV.
      */
-    public function testUploadSuccess(): void
-    {
+    public function testUploadSuccess(): void {
         $_SESSION['user'] = ['id' => 42];
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
@@ -173,8 +158,7 @@ class EnergyControllerTest extends TestCase
     /**
      * Test : Delete supprime le fichier (Simulation réussie).
      */
-    public function testDeleteSuccess(): void
-    {
+    public function testDeleteSuccess(): void {
         global $mockFileExists, $mockUnlink;
         $mockFileExists = true;
         $mockUnlink = true;

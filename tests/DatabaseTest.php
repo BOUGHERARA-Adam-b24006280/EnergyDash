@@ -1,36 +1,29 @@
 <?php
 /**
  * Fichier : DatabaseTest.php
- * Rôle : Tests Unitaires PHPUnit de Database.php.
+ * Rôle : Tests Unitaires PHPUnit de \App\Core\Database.php.
  * Auteur : Lucas LEPAPE
  */
 
-use PHPUnit\Framework\TestCase;
-use App\Core\Database;
-use PDO;
-
 /**
- * Classe DatabaseTest qui teste Database.php.
+ * Classe DatabaseTest qui teste \App\Core\Database.php.
  * Hérite de PHPUnit\Framework\TestCase pour utiliser les asserts.
  */
-class DatabaseTest extends TestCase
-{
-    /** @var Database pour tester la classe. */
-    private Database $database;
+class DatabaseTest extends \PHPUnit\Framework\TestCase {
+    /** @var \App\Core\Database pour tester la classe. */
+    private \App\Core\Database $database;
 
-    /** Initialise une nouvelle instance de Database. */
-    protected function setUp(): void
-    {
+    /** Initialise une nouvelle instance de \App\Core\Database. */
+    protected function setUp(): void {
         $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
-        $this->database = new Database();
+        $this->database = new \App\Core\Database();
     }
 
     /**
      * Vérifie que getConnection() retourne bien une instance PDO.
      */
-    public function testGetConnectionReturnsPDO()
-    {
+    public function testGetConnectionReturnsPDO() {
         $pdo = $this->database->getConnection();
         $this->assertInstanceOf(PDO::class, $pdo);
     }    
@@ -38,8 +31,7 @@ class DatabaseTest extends TestCase
     /**
      * Vérifie que la connexion PDO est unique.
      */
-    public function testGetConnectionIsUnique()
-    {
+    public function testGetConnectionIsUnique() {
         $pdo1 = $this->database->getConnection();
         $pdo2 = $this->database->getConnection();
 

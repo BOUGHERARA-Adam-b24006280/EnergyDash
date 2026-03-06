@@ -2,28 +2,20 @@
 
 namespace Tests\Core;
 
-use PHPUnit\Framework\TestCase;
-use App\Core\Model;
-use PDO;
-use PDOStatement;
-
 /**
- * Classe concrète pour tester la classe abstraite Model.
+ * Classe concrète pour tester la classe abstraite \App\Core\Model.
  * On définit une table fictive 'users' pour les tests.
  */
-class ConcreteModel extends Model
-{
+class ConcreteModel extends \App\Core\Model {
     protected string $table = 'users';
 }
 
-class ModelTest extends TestCase
-{
+class ModelTest extends \PHPUnit\Framework\TestCase {
     private $pdo;
     private $model;
 
-    protected function setUp(): void
-    {
-        $this->pdo = $this->createMock(PDO::class);
+    protected function setUp(): void {
+        $this->pdo = $this->createMock(\PDO::class);
 
         $this->model = new ConcreteModel($this->pdo);
     }
@@ -31,9 +23,8 @@ class ModelTest extends TestCase
     /**
      * Test de la méthode findAll()
      */
-    public function testFindAllReturnsArrayOfRows(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testFindAllReturnsArrayOfRows(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         
         $expectedData = [
             ['id' => 1, 'name' => 'Alice'],
@@ -57,9 +48,8 @@ class ModelTest extends TestCase
     /**
      * Test de findById()
      */
-    public function testFindByIdReturnsRowIfFound(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testFindByIdReturnsRowIfFound(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         
         $stmt->method('fetch')->willReturn(['id' => 10, 'name' => 'Charlie']);
 
@@ -74,9 +64,8 @@ class ModelTest extends TestCase
         $this->assertEquals(10, $result['id']);
     }
 
-    public function testFindByIdReturnsNullIfNotFound(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testFindByIdReturnsNullIfNotFound(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('fetch')->willReturn(false);
 
         $this->pdo->method('prepare')->willReturn($stmt);
@@ -89,9 +78,8 @@ class ModelTest extends TestCase
     /**
      * Test de create()
      */
-    public function testCreateInsertsDataAndReturnsId(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testCreateInsertsDataAndReturnsId(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('execute')->willReturn(true);
 
         $this->pdo->method('prepare')->willReturn($stmt);
@@ -106,9 +94,8 @@ class ModelTest extends TestCase
     /**
      * Test de update()
      */
-    public function testUpdateReturnsTrueOnSuccess(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testUpdateReturnsTrueOnSuccess(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('execute')->willReturn(true);
         $stmt->method('rowCount')->willReturn(1);
 
@@ -122,9 +109,8 @@ class ModelTest extends TestCase
     /**
      * Test de delete()
      */
-    public function testDeleteReturnsTrueOnSuccess(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testDeleteReturnsTrueOnSuccess(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('execute')->willReturn(true);
         $stmt->method('rowCount')->willReturn(1);
 

@@ -4,8 +4,7 @@ namespace App\Services;
 
 $mockApiResponse = '';
 
-function file_get_contents(string $filename, bool $use_include_path = false, $context = null): string|false
-{
+function file_get_contents(string $filename, bool $use_include_path = false, $context = null): string|false {
     global $mockApiResponse;
 
     if (str_starts_with($filename, 'http')) {
@@ -17,17 +16,12 @@ function file_get_contents(string $filename, bool $use_include_path = false, $co
 
 namespace Tests\Services;
 
-use PHPUnit\Framework\TestCase;
-use App\Services\EnergyCsvService;
-use ReflectionClass;
 
-class EnergyCsvServiceTest extends TestCase
-{
+class EnergyCsvServiceTest extends \PHPUnit\Framework\TestCase {
     private string $tempCsvPath;
-    private EnergyCsvService $service;
+    private \App\Services\EnergyCsvService $service;
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         if (session_status() === PHP_SESSION_NONE) {
             $_SESSION = ['user' => ['id' => 999, 'role' => 'user']];
         }
@@ -40,9 +34,9 @@ class EnergyCsvServiceTest extends TestCase
         
         file_put_contents($this->tempCsvPath, $csvContent);
 
-        $this->service = new EnergyCsvService();
+        $this->service = new \App\Services\EnergyCsvService();
 
-        $reflection = new ReflectionClass($this->service);
+        $reflection = new \ReflectionClass($this->service);
         $property = $reflection->getProperty('csvPath');
         $property->setAccessible(true);
         $property->setValue($this->service, $this->tempCsvPath);
@@ -52,8 +46,7 @@ class EnergyCsvServiceTest extends TestCase
         $propDelim->setValue($this->service, ';');
     }
 
-    protected function tearDown(): void
-    {
+    protected function tearDown(): void {
         if (file_exists($this->tempCsvPath)) {
             unlink($this->tempCsvPath);
         }
@@ -62,8 +55,7 @@ class EnergyCsvServiceTest extends TestCase
     /**
      * Test : Récupération des villes disponibles dans le CSV.
      */
-    public function testGetAvailableCitiesReturnsUniqueSortedCities(): void
-    {
+    public function testGetAvailableCitiesReturnsUniqueSortedCities(): void {
         $cities = $this->service->getAvailableCities();
 
         $this->assertIsArray($cities);
@@ -75,8 +67,7 @@ class EnergyCsvServiceTest extends TestCase
     /**
      * Test : getEnergyData filtre correctement par Type et Ville.
      */
-    public function testGetEnergyDataFiltersCorrectly(): void
-    {
+    public function testGetEnergyDataFiltersCorrectly(): void {
         $result = $this->service->getEnergyData('solaire', 'Paris', '2023-01-01', '2023-12-31');
 
         $this->assertIsArray($result['data']);
@@ -88,8 +79,7 @@ class EnergyCsvServiceTest extends TestCase
     /**
      * Test : getEnergyData renvoie un tableau vide si aucune correspondance.
      */
-    public function testGetEnergyDataReturnsEmptyIfNoMatch(): void
-    {
+    public function testGetEnergyDataReturnsEmptyIfNoMatch(): void {
         $result = $this->service->getEnergyData('hydraulique', 'Paris', '2023-01-01', '2023-12-31');
 
         $this->assertEmpty($result['data']);
@@ -99,8 +89,7 @@ class EnergyCsvServiceTest extends TestCase
      * Test : Simulation API (IA/Prévision).
      * C'est ici qu'on utilise le Mock de file_get_contents.
      */
-    public function testSimulateDataFromWeatherCallsApiAndReturnsData(): void
-    {
+    public function testSimulateDataFromWeatherCallsApiAndReturnsData(): void {
         global $mockApiResponse;
         $mockApiResponse = json_encode([
             'hourly' => [
@@ -125,8 +114,7 @@ class EnergyCsvServiceTest extends TestCase
     /**
      * Test : Simulation API gère les erreurs (JSON vide ou invalide).
      */
-    public function testSimulateDataHandlesApiError(): void
-    {
+    public function testSimulateDataHandlesApiError(): void {
         global $mockApiResponse;
         $mockApiResponse = false;
 

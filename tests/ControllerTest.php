@@ -2,39 +2,29 @@
 
 namespace Tests\Core;
 
-use PHPUnit\Framework\TestCase;
-use App\Core\Controller;
-
 /**
- * Classe concrète temporaire pour tester la classe abstraite Controller..
+ * Classe concrète temporaire pour tester la classe abstraite \App\Core\Controller..
  */
-class TestableController extends Controller
-{
-    public function publicSanitize(string $input): string
-    {
+class TestableController extends \App\Core\Controller {
+    public function publicSanitize(string $input): string {
         return $this->sanitize($input);
     }
 
-    public function publicFlash(string $type, string $message): void
-    {
+    public function publicFlash(string $type, string $message): void {
         $this->flash($type, $message);
     }
 
-    public function publicRequireLogin(): void
-    {
+    public function publicRequireLogin(): void {
         $this->requireLogin();
     }
 
-    public function publicRequireAdmin(): void
-    {
+    public function publicRequireAdmin(): void {
         $this->requireAdmin();
     }
 }
 
-class ControllerTest extends TestCase
-{
-    protected function setUp(): void
-    {
+class ControllerTest extends \PHPUnit\Framework\TestCase {
+    protected function setUp(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -44,8 +34,7 @@ class ControllerTest extends TestCase
     /**
      * Test de la méthode sanitize (protection XSS)
      */
-    public function testSanitizeCleansInput(): void
-    {
+    public function testSanitizeCleansInput(): void {
         $controller = new TestableController();
         
         $dirty = '<script>alert("hack")</script>';
@@ -57,8 +46,7 @@ class ControllerTest extends TestCase
     /**
      * Test du système de messages Flash
      */
-    public function testFlashMessages(): void
-    {
+    public function testFlashMessages(): void {
         $controller = new TestableController();
 
         $controller->publicFlash('success', 'Bravo !');
@@ -69,8 +57,7 @@ class ControllerTest extends TestCase
     /**
      * Test : requireLogin redirige si l'utilisateur n'est PAS connecté.
      */
-    public function testRequireLoginRedirectsWhenNotLogged(): void
-    {
+    public function testRequireLoginRedirectsWhenNotLogged(): void {
         $controller = $this->getMockBuilder(TestableController::class)->onlyMethods(['redirect'])->getMock();
 
         $controller->expects($this->once())->method('redirect')->with('/login');
@@ -81,8 +68,7 @@ class ControllerTest extends TestCase
     /**
      * Test : requireLogin ne fait rien si l'utilisateur EST connecté.
      */
-    public function testRequireLoginDoesNothingWhenLogged(): void
-    {
+    public function testRequireLoginDoesNothingWhenLogged(): void {
         $controller = $this->getMockBuilder(TestableController::class)->onlyMethods(['redirect'])->getMock();
 
         $controller->expects($this->never())->method('redirect');
@@ -95,8 +81,7 @@ class ControllerTest extends TestCase
     /**
      * Test : requireAdmin redirige un utilisateur normal vers /profile.
      */
-    public function testRequireAdminRedirectsSimpleUser(): void
-    {
+    public function testRequireAdminRedirectsSimpleUser(): void {
         $controller = $this->getMockBuilder(TestableController::class)
                            ->onlyMethods(['redirect'])
                            ->getMock();
@@ -111,8 +96,7 @@ class ControllerTest extends TestCase
     /**
      * Test : requireAdmin laisse passer un admin.
      */
-    public function testRequireAdminAllowsAdminUser(): void
-    {
+    public function testRequireAdminAllowsAdminUser(): void {
         $controller = $this->getMockBuilder(TestableController::class)->onlyMethods(['redirect'])->getMock();
 
         $controller->expects($this->never())->method('redirect');

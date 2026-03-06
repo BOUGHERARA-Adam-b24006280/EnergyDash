@@ -1,15 +1,11 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use App\Controllers\HomeController;
-use App\Core\View;
-
-class HomeControllerTest extends TestCase {
+class HomeControllerTest extends \PHPUnit\Framework\TestCase {
 
     public function testIndexAfficheLaPageDAccueil() {
-        $controller = $this->getMockBuilder(HomeController::class)->disableOriginalConstructor()->getMock();
+        $controller = (new ReflectionClass(\App\Controllers\HomeController::class))->newInstanceWithoutConstructor();
 
-        $viewMock = $this->createMock(View::class);
+        $viewMock = $this->createMock(\App\Core\View::class);
         $viewMock->expects($this->once())->method('render')->with(
                        $this->equalTo('home/index'),
                        $this->callback(function($data) {
@@ -19,7 +15,7 @@ class HomeControllerTest extends TestCase {
                        })
                    );
 
-        $reflection = new ReflectionClass(HomeController::class);
+        $reflection = new ReflectionClass(\App\Controllers\HomeController::class);
         $property = $reflection->getProperty('view');
         $property->setAccessible(true);
         $property->setValue($controller, $viewMock);

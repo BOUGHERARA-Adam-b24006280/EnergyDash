@@ -7,8 +7,7 @@
 // On le redéfinit DANS le namespace du contrôleur pour qu'il lise directement $_POST.
 namespace App\Controllers;
 
-function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT): mixed
-{
+function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT): mixed {
     if ($type === INPUT_POST) {
         $val = $_POST[$variable_name] ?? null;
         // Simulation simplifiée : si c'est un email valide demandé et que la valeur ressemble à un email
@@ -28,35 +27,28 @@ function filter_input(int $type, string $variable_name, int $filter = FILTER_DEF
 // ---------------------------------------------------------
 namespace Tests\Controllers;
 
-use PHPUnit\Framework\TestCase;
-use App\Controllers\ProfileController;
-use App\Models\UserModel;
-use App\Core\View;
-use ReflectionClass;
 
-class ProfileControllerTest extends TestCase
-{
+class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
     private $controller;
     private $userModelMock;
     private $viewMock;
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         $_SESSION = [];
         $_POST = [];
 
-        $this->userModelMock = $this->createMock(UserModel::class);
-        $this->viewMock = $this->createMock(View::class);
+        $this->userModelMock = $this->createMock(\App\Models\UserModel::class);
+        $this->viewMock = $this->createMock(\App\Core\View::class);
 
-        $this->controller = $this->getMockBuilder(ProfileController::class)
+        $this->controller = $this->getMockBuilder(\App\Controllers\ProfileController::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['redirect', 'flash', 'requireLogin', 'requireAdmin'])
             ->getMock();
 
-        $reflection = new ReflectionClass(ProfileController::class);
+        $reflection = new \ReflectionClass(\App\Controllers\ProfileController::class);
         
         $property = $reflection->getProperty('userModel');
         $property->setAccessible(true);
@@ -70,8 +62,7 @@ class ProfileControllerTest extends TestCase
     /**
      * Test : index() affiche le profil standard pour un utilisateur lambda.
      */
-    public function testIndexRendersStandardProfileForUser(): void
-    {
+    public function testIndexRendersStandardProfileForUser(): void {
         $_SESSION['user'] = ['id' => 1, 'role' => 'user', 'first_name' => 'John'];
 
         $this->userModelMock->expects($this->never())->method('getAllUsers');
@@ -91,8 +82,7 @@ class ProfileControllerTest extends TestCase
     /**
      * Test : index() affiche le profil ADMIN et charge la liste des utilisateurs.
      */
-    public function testIndexRendersAdminProfileWithUsersList(): void
-    {
+    public function testIndexRendersAdminProfileWithUsersList(): void {
         // Contexte : Admin connecté
         $_SESSION['user'] = ['id' => 99, 'role' => 'admin'];
 
@@ -110,8 +100,7 @@ class ProfileControllerTest extends TestCase
     /**
      * Test : update() redirige si pas connecté (Sécurité).
      */
-    public function testUpdateRedirectsIfNotLogged(): void
-    {
+    public function testUpdateRedirectsIfNotLogged(): void {
         unset($_SESSION['user']);
 
         $this->controller->expects($this->once())
@@ -124,8 +113,7 @@ class ProfileControllerTest extends TestCase
     /**
      * Test : update() met à jour le profil avec succès.
      */
-    public function testUpdateSuccess(): void
-    {
+    public function testUpdateSuccess(): void {
         $_SESSION['user'] = ['id' => 10, 'email' => 'old@test.com', 'first_name' => 'Old', 'last_name' => 'OldName'];
         
         $_POST['email'] = 'new@test.com';
@@ -154,8 +142,7 @@ class ProfileControllerTest extends TestCase
     /**
      * Test : updateRole() refuse qu'un admin se modifie lui-même.
      */
-    public function testUpdateRolePreventsSelfModification(): void
-    {
+    public function testUpdateRolePreventsSelfModification(): void {
         $_SESSION['user'] = ['id' => 5, 'role' => 'admin'];
 
         $_POST['id'] = 5;
@@ -173,8 +160,7 @@ class ProfileControllerTest extends TestCase
     /**
      * Test : updateRole() fonctionne sur un autre utilisateur.
      */
-    public function testUpdateRoleSuccessOnOtherUser(): void
-    {
+    public function testUpdateRoleSuccessOnOtherUser(): void {
         $_SESSION['user'] = ['id' => 1, 'role' => 'admin'];
 
         $_POST['id'] = 2;
