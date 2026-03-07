@@ -52,7 +52,8 @@ class DashboardControllerTest extends \PHPUnit\Framework\TestCase {
                 $this->callback(function ($data) use ($fakeCities) {
                     return isset($data['cities']) 
                         && $data['cities'] === $fakeCities
-                        && $data['title'] === 'Tableau de bord - EnergyDash';
+                        && $data['title'] === 'Tableau de bord - EnergyDash'
+                        && isset($data['csrf_token']); // <-- AJOUT : On vérifie que le token est bien présent
                 })
             );
 

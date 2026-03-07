@@ -67,6 +67,7 @@ class ProfileController extends \App\Core\Controller {
     public function update(): void {
         
         $this->requireLogin();
+        if (!isset($_SESSION['user'])) return;
 
         try {
             $this->validateCsrf();

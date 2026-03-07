@@ -48,6 +48,8 @@ class EnergyControllerTest extends \PHPUnit\Framework\TestCase {
         $_GET = [];
         $_POST = [];
         $_FILES = [];
+        
+        $_SESSION['csrf_token'] = 'token_de_test_123';
 
         \App\Core\JsonResponse::$exitAfterSend = false;
 
@@ -115,6 +117,9 @@ class EnergyControllerTest extends \PHPUnit\Framework\TestCase {
      */
     public function testUploadFailsWithWrongExtension(): void {
         $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $_POST['csrf_token'] = 'token_de_test_123';
+        
         $_FILES['csv_file'] = [
             'name' => 'image.jpg',
             'type' => 'image/jpeg',
@@ -136,6 +141,8 @@ class EnergyControllerTest extends \PHPUnit\Framework\TestCase {
     public function testUploadSuccess(): void {
         $_SESSION['user'] = ['id' => 42];
         $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $_POST['csrf_token'] = 'token_de_test_123';
 
         $_FILES['csv_file'] = [
             'name' => 'data.csv',
@@ -165,6 +172,8 @@ class EnergyControllerTest extends \PHPUnit\Framework\TestCase {
 
         $_SESSION['user'] = ['id' => 42];
         $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $_POST['csrf_token'] = 'token_de_test_123';
 
         $this->controller->expects($this->once())
             ->method('flash')
