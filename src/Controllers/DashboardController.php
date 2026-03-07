@@ -36,6 +36,8 @@ class DashboardController extends \App\Core\Controller {
     public function index(): void {
         $this->requireLogin();
 
+        $this->initCsrf();
+
         $cities = $this->energyService->getAvailableCities();
         $energyMapping = $this->energyService->getCityEnergyMapping();
 
