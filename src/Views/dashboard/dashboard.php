@@ -62,7 +62,7 @@
                 </p>
 
                 <form action="/energy/upload" method="POST" enctype="multipart/form-data" class="space-y-3">
-                    
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     <label class="block">
                         <span class="sr-only">Choisir un fichier</span>
                         <input type="file" name="csv_file" accept=".csv" required
@@ -110,6 +110,7 @@
 
                             <?php if ($fileExists): ?>
                                 <form action="/energy/delete" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer vos données et revenir à l\'affichage par défaut ?');">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                     <button type="submit" class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:bg-red-100 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:bg-red-800/30">
                                         <svg class="flex-shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                                         Supprimer

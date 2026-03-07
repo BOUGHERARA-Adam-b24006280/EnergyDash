@@ -84,4 +84,35 @@ abstract class Controller {
     protected function flash(string $type, string $message): void {
         $_SESSION[$type] = $message;
     }
+
+    /**
+     * Intialise le token CRSF s'il n'existe pas déjà dans la session.
+     * 
+     * @return void
+     */
+    protected function initCsrf(): void {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+    }
+
+    /**
+     * Valide le token CRSF réçu en POST.
+     * Compare le token de la requête POST avec celui stocké en session.
+     * 
+     * @throws /Exception Si le token est invalide ou manquant.
+     * @return void
+     */
+    protected function validateCsrf(): void {
+        $rawToken = $_POST['csrf_token'] ?? '';
+        $token = is_string($rawToken) ? $rawToken : '';
+        
+        $rawSession = $_SESSION['csrf_token'] ?? '';
+        $sessionToken = is_string($rawSession) ? $rawSession : '';
+
+        if (empty($sessionToken) || !hash_equals($sessionToken, $token)) {
+            throw new \Exception("Session expirée ou requête non autorisée. Veuillez recharger la page.");
+        }
+    }
+
 }

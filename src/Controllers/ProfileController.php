@@ -5,6 +5,7 @@
  */
 
 namespace App\Controllers;
+use App\Models\UserModel;
 
 /**
  * Contrôleur ProfileController
@@ -36,6 +37,8 @@ class ProfileController extends \App\Core\Controller {
     public function index(): void {
         $this->requireLogin();
 
+        $this->initCsrf();
+
         /** @var array{id: int|string, role: string, first_name: string, last_name: string, email: string} $user */
         $user = $_SESSION['user'];
 
@@ -50,7 +53,8 @@ class ProfileController extends \App\Core\Controller {
         $this->view->render($viewPath, [
             'title' => 'Mon Profil',
             'user'  => $user,
-            'users' => $users
+            'users' => $users,
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 
@@ -63,6 +67,14 @@ class ProfileController extends \App\Core\Controller {
     public function update(): void {
         
         $this->requireLogin();
+
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
 
         if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
             $this->redirect('/login');
@@ -125,6 +137,14 @@ class ProfileController extends \App\Core\Controller {
     public function updateRole(): void {
         $this->requireAdmin();
 
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
+
         if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
              $this->redirect('/login');
              return;
@@ -161,6 +181,14 @@ class ProfileController extends \App\Core\Controller {
      */
     public function createUser(): void {
         $this->requireAdmin();
+
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
 
         $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
         if (!$rawEmail) {
@@ -214,6 +242,13 @@ class ProfileController extends \App\Core\Controller {
     public function deleteUser(): void {
         $this->requireAdmin();
 
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
 
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 

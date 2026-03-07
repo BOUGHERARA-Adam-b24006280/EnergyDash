@@ -106,6 +106,14 @@ class EnergyController extends \App\Core\Controller
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+            try {
+                $this->validateCsrf();
+            } catch (\Exception $e) {
+                $this->flash('error', $e->getMessage());
+                $this->redirect('/dashboard');
+                return;
+            }
+
             /** @var array{name: string, type: string, tmp_name: string, error: int, size: int} $file */
             $file = $_FILES['csv_file'];
 
@@ -190,6 +198,14 @@ class EnergyController extends \App\Core\Controller
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $this->validateCsrf();
+            } catch (\Exception $e) {
+                $this->flash('error', $e->getMessage());
+                $this->redirect('/dashboard');
+                return;
+            }
+
             /** @var array{id: int|string}|null $user */
             $user = $_SESSION['user'] ?? null;
 

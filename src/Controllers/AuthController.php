@@ -377,35 +377,6 @@ class AuthController extends \App\Core\Controller {
     }
 
     /**
-     * Initialise le token CSRF s'il n'existe pas déjà.
-     *
-     * @return void
-     */
-    private function initCsrf(): void {
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-    }
-
-    /**
-     * Valide le token CSRF reçu en POST.
-     *
-     * @throws \Exception Si le token est invalide ou manquant.
-     * @return void
-     */
-    private function validateCsrf(): void {
-        $rawToken = $_POST['csrf_token'] ?? '';
-        $token = is_string($rawToken) ? $rawToken : '';
-        
-        $rawSession = $_SESSION['csrf_token'] ?? '';
-        $sessionToken = is_string($rawSession) ? $rawSession : '';
-
-        if (empty($sessionToken) || !hash_equals($sessionToken, $token)) {
-            throw new \Exception("Session expirée. Veuillez recharger la page.");
-        }
-    }
-
-    /**
      * Valide les données d'inscription.
      *
      * @param array{first_name: string, last_name: string, email: string, password: string, confirm: string} $data
