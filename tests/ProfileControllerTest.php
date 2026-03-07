@@ -39,13 +39,16 @@ class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
         }
         $_SESSION = [];
         $_POST = [];
+        
+        // --- AJOUT : Simuler un jeton CSRF valide en session ---
+        $_SESSION['csrf_token'] = 'token_de_test_123';
 
         $this->userModelMock = $this->createMock(\App\Models\UserModel::class);
         $this->viewMock = $this->createMock(\App\Core\View::class);
 
         $this->controller = $this->getMockBuilder(\App\Controllers\ProfileController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['redirect', 'flash', 'requireLogin', 'requireAdmin'])
+            ->onlyMethods(['redirect', 'flash']) 
             ->getMock();
 
         $reflection = new \ReflectionClass(\App\Controllers\ProfileController::class);
@@ -72,7 +75,10 @@ class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
             ->with(
                 'profile/profile',
                 $this->callback(function ($data) {
-                    return $data['title'] === 'Mon Profil' && $data['user']['first_name'] === 'John';
+                    // --- AJOUT : Vérifier que le jeton CSRF est bien passé à la vue ---
+                    return $data['title'] === 'Mon Profil' 
+                        && $data['user']['first_name'] === 'John'
+                        && isset($data['csrf_token']); 
                 })
             );
 
@@ -116,6 +122,8 @@ class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
     public function testUpdateSuccess(): void {
         $_SESSION['user'] = ['id' => 10, 'email' => 'old@test.com', 'first_name' => 'Old', 'last_name' => 'OldName'];
         
+        // --- AJOUT : Simuler l'envoi du bon token dans le formulaire ---
+        $_POST['csrf_token'] = 'token_de_test_123';
         $_POST['email'] = 'new@test.com';
         $_POST['first_name'] = 'New';
         $_POST['last_name'] = 'Name';
@@ -145,6 +153,8 @@ class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
     public function testUpdateRolePreventsSelfModification(): void {
         $_SESSION['user'] = ['id' => 5, 'role' => 'admin'];
 
+        // --- AJOUT : Simuler l'envoi du bon token ---
+        $_POST['csrf_token'] = 'token_de_test_123';
         $_POST['id'] = 5;
         $_POST['role'] = 'user';
 
@@ -163,6 +173,8 @@ class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
     public function testUpdateRoleSuccessOnOtherUser(): void {
         $_SESSION['user'] = ['id' => 1, 'role' => 'admin'];
 
+        // --- AJOUT : Simuler l'envoi du bon token ---
+        $_POST['csrf_token'] = 'token_de_test_123';
         $_POST['id'] = 2;
         $_POST['role'] = 'editor';
 

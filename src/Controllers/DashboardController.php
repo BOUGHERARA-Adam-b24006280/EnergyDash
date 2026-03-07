@@ -44,7 +44,8 @@ class DashboardController extends \App\Core\Controller {
         $this->view->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',
             'cities' => $cities,
-            'energyMapping' => $energyMapping
+            'energyMapping' => $energyMapping,
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 }
