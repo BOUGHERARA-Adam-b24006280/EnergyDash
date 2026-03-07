@@ -34,7 +34,20 @@ if (is_array($user)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="<?php
+// Applique le thème immédiatement côté serveur via un cookie ou défaut
+$themeClass = 'light'; // Valeur par défaut
+if (isset($_COOKIE['hs_theme'])) {
+    $theme = $_COOKIE['hs_theme'];
+    if ($theme === 'dark') {
+        $themeClass = 'dark';
+    } elseif ($theme === 'auto') {
+        // Pour auto, on ne peut pas détecter côté serveur, on laisse le JS gérer
+        $themeClass = '';
+    }
+}
+echo htmlspecialchars($themeClass);
+?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,13 +58,36 @@ if (is_array($user)) {
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
     <link rel="shortcut icon" href="/assets/images/favicon/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/assets/tailwindcss/style.css">
+
+    <script>
+        (function() {
+            'use strict';
+            const theme = localStorage.getItem('hs_theme') || 'default';
+            const html = document.documentElement;
+
+            let computedTheme = theme === 'default' ? 'light' : theme;
+            if (theme === 'auto') {
+                computedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            html.classList.remove('light', 'dark', 'default', 'auto');
+
+            if (theme === 'auto') {
+                html.classList.add('auto', computedTheme);
+            } else {
+                html.classList.add(computedTheme);
+            }
+
+            document.cookie = 'hs_theme=' + theme + '; path=/; max-age=31536000; SameSite=Lax';
+        })();
+    </script>
 </head>
 
-<body>
+<body class="dark:bg-neutral-900">
 <header class="flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full">
     <nav class="relative max-w-340 w-full mx-auto flex items-center justify-between md:gap-3 py-2 px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-x-1">
-            <a class="flex-none font-bold text-3xl text-blue-600 focus:outline-hidden focus:opacity-80 dark:text-white" 
+            <a class="flex-none font-bold text-3xl text-blue-600 focus:outline-hidden focus:opacity-80 dark:text-white"
                href="/" aria-label="EnergyDash">
                 Energy Dash
             </a>
@@ -61,12 +97,12 @@ if (is_array($user)) {
         <div class="flex flex-wrap items-center gap-x-1.5">
             <?php if (!$user): ?>
                 <!-- Si personne n'est connecté -->
-                <a class="py-[7px] px-2.5 inline-flex items-center font-medium text-sm rounded-lg border border-gray-200 
-                    bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none 
-                    dark:bg-neutral-800 focus:outline-hidden focus:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300 
+                <a class="py-[7px] px-2.5 inline-flex items-center font-medium text-sm rounded-lg border border-gray-200
+                    bg-white text-gray-800 shadow-2xs hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none
+                    dark:bg-neutral-800 focus:outline-hidden focus:bg-gray-100 dark:border-neutral-700 dark:text-neutral-300
                     dark:hover:bg-neutral-700 dark:focus:bg-neutral-700" href="/login">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" 
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                          class="lucide lucide-user-icon lucide-user">
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
                         <circle cx="12" cy="7" r="4"/>
@@ -74,10 +110,10 @@ if (is_array($user)) {
                     <span class="ps-2">Connexion</span>
                 </a>
 
-                <a id="registerButton" class="py-2 px-2.5 inline-flex items-center font-medium text-sm rounded-lg bg-blue-600 text-white 
-                    hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50 
-                    disabled:pointer-events-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:bg-blue-600" 
-                    href="/register">
+                <a id="registerButton" class="py-2 px-2.5 inline-flex items-center font-medium text-sm rounded-lg bg-blue-600 text-white
+                    hover:bg-blue-700 focus:outline-hidden focus:bg-blue-700 disabled:opacity-50
+                    disabled:pointer-events-none dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:bg-blue-600"
+                   href="/register">
                     Inscription
                 </a>
             <?php else: ?>
@@ -108,5 +144,3 @@ if (is_array($user)) {
         </div>
     </nav>
 </header>
-
-<body class="dark:bg-neutral-900">
