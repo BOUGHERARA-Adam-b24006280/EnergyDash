@@ -134,10 +134,4 @@ $action = is_string($uri)
         </div>
     </div>
 </main>
-<script>
-    document.querySelector('form').addEventListener('submit', function () {
-        const btn = document.querySelector('.form-button');
-        btn.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
-        btn.disabled = true;
-    });
-</script>
+<script src="/assets/js/auth.js"></script>

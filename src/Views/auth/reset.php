@@ -114,3 +114,5 @@ $uri = $_SERVER['REQUEST_URI'] ?? '';
     </div>
 </main>
 <?php endif; ?>
+
+<script src="/assets/js/auth.js"></script>
