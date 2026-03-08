@@ -12,8 +12,7 @@ namespace App\Controllers;
  *
  * @package App\Controllers
  */
-class EnergyController extends \App\Core\Controller
-{
+class EnergyController extends \App\Core\Controller {
     private \App\Services\EnergyCsvService $energyService;
 
     public function __construct() {
