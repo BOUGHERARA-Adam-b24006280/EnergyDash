@@ -45,51 +45,64 @@ class EnergyController extends \App\Core\Controller {
         $to = (!empty($rawTo) && is_string($rawTo)) ? $this->sanitize($rawTo) : $from;
 
         try {
-            // 2. On récupère d'abord les données RÉELLES (CSV) via le Service
+            // 2. On récupère d'abord les données RÉELLES (CSV)
             $realData = $this->energyService->getEnergyData($type, $city, $from, $to, $compare);
-            /** @var array<int, array<string, mixed>> $finalData */
-            $finalData = isset($realData['data']) && is_array($realData['data']) ? $realData['data'] : []; // Les données brutes
+            $finalData = isset($realData['data']) && is_array($realData['data']) ? $realData['data'] : []; 
             
-            // On cherche la dernière date connue dans le CSV
-            $lastDateFound = $from; 
-            if (!empty($finalData)) {
-                $lastItem = end($finalData);
-                $dateVal = $lastItem['date'] ?? null;
-                if (is_string($dateVal)) {
-                    $lastDateFound = substr($dateVal, 0, 10);
-                }
-            } else {
-                // Si CSV vide, on simule depuis le début - 1 jour
-                $lastDateFound = date('Y-m-d', (int)strtotime($from . ' -1 day'));
-            }
+            foreach ($finalData as &$d) { $d['statut'] = 'reel'; } // On marque explicitement la donnée comme réelle
 
-            if ($lastDateFound < $to) {
-                $simStart = date('Y-m-d', (int)strtotime($lastDateFound . ' +1 day'));
-                $simEnd = $to;
+            // NOUVEAU : Mode Backtest pour l'Administrateur
+            $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
+            $user = $_SESSION['user'] ?? null;
+            $isAdmin = (is_array($user) && in_array($user['role'] ?? '', ['admin', 'editor']));
+
+            if ($isAdmin && $isBacktest) {
+                // En mode backtest, on force la prévision sur les MEMES dates que le passé
+                $targetType = ($type === 'all') ? 'solaire' : $type;
                 
-                // Sécurité : Max 3 jours de prévision pour ne pas surcharger l'API
-                $maxSimDate = date('Y-m-d', (int)strtotime($simStart . ' +3 days'));
-                if ($simEnd > $maxSimDate) $simEnd = $maxSimDate; 
+                $simStandard = $this->energyService->simulateDataFromWeather($targetType, $city, $from, $to);
+                foreach($simStandard['data'] as &$d) { $d['algo'] = 'standard'; $d['statut'] = 'prevision'; }
+                
+                $simLSTM = $this->energyService->simulateDataWithLSTM($targetType, $city, $from, $to);
+                foreach($simLSTM['data'] as &$d) { $d['algo'] = 'lstm'; $d['statut'] = 'prevision'; }
 
-                if ($simStart <= $simEnd) {
-                    // On détermine le type principal pour la simulation
-                    $targetType = ($type === 'all') ? 'solaire' : $type;
-                    
-                    $simulated = $this->energyService->simulateDataFromWeather($targetType, $city, $simStart, $simEnd);
-                    
-                    // Fusion : CSV + IA
-                    if (isset($simulated['data']) && is_array($simulated['data']) && !empty($simulated['data'])) {
-                        /** @var array<int, array<string, mixed>> $simData */
-                        $simData = $simulated['data'];
-                        $finalData = array_merge($finalData, $simData);
+                $finalData = array_merge($finalData, $simStandard['data'], $simLSTM['data']);
+            } 
+            else {
+                // Mode normal (Prédiction classique du futur uniquement pour le lendemain)
+                $lastDateFound = $from; 
+                if (!empty($finalData)) {
+                    $lastItem = end($finalData);
+                    $lastDateFound = substr($lastItem['date'] ?? $from, 0, 10);
+                } else {
+                    $lastDateFound = date('Y-m-d', (int)strtotime($from . ' -1 day'));
+                }
+
+                if ($lastDateFound < $to) {
+                    $simStart = date('Y-m-d', (int)strtotime($lastDateFound . ' +1 day'));
+                    $simEnd = $to;
+                    if ($simEnd > $simStart) $simEnd = $simStart; // Limité à 1 jour
+
+                    if ($simStart <= $simEnd) {
+                        $targetType = ($type === 'all') ? 'solaire' : $type;
+                        $algoPath = __DIR__ . '/../../Storage/active_algo.txt';
+                        $activeAlgo = file_exists($algoPath) ? trim(file_get_contents($algoPath)) : 'standard';
+                        $requestedAlgo = $_GET['algo'] ?? $activeAlgo;
+
+                        if ($requestedAlgo === 'lstm') {
+                            $simulated = $this->energyService->simulateDataWithLSTM($targetType, $city, $simStart, $simEnd);
+                        } else {
+                            $simulated = $this->energyService->simulateDataFromWeather($targetType, $city, $simStart, $simEnd);
+                        }
+                        if (isset($simulated['data']) && is_array($simulated['data'])) {
+                            $finalData = array_merge($finalData, $simulated['data']);
+                        }
                     }
                 }
             }
             
-            // On prépare la réponse finale
             $response = $realData;
             $response['data'] = $finalData;
-            
             \App\Core\JsonResponse::send($response);
 
         } catch (\Exception $e) {
@@ -228,4 +241,25 @@ class EnergyController extends \App\Core\Controller {
         }
         $this->redirect('/dashboard');
     }
+
+    /**
+     * Action (Admin) : Choisit l'algorithme par défaut pour les utilisateurs.
+     * Route: POST /energy/setAlgorithm
+     */
+    public function setAlgorithm(): void {
+        $this->requireLogin();
+        $user = $_SESSION['user'] ?? null;
+        
+        if (!is_array($user) || !in_array($user['role'] ?? '', ['admin', 'editor'])) {
+            $this->redirect('/dashboard');
+            return;
+        }
+
+        $algo = $_POST['algo'] === 'lstm' ? 'lstm' : 'standard';
+        file_put_contents(__DIR__ . '/../../Storage/active_algo.txt', $algo);
+        
+        $this->flash('success', "L'algorithme actif a été mis à jour.");
+        $this->redirect('/dashboard');
+    }
+
 }

@@ -48,3 +48,4 @@ $router->add('POST', '/profile/createUser', [App\Controllers\ProfileController::
 $router->add('GET',  '/api/energy',         [App\Controllers\EnergyController::class,   'index']);
 $router->add('POST', '/energy/upload',      [App\Controllers\EnergyController::class,   'upload']);
 $router->add('POST', '/energy/delete',      [App\Controllers\EnergyController::class,   'delete']);
+$router->add('POST', '/energy/setAlgorithm', [App\Controllers\EnergyController::class,   'setAlgorithm']);

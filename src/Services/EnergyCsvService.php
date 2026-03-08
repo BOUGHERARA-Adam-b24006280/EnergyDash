@@ -371,6 +371,30 @@ class EnergyCsvService {
     }
 
     /**
+     * Deuxième algorithme (Simulé) : LSTM (Long Short-Term Memory)
+     * Lisse les prévisions météorologiques brutes pour simuler l'apprentissage profond.
+     * 
+     * @param string $type Type d'énergie.
+     * @param string $city Ville cible pour la météo.
+     * @param string $startDate Date de début de simulation (Y-m-d).
+     * @param string $endDate Date de fin de simulation (Y-m-d).
+     * @return array<string, mixed> $baseData Données simulées formatées pour le frontend.
+     */
+    public function simulateDataWithLSTM(string $type, string $city, string $startDate, string $endDate): array {
+        $baseData = $this->simulateDataFromWeather($type, $city, $startDate, $endDate);
+        
+        if (empty($baseData['data'])) return $baseData;
+
+        foreach ($baseData['data'] as &$row) {
+            // Un modèle LSTM a tendance à lisser les courbes (réduction de la variance)
+            $row['production'] = round(max(0, $row['production'] * 0.85 + (rand(0, 15) / 100)), 2);
+            $row['statut'] = 'prevision_lstm';
+        }
+
+        return $baseData;
+    }
+
+    /**
      * Helper : Formate la réponse standardisée.
      * @param string $type Type d'énergie.
      * @param string $city Ville.

@@ -199,19 +199,71 @@
             </div>
         </div>
 
-        <div class="lg:col-span-8">
-            <div class="bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 dark:border-neutral-700 p-5 h-full min-h-[500px] flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white" id="chartTitle">
-                        Graphique de production
-                    </h3>
-                    <span class="text-xs text-gray-400">Données en kW</span>
+        <div class="lg:col-span-8 space-y-6">
+            <?php 
+            $userRole = (is_array($user) && isset($user['role'])) ? $user['role'] : 'user';
+            $isAdmin = in_array($userRole, ['admin', 'editor']);
+            
+            // On lit l'algorithme actuel depuis le fichier texte (ou on met 'standard' par défaut)
+            $algoFile = __DIR__ . '/../../../Storage/active_algo.txt';
+            $activeAlgo = file_exists($algoFile) ? trim(file_get_contents($algoFile)) : 'standard';
+            ?>
+
+            <?php if ($isAdmin): ?>
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 dark:bg-blue-900/20 dark:border-blue-800">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <h3 class="text-md font-bold text-blue-800 dark:text-blue-300">Panneau de contrôle IA (Administrateur)</h3>
+                        
+                        <label id="backtestContainer" class="inline-flex items-center cursor-pointer bg-white dark:bg-neutral-800 px-4 py-2 rounded-lg border border-gray-200 shadow-sm transition-colors duration-300">
+                            <input type="checkbox" id="backtestToggle" class="sr-only peer">
+                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                            <span id="backtestLabel" class="ms-3 text-sm font-medium text-gray-700 dark:text-gray-300">Mode Backtest : <strong>INACTIF</strong></span>
+                        </label>
+                    </div>
+                    
+                    <form action="/energy/setAlgorithm" method="POST" class="flex flex-col sm:flex-row items-center gap-4">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '') ?>">
+                        <select name="algo" class="py-2 px-3 border-gray-200 rounded-lg text-sm w-full sm:w-auto dark:bg-neutral-800 dark:border-neutral-700 dark:text-gray-400">
+                            <option value="standard" <?= $activeAlgo === 'standard' ? 'selected' : '' ?>>Algorithme Standard (Météo)</option>
+                            <option value="lstm" <?= $activeAlgo === 'lstm' ? 'selected' : '' ?>>Algorithme LSTM (Réseau de neurones)</option>
+                        </select>
+                        <button type="submit" class="w-full sm:w-auto py-2 px-4 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                            Appliquer pour tous les clients
+                        </button>
+                    </form>
                 </div>
-                
-                <div class="relative flex-1 w-full">
-                    <canvas id="energyChart"></canvas>
+
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 p-5 flex flex-col" style="height: 450px;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white" id="chartTitleStd">Modèle 1 : Standard (Météo)</h3>
+                        <span id="errorStd" class="hidden px-3 py-1 bg-gray-100 text-gray-800 font-bold rounded-lg text-sm dark:bg-neutral-800 dark:text-white border border-gray-200"></span>
+                    </div>
+                    <div class="relative flex-1 w-full"><canvas id="energyChartStandard"></canvas></div>
                 </div>
-            </div>
+
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 p-5 flex flex-col mt-6" style="height: 450px;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white" id="chartTitleLstm">Modèle 2 : LSTM (Deep Learning)</h3>
+                        <span id="errorLstm" class="hidden px-3 py-1 bg-red-100 text-red-800 font-bold rounded-lg text-sm dark:bg-red-900/30 dark:text-red-400 border border-red-200"></span>
+                    </div>
+                    <div class="relative flex-1 w-full"><canvas id="energyChartLSTM"></canvas></div>
+                </div>
+
+            <?php else: ?>
+                <div class="bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-900 p-5 flex flex-col" style="height: 600px;">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white" id="chartTitle">
+                            Graphique de production
+                        </h3>
+                        <span class="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded dark:bg-blue-900 dark:text-blue-300">
+                            Propulsé par IA (<?= strtoupper($activeAlgo) ?>)
+                        </span>
+                    </div>
+                    <div class="relative flex-1 w-full">
+                        <canvas id="energyChart"></canvas>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
 
     </div>
