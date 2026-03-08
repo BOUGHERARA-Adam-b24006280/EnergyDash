@@ -201,7 +201,7 @@ class EnergyCsvService {
                         
                         if ($d >= $from && $d <= $to) {
                             $results[] = [
-                                'date' => (string)$data['date_heure'],
+                                'date' => date('Y-m-d H:00:00', $ts),
                                 'production' => (float)($data['production_kw'] ?? 0),
                                 'ville' => (string)($data['ville'] ?? ''),
                                 'meteo'      => (float)($data['valeur_meteo'] ?? 0),
