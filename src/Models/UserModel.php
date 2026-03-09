@@ -262,8 +262,8 @@ class UserModel extends \App\Core\Model {
      * @return bool Vrai si le mot de passe respecte les critères de sécurité.
      */
     public static function isPasswordStrong(string $password): bool {
-        return mb_strlen($password) >= 8 
-            && preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password);
+        return mb_strlen($password) >= 12
+            && preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/', $password);
     }
 
     /**
