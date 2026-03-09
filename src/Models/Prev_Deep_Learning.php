@@ -13,16 +13,16 @@ use Rubix\ML\Datasets\Labeled;
 
 class Prev_Deep_Learning
 {
-    private Pipeline $estimator;
+    private Pipeline $estimator; // Le réseau de neurones utilisé pour faire la prédiction
     private array $samples; // Les données d'entraînement (shape : [[meteoType, temp, meteoData], ...])
     private array $labels;  // Les étiquettes d'entraînement (shape : [energyProducted, ...])
     /**
-     * @param array $meteoType    The type of energy to predict (ex : 'sun', 'rain', 'wind')
-     * @param array $temp          The temperature data to use for the prediction (shape : [temp, ...])
-     * @param array $meteoData     The meteorological data to use for the prediction (shape : [meteoData, ...])
-     * @param array $archiveData   The archive data to use for the training (shape : [energyProducted, ...])
+     * @param array $meteoType Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
+     * @param array $temp Température utilisé pour la prédiction (format : [temp, ...])
+     * @param array $meteoData Données météo utilisé pour la prédiction (format : [meteoData, ...])
+     * @param array $archiveData Production d'énergie associé à chaque entrée de données météo (format : [energyProducted, ...])
      *
-     * @brief Construct the model with the given energy type, meteo data and archive data
+     * @brief Construit et entraine le modèle de prédiction
      */
     public function __construct(array $meteoType, array $temp, array $meteoData, array $archiveData)
     {
@@ -31,6 +31,7 @@ class Prev_Deep_Learning
         }
         $this->shapeData($meteoType, $temp, $meteoData, $archiveData);
 
+        // Définition de la structure du réseaux de neurones
         $this->estimator = new Pipeline([
             // Dit à l'estimateur de transformer les données catégoriques
             // (ex : 'éolien', 'solaire', 'hydrolique')
@@ -50,6 +51,15 @@ class Prev_Deep_Learning
         $this->train();
     }
 
+    /**
+     * @param array $meteoType      Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
+     * @param array $temp           Température utilisé pour la prédiction (format : [temp, ...])
+     * @param array $meteoData      Données météo utilisé pour la prédiction (format : [meteoData, ...])
+     * @param array $archiveData    Production d'énergie associé à chaque entrée de données météo (format : [energyProducted, ...])
+     * @return void
+     *
+     * @brief Formate les données d'entrée pour les rendre compatible avec le modèle de prédiction
+     */
     private function shapeData(array $meteoType, array $temp, array $meteoData, array $archiveData) : void
     {
         for ($i = 0; $i < count($archiveData); $i++) {
@@ -70,12 +80,17 @@ class Prev_Deep_Learning
     }
 
     /**
-     * @param array $meteoType      Type of energy to predict (ex : 'sun', 'rain', 'wind')
-     * @param array $temp           Temperature data to use for the prediction (format : [temp, ...])
-     * @param array $meteoData      Data to use for the prediction (format : [meteoData, ...])
-     * @return void
+     * @param array $meteoType      Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
+     * @param array $temp           Température utilisé pour la prédiction (format : [temp, ...])
+     * @param array $meteoData      Données météo utilisé pour la prédiction (format : [meteoData, ...])
+     * @param array $dateString     Les dates de la prédiction (format : [date, ...])
+     * @param string $city          Le cite associé à la prédiction (ex : 'Paris', 'Lyon', 'Marseille')
      *
-     * @brief Predict the energy production for the given meteo data
+     * @return array                The predicted energy production (format : [[date, production, ville, meteo, temp, status], ...], ...])
+     *
+     * @warning Faites attention à bien correler les données d'entrée entre elles ( $meteoType[)
+     *
+     * @brief Prédit la production d'énergie en fonction des données météo, puis le formeate s'addapter au projet
      */
     public function predict(array $meteoType, array $temp, array $meteoData, array $dateString, string $city) : array
     {
