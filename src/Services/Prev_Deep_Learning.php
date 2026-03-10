@@ -1,5 +1,5 @@
 <?php
-namespace App\Models;
+namespace App\Services;
 
 use Rubix\ML\Datasets\Unlabeled;
 use Rubix\ML\NeuralNet\ActivationFunctions\ReLU;
@@ -14,8 +14,9 @@ use Rubix\ML\Datasets\Labeled;
 class Prev_Deep_Learning
 {
     private Pipeline $estimator; // Le réseau de neurones utilisé pour faire la prédiction
-    private array $samples; // Les données d'entraînement (shape : [[meteoType, temp, meteoData], ...])
-    private array $labels;  // Les étiquettes d'entraînement (shape : [energyProducted, ...])
+    private array $samples = []; // Les données d'entraînement (shape : [[meteoType, temp, meteoData], ...])
+    private array $labels = [];  // Les étiquettes d'entraînement (shape : [energyProducted, ...])
+
     /**
      * @param array $meteoType Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
      * @param array $temp Température utilisé pour la prédiction (format : [temp, ...])
@@ -99,9 +100,9 @@ class Prev_Deep_Learning
          */
         $samples = [];
         for($i = 0; $i < count($meteoType); $i++) {
-            $samples[$i][0] = [$meteoType[$i], $temp[$i], $meteoData[$i]];
+            $samples[] = [$meteoType[$i], $temp[$i], $meteoData[$i]];
         }
-        $dataset = new Unlabeled($this->samples);
+        $dataset = new Unlabeled($samples);
 
         /*
          * Prédiction de la production
@@ -115,7 +116,7 @@ class Prev_Deep_Learning
         for ($i = 0; $i < count($samples); $i++) {
             $prediction[$i] = [
                 'date' => $dateString[$i],
-                'production' => $previewData[$i],
+                'production' => round($previewData[$i], 2),
                 'ville' => $city,
                 'meteo' => $meteoData[$i],
                 'temp' => $temp[$i],
