@@ -50,7 +50,8 @@ class EnergyController extends \App\Core\Controller {
             
             // 6. Mode Backtest (Admin)
             $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
-            $isAdmin = (is_array($_SESSION['user'] ?? null) && in_array($_SESSION['user']['role'] ?? '', ['admin', 'editor']));
+            // Seul l'admin pur a le droit au backtest
+            $isAdmin = (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin');
 
             if ($isAdmin && $isBacktest) {
                 $targetType = ($type === 'all') ? 'solaire' : $type;

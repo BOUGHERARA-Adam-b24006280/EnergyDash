@@ -31,8 +31,12 @@ class CsvReader {
     private function cleanHeaders(array $headers): array {
         if (empty($headers)) return [];
         $headersString = array_map('strval', $headers);
-        $bom = pack('H*','EFBBBF');
-        $headersString[0] = preg_replace("/^$bom/", '', $headersString[0]) ?? $headersString[0];
+        
+        // Suppression robuste du caractère invisible (BOM UTF-8)
+        $bom = pack('H*', 'EFBBBF');
+        if (str_starts_with($headersString[0], $bom)) {
+            $headersString[0] = substr($headersString[0], strlen($bom));
+        }
         
         return array_map(function($h) { return strtolower(trim($h)); }, $headersString);
     }
