@@ -6,25 +6,36 @@
 
 namespace App\Controllers;
 
+use App\Infrastructure\CsvReader;
+use App\Repositories\EnergyRepository;
+
 /**
  * Classe DashboardController
  * Gère la vue principale de l'application où sont affichés les graphiques et les données.
- * Fait le lien entre le service de données (EnergyCsvService) et la vue.
+ * Fait le lien entre le dépôt de données (EnergyRepository) et la vue.
  *
  * @package App\Controllers
  */
 class DashboardController extends \App\Core\Controller {
 
-    /** @var EnergyCsvService Service responsable de la lecture du CSV et des prévisions */
-    private \App\Services\EnergyCsvService $energyService;
+    /** @var EnergyRepository Dépôt responsable des requêtes sur les données énergétiques */
+    private EnergyRepository $energyRepository;
 
     /**
      * Constructeur.
-     * Initialise la session (via le parent) et instancie le service de données.
+     * Initialise la session (via le parent) et instancie l'accès aux données.
      */
     public function __construct() {
         parent::__construct();
-        $this->energyService = new \App\Services\EnergyCsvService();
+        
+        $userId = $_SESSION['user']['id'] ?? null;
+        $idSuffix = $userId ? (int)$userId : 'default';
+        $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
+        $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
+        $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
+
+        $csvReader = new \App\Infrastructure\CsvReader($csvPath);
+        $this->energyRepository = new \App\Repositories\EnergyRepository($csvReader);
     }
 
     /**
@@ -38,8 +49,9 @@ class DashboardController extends \App\Core\Controller {
 
         $this->initCsrf();
 
-        $cities = $this->energyService->getAvailableCities();
-        $energyMapping = $this->energyService->getCityEnergyMapping();
+        // 3. Utiliser le Repository au lieu de l'ancien CsvService
+        $cities = $this->energyRepository->getAvailableCities();
+        $energyMapping = $this->energyRepository->getCityEnergyMapping();
 
         $this->view->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',
