@@ -11,7 +11,7 @@ use Rubix\ML\Regressors\MLPRegressor;
 use Rubix\ML\Transformers\OneHotEncoder;
 use Rubix\ML\Datasets\Labeled;
 
-class Prev_Deep_Learning
+class DeepLearningPredictionService
 {
     private Pipeline $estimator; // Le réseau de neurones utilisé pour faire la prédiction
     private array $samples = []; // Les données d'entraînement (shape : [[meteoType, temp, meteoData], ...])
