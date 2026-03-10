@@ -1,14 +1,13 @@
 <?php
 namespace App\Services;
 
-class PredictionService 
+use App\Contracts\PredictionStrategyInterface;
+
+class PredictionService implements PredictionStrategyInterface 
 {
     private WeatherApiService $weatherApi;
-    
-    // 1. On remplace l'ancienne propriété par le nouveau service d'analyse
     private EnergyAnalyticsService $analyticsService;
 
-    // 2. On modifie le constructeur pour accepter le nouveau service
     public function __construct(EnergyAnalyticsService $analyticsService)
     {
         $this->weatherApi = new WeatherApiService();
@@ -16,13 +15,11 @@ class PredictionService
     }
 
     /**
-     * Votre algorithme d'origine (sauvegardé et isolé ici !)
+     * L'ancienne méthode "simulateStandard" s'appelle maintenant "predict" pour respecter l'interface.
      */
-    public function simulateStandard(string $type, string $city, string $startDate, string $endDate): array 
+    public function predict(string $type, string $city, string $startDate, string $endDate): array 
     {
         $weatherData = $this->weatherApi->getHourlyWeather($city, $startDate, $endDate);
-        
-        // 3. On appelle le nouveau service pour calculer le ratio
         $ratio = $this->analyticsService->getPerformanceRatio($type, $city);
         
         if ($ratio <= 0) {
@@ -32,14 +29,13 @@ class PredictionService
         }
 
         $predictions = [];
-
         foreach ($weatherData as $w) {
             $predictedProd = 0;
             $meteoValueForChart = 0;
 
             if ($type === 'solaire') {
                 $predictedProd = $w['sun'] * $ratio;
-                if ($w['temp'] > 25) $predictedProd *= 0.95; // Malus chaleur
+                if ($w['temp'] > 25) $predictedProd *= 0.95; 
                 $meteoValueForChart = $w['sun'];
             } elseif ($type === 'eolien') {
                 if ($w['wind'] > 10) $predictedProd = $w['wind'] * $ratio;

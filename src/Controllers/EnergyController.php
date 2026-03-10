@@ -5,7 +5,7 @@ use App\Infrastructure\CsvReader;
 use App\Repositories\EnergyRepository;
 use App\Services\EnergyAnalyticsService;
 use App\Services\FileUploadService;
-use App\Services\PredictionService;
+use App\Factories\PredictionFactory;
 
 class EnergyController extends \App\Core\Controller {
     
@@ -17,25 +17,27 @@ class EnergyController extends \App\Core\Controller {
         $to = (!empty($_GET['to'])) ? $this->sanitize($_GET['to']) : $from;
 
         try {
-            // 1. Déterminer le fichier cible (responsabilité d'infrastructure)
+            // 1. Déterminer le fichier cible
             $userId = $_SESSION['user']['id'] ?? null;
             $idSuffix = $userId ? (int)$userId : 'default';
             $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
             $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
             $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
 
-            // 2. Initialiser les nouveaux services (Respect du SRP)
+            // 2. Initialiser les nouveaux services
             $csvReader = new CsvReader($csvPath);
             $energyRepository = new EnergyRepository($csvReader);
             $analyticsService = new EnergyAnalyticsService($energyRepository);
             
-            // Le PredictionService utilise maintenant l'AnalyticsService pour ses calculs de ratio
-            $predictionService = new PredictionService($analyticsService);
+            // 3. ON UTILISE LA FACTORY ICI !
+            // Le contrôleur demande à la fabrique de lui donner le bon algorithme 
+            // (Standard ou IA) en fonction de ce qui a été choisi dans les réglages.
+            $predictionAlgorithm = PredictionFactory::make($energyRepository, $analyticsService);
 
-            // 3. Récupérer les données brutes depuis le Repository
+            // 4. Récupérer les données brutes depuis le Repository
             $rawData = $energyRepository->getEnergyData($type, $city, $from, $to, $compare);
             
-            // 4. Formater la structure de base (Responsabilité du Contrôleur)
+            // 5. Formater la structure de base
             $realData = [
                 'type' => $type,
                 'city' => $city,
@@ -46,19 +48,16 @@ class EnergyController extends \App\Core\Controller {
             
             $finalData = $realData['data']; 
             
-            // 5. Mode Backtest (Admin)
+            // 6. Mode Backtest (Admin)
             $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
             $isAdmin = (is_array($_SESSION['user'] ?? null) && in_array($_SESSION['user']['role'] ?? '', ['admin', 'editor']));
 
             if ($isAdmin && $isBacktest) {
                 $targetType = ($type === 'all') ? 'solaire' : $type;
                 
-                // Appel au PredictionService
-                $simStandard = $predictionService->simulateStandard($targetType, $city, $from, $to);
-                
-                // NOTE: On intégrera l'appel à Prev_Deep_Learning ici plus tard !
-                
-                $finalData = array_merge($finalData, $simStandard['data']);
+                // Appel UNIVERSEL de prédiction (via l'interface)
+                $simulated = $predictionAlgorithm->predict($targetType, $city, $from, $to);
+                $finalData = array_merge($finalData, $simulated['data']);
             } 
             else {
                 // Mode normal (Futur)
@@ -70,8 +69,8 @@ class EnergyController extends \App\Core\Controller {
 
                     $targetType = ($type === 'all') ? 'solaire' : $type;
                     
-                    // Appel au PredictionService
-                    $simulated = $predictionService->simulateStandard($targetType, $city, $simStart, $simEnd);
+                    // Appel UNIVERSEL de prédiction (via l'interface)
+                    $simulated = $predictionAlgorithm->predict($targetType, $city, $simStart, $simEnd);
                     $finalData = array_merge($finalData, $simulated['data']);
                 }
             }
@@ -122,8 +121,37 @@ class EnergyController extends \App\Core\Controller {
         $this->redirect('/dashboard');
     }
 
+    /**
+     * Sauvegarde le choix de l'algorithme (Standard ou Deep Learning) 
+     * depuis le formulaire d'administration.
+     */
     public function setAlgorithm(): void {
-        // Logique simplifiée en attendant l'intégration finale de l'IA
+        $this->requireLogin();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $this->validateCsrf();
+                
+                // Récupère l'algo choisi dans le menu déroulant
+                $algo = $_POST['algorithm'] ?? 'standard';
+                
+                // Sécurité : On vérifie que le choix est valide
+                $allowedAlgos = ['standard', 'deep_learning'];
+                
+                if (in_array($algo, $allowedAlgos)) {
+                    // On écrit le choix physiquement dans le fichier
+                    $file = __DIR__ . '/../../Storage/active_algo.txt';
+                    file_put_contents($file, $algo);
+                    
+                    $this->flash('success', "L'algorithme de prédiction a été mis à jour avec succès !");
+                } else {
+                    $this->flash('error', "Algorithme non reconnu.");
+                }
+            } catch (\Exception $e) {
+                $this->flash('error', $e->getMessage());
+            }
+        }
+        
         $this->redirect('/dashboard');
     }
 }
