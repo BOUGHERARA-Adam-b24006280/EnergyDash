@@ -29,17 +29,19 @@ class CsvReader {
     }
 
     private function cleanHeaders(array $headers): array {
-        if (empty($headers)) return [];
-        $headersString = array_map('strval', $headers);
-        
-        // Suppression robuste du caractère invisible (BOM UTF-8)
-        $bom = pack('H*', 'EFBBBF');
-        if (str_starts_with($headersString[0], $bom)) {
-            $headersString[0] = substr($headersString[0], strlen($bom));
-        }
-        
-        return array_map(function($h) { return strtolower(trim($h)); }, $headersString);
+    if (empty($headers)) return [];
+    $headersString = array_map('strval', $headers);
+    
+    // Suppression explicite et robuste du BOM UTF-8
+    $bom = pack('H*', 'EFBBBF');
+    if (str_starts_with($headersString[0], $bom)) {
+        $headersString[0] = substr($headersString[0], strlen($bom));
     }
+    
+    return array_map(function($h) { 
+        return strtolower(trim($h)); 
+    }, $headersString);
+}
 
     /**
      * Lit le fichier ligne par ligne de manière optimisée (Générateur).

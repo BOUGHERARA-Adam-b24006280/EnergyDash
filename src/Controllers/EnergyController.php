@@ -133,16 +133,21 @@ class EnergyController extends \App\Core\Controller {
             try {
                 $this->validateCsrf();
                 
-                // Récupère l'algo choisi dans le menu déroulant
-                $algo = $_POST['algorithm'] ?? 'standard';
+                // 1. On cherche bien $_POST['algo'] (comme dans votre HTML)
+                $algo = $_POST['algo'] ?? 'standard';
                 
-                // Sécurité : On vérifie que le choix est valide
-                $allowedAlgos = ['standard', 'deep_learning'];
+                // 2. On autorise 'lstm' au lieu de 'deep_learning'
+                $allowedAlgos = ['standard', 'lstm'];
                 
                 if (in_array($algo, $allowedAlgos)) {
-                    // On écrit le choix physiquement dans le fichier
-                    $file = __DIR__ . '/../../Storage/active_algo.txt';
-                    file_put_contents($file, $algo);
+                    $baseDir = realpath(__DIR__ . '/../../');
+                    $file = $baseDir ? $baseDir . '/Storage/active_algo.txt' : __DIR__ . '/../../Storage/active_algo.txt';
+                    
+                    $result = @file_put_contents($file, $algo);
+                    
+                    if ($result === false) {
+                        throw new \Exception("Erreur de permission : Impossible d'écrire dans le fichier active_algo.txt");
+                    }
                     
                     $this->flash('success', "L'algorithme de prédiction a été mis à jour avec succès !");
                 } else {
@@ -153,6 +158,7 @@ class EnergyController extends \App\Core\Controller {
             }
         }
         
+        // On redirige bien vers le dashboard
         $this->redirect('/dashboard');
     }
 }
