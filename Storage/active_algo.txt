@@ -1,1 +1,1 @@
-lstm
+standard
