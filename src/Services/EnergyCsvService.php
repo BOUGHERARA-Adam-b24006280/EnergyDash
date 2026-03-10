@@ -1,11 +1,24 @@
 <?php
+/**
+ * Fichier : EnergyCsvService.php
+ * Rôle : gère la lecture, le traitement et l'extraction des données historiques de production d'énergie depuis un fichier CSV.
+ */
+
 namespace App\Services;
 
+/**
+ * Service responsable de la manipulation et de l'extraction des données depuis les fichiers CSV d'énergie.
+ */
 class EnergyCsvService {
+
+    /** @var string $csvPath Le chemin absolu vers le fichier CSV utilisé pour lire les données. */
     private string $csvPath;
+
+    /** @var string $delimiter Le caratère utilisé pour séparer les colonnes dans le fichier CSV (virgule par défaut) */
     private string $delimiter = ','; 
 
     /**
+     * Constructeur de service. Initialise le chemin du fichier CSV à utiliser.
      * @param int|null $userId L'ID de l'utilisateur (null pour utiliser le fichier par défaut)
      */
     public function __construct(?int $userId = null) {
@@ -24,6 +37,11 @@ class EnergyCsvService {
         }
     }
 
+    /** 
+     * Détecte automatiquement le délimiteur utilisé dans le fichier CSV (virgule ou point virgule).
+     * @param string $file Le chemin absolu vers le fichier CSV à analyser.
+     * @return string Le déliimiteur détecté (',' ou ';').
+     */
     private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
         if ($handle) {
@@ -34,6 +52,11 @@ class EnergyCsvService {
         return ',';
     }
 
+    /**
+     * Nettoie les en-têtes du fichier CSV (supprime les BOM UTF-8, met en minuscules et retire les espaces).
+     * @param array $headers Le tableau brut des en-têtes récupéré via fgetcsv.
+     * @return array Le tableau des en-têtes nettoyés.
+     */
     private function cleanHeaders(array $headers): array {
         if (empty($headers)) return [];
         $headersString = array_map('strval', $headers);
@@ -46,6 +69,10 @@ class EnergyCsvService {
         }, $headersString);
     }
 
+    /**
+     * Récupère un tableau associatif liant chaque ville à ses types d'énergie disponibles.
+     * @return array Un tableau sous la forme ['ville' => ['type1', 'type2']].
+     */
     public function getCityEnergyMapping(): array {
         if (!file_exists($this->csvPath)) return [];
         $mapping = [];
@@ -75,6 +102,10 @@ class EnergyCsvService {
         return $mapping;
     }
 
+    /**
+     * Récupère la liste de toutes les villes disponibles dans le fichier CSV.
+     * @return array Un tableau indexé contenant le nom des villes triées par ordre alphabétique.
+     */
     public function getAvailableCities(): array {
         if (!file_exists($this->csvPath)) return [];
         $cities = [];
@@ -100,6 +131,15 @@ class EnergyCsvService {
         return $unique;
     }
 
+    /**
+     * Récupère les données de production énergétique réelles pour des critères spécifiques.
+     * @param string $type Le type d'énergie.
+     * @param string $city La ville ciblée (ou 'all').
+     * @param string $from La date de début de la recherche au format 'Y-m-d'.
+     * @param string $to La date de fin de la recherche au format 'Y-m-d'.
+     * @param string|null $compareCity (Optionnel) Une deuxième ville pour effectuer une comparaison.
+     * @return array Les données formatées et filtrées contenant les productions réelles heure par heure.
+     */
     public function getEnergyData(string $type, string $city, string $from, string $to, ?string $compareCity = null): array {
         if (!file_exists($this->csvPath)) return $this->fmt($type, $city, $from, $to, []);
 
@@ -159,7 +199,10 @@ class EnergyCsvService {
     }
 
     /**
-     * Calcule le ratio de performance historique (Production / Météo)
+     * Calcule le ratio de performance historique moyen (Production / Météo).
+     * @param string $type Le type d'énergie concerné.
+     * @param string $city La ville concernée.
+     * @return float Le ratio moyen de performance calculé sur la base de l'historique.
      */
     public function getPerformanceRatio(string $type, string $city): float {
         if (!file_exists($this->csvPath)) return 0;
@@ -189,6 +232,15 @@ class EnergyCsvService {
         return ($count > 0) ? $totalRatio / $count : 0;
     }
 
+    /**
+     * Formate la structure de réponse finale renvoyée par le service de données.
+     * @param string $type Le type d'énergie demandé.
+     * @param string $city La ville demandée.
+     * @param string $from La date de début de la plage.
+     * @param string $to La date de fin de la plage.
+     * @param array $data Le tableau des résultats horaires formatés de production.
+     * @return array Le tableau associatif final encapsulant les méta-données et les résultats.
+     */
     private function fmt($type, $city, $from, $to, $data): array {
         return ['type' => $type, 'city' => $city, 'from' => $from, 'to' => $to, 'data' => $data];
     }

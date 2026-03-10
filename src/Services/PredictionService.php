@@ -1,11 +1,26 @@
 <?php
+/**
+ * Fichier : PredictionService.php
+ * Rôle : Fichier contenant le service de prédiction standard.
+ */
+
 namespace App\Services;
 
+/**
+ * Service encapsulant l'algorithme de prédiction standard par calculs mathématiques.
+ */
 class PredictionService 
 {
+    /** @var WeatherApiService $weatherApi L'instance du service permettant de requêter l'API météo externe. */
     private WeatherApiService $weatherApi;
+
+    /** @var EnergyCsvService $csvService L'instance de service permettant d'accéder aux données historiques du fichier CSV. */
     private EnergyCsvService $csvService;
 
+    /** 
+     * Constructeur injectant les services dépendants nécessaires aux calculs mathématiques de prédiction.
+     * @param EnergyCsvService $csvService L'instance du service CSV déjà initialisée.
+     */
     public function __construct(EnergyCsvService $csvService)
     {
         $this->weatherApi = new WeatherApiService();
@@ -13,7 +28,13 @@ class PredictionService
     }
 
     /**
-     * Votre algorithme d'origine (sauvegardé et isolé ici !)
+     * Simule la production énergétique d'une ville selon un algorithme empirique standard basé sur
+     * les données météorologiques et le ratio de performance historique (ou un ratio par défaut si introuvable).
+     * @param string $type Le type d'énergie à simuler.
+     * @param string $city La ville sur laquelle s'applique la simulation.
+     * @param string $startDate La date de début de la simulation au format 'Y-m-d'.
+     * @param string $endDate La date de fin de la simulation au format 'Y-m-d'.
+     * @return array Un tableau contenant les métadonnées de requête et la série temporelle ('data') des productions horaires estimées.
      */
     public function simulateStandard(string $type, string $city, string $startDate, string $endDate): array 
     {

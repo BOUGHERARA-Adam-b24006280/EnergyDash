@@ -1,4 +1,9 @@
 <?php
+/**
+ * Fichier : DeepLearningPrédictionService.php
+ * Rôle : Fichier contenant le service de prédiction énergétique basé sur le Machine Learning.
+ */
+
 namespace App\Services;
 
 use Rubix\ML\Datasets\Unlabeled;
@@ -11,19 +16,28 @@ use Rubix\ML\Regressors\MLPRegressor;
 use Rubix\ML\Transformers\OneHotEncoder;
 use Rubix\ML\Datasets\Labeled;
 
+/** 
+ * Service utilisant l'Intelligence Artificielle (Deep Learning) via Rubix ML pour générer 
+ * des prédictions sur la production d'énergie en fonction de données météorologiques.
+ */
 class DeepLearningPredictionService
 {
-    private Pipeline $estimator; // Le réseau de neurones utilisé pour faire la prédiction
-    private array $samples = []; // Les données d'entraînement (shape : [[meteoType, temp, meteoData], ...])
-    private array $labels = [];  // Les étiquettes d'entraînement (shape : [energyProducted, ...])
+    /** @var Pipeline $estimator Le réseau de neurones artificiels utilisé pour faire l'apprentissage et la prédiction. */
+    private Pipeline $estimator;
+
+    /** @var array $samples Le tableau des données d'entrainement. */
+    private array $samples = [];
+
+    /** @var array $labels Le tableau des étiquettes d'entrainement cible. */
+    private array $labels = [];
 
     /**
-     * @param array $meteoType Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
-     * @param array $temp Température utilisé pour la prédiction (format : [temp, ...])
-     * @param array $meteoData Données météo utilisé pour la prédiction (format : [meteoData, ...])
-     * @param array $archiveData Production d'énergie associé à chaque entrée de données météo (format : [energyProducted, ...])
-     *
-     * @brief Construit et entraine le modèle de prédiction
+     * Contruit le modèle de prédiction et l'entraine immédiatement avec les données d'archives fournies.
+     * @param array $meteoType Le tableau listant les types d'énergie associés aux archives (ex : ['solaire', 'eolien', ...]).
+     * @param array $temp Le tableau des températures archivées.
+     * @param array $meteoData Le tableau des données météo principales (vent, pluie, soleil) archivées.
+     * @param array $archiveData Le tableau de la production d'énergie réelle (label/cible) associée à chaque entrée météo.
+     * @throws \InvalidArgumentException Si les tableaux d'entrée n'ont pas la même taille (incohérence des données).
      */
     public function __construct(array $meteoType, array $temp, array $meteoData, array $archiveData)
     {
@@ -53,13 +67,12 @@ class DeepLearningPredictionService
     }
 
     /**
-     * @param array $meteoType      Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
-     * @param array $temp           Température utilisé pour la prédiction (format : [temp, ...])
-     * @param array $meteoData      Données météo utilisé pour la prédiction (format : [meteoData, ...])
-     * @param array $archiveData    Production d'énergie associé à chaque entrée de données météo (format : [energyProducted, ...])
+     * Formate les tableaux bruts d'entrée pour les transformer en structures lisibles par l'estimateur ($samples et $labels).
+     * @param array $meteoType Le tableau des types d'énergies.
+     * @param array $temp Le tableau des températures correspondantes.
+     * @param array $meteoData Le tableau des valeurs météos spécifiques correspondantes.
+     * @param array $archiveData Le tableau de la production d'énergie cible.
      * @return void
-     *
-     * @brief Formate les données d'entrée pour les rendre compatible avec le modèle de prédiction
      */
     private function shapeData(array $meteoType, array $temp, array $meteoData, array $archiveData) : void
     {
@@ -70,9 +83,8 @@ class DeepLearningPredictionService
     }
 
     /**
+     * Déclenche l'entraînement (training) du réseau de neurones avec le jeu de données configuré.
      * @return void
-     *
-     * @brief Train the model with the given archive data and meteo data
      */
     private function train() : void
     {
@@ -81,17 +93,13 @@ class DeepLearningPredictionService
     }
 
     /**
-     * @param array $meteoType      Type d'énergie utilisé pour la prédiction (format : ['sun', 'rain', 'wind', ...])
-     * @param array $temp           Température utilisé pour la prédiction (format : [temp, ...])
-     * @param array $meteoData      Données météo utilisé pour la prédiction (format : [meteoData, ...])
-     * @param array $dateString     Les dates de la prédiction (format : [date, ...])
-     * @param string $city          Le cite associé à la prédiction (ex : 'Paris', 'Lyon', 'Marseille')
-     *
-     * @return array                The predicted energy production (format : [[date, production, ville, meteo, temp, status], ...], ...])
-     *
-     * @warning Faites attention à bien correler les données d'entrée entre elles ( $meteoType[)
-     *
-     * @brief Prédit la production d'énergie en fonction des données météo, puis le formeate s'addapter au projet
+     * Prédit la production d'énergie future à partir des prévisions météorologiques en utilisant le modèle entraîné.
+     * @param array $meteoType Le tableau des types d'énergies pour lesquels on veut prédire.
+     * @param array $temp Le tableau des prévisions de températures.
+     * @param array $meteoData Le tableau des prévisions de données météo principales (soleil, pluie, vent).
+     * @param array $dateString Le tableau des dates et heures associées aux prédictions.
+     * @param string $city La ville ciblée pour la prédiction (sera injectée dans la réponse).
+     * @return array Un tableau structuré contenant les productions horaires estimées formatées pour le tableau de bord.
      */
     public function predict(array $meteoType, array $temp, array $meteoData, array $dateString, string $city) : array
     {

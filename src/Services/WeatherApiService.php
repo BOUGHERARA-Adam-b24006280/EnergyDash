@@ -1,8 +1,18 @@
 <?php
+/**
+ * Fichier : WeatherApiService.php
+ * Rôle : Fichier contenant le client HTTP pour l'API Open-Meteo.
+ */
+
 namespace App\Services;
 
+/**
+ * Service faisant office de client pour l'API externe Open-Meteo.
+ */
 class WeatherApiService 
 {
+
+    /** @var array $coordinates Tableau associatif statique stockant la latitude et la longitude des villes prédéfinies. */
     private array $coordinates = [
         'lyon'      => ['lat' => 45.76, 'lon' => 4.83],
         'paris'     => ['lat' => 48.85, 'lon' => 2.35],
@@ -13,7 +23,11 @@ class WeatherApiService
     ];
 
     /**
-     * Récupère les données météo depuis Open-Meteo
+     * Récupère les données météorologiques horaires depuis Open-Meteo pour une période donnée.
+     * @param string $city Le nom de la ville pour laquelle on souhaite la météo.
+     * @param string $startDate La date de début de l'extraction au format 'Y-m-d'.
+     * @param string $endDate La date de fin de l'extraction au format 'Y-m-d'.
+     * @return array Un tableau contenant la liste formatée des relevés météo horaires. Retourne un tableau vide en cas d'erreur de l'API.
      */
     public function getHourlyWeather(string $city, string $startDate, string $endDate): array 
     {
@@ -44,6 +58,13 @@ class WeatherApiService
         return $this->formatWeatherData($apiData['hourly'], $startDate, $endDate);
     }
 
+    /**
+     * Nettoie et formate les données brutes reçues de l'API Open-Meteo en une structure plus lisible et normalisée.
+     * @param array $hourly Le tableau multidimensionnel brut retourné par la clé 'hourly' de l'API Open-Meteo.
+     * @param string $startDate La date de début au format 'Y-m-d' utilisée pour filtrer et conserver uniquement les jours demandés.
+     * @param string $endDate La date de fin au format 'Y-m-d' utilisée pour filtrer et conserver uniquement les jours demandés.
+     * @return array Un tableau indexé de relevés météo horaires contenant les clés 'date', 'temp', 'rain', 'wind', et 'sun'.
+     */
     private function formatWeatherData(array $hourly, string $startDate, string $endDate): array
     {
         $weatherList = [];

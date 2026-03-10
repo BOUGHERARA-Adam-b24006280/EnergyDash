@@ -1,18 +1,31 @@
 <?php
+/**
+ * Fichier : FileUploadService.php
+ * Rôle : Fichier contenant le service de gestion des téléversements (upload).
+ */
+
 namespace App\Services;
 
+/**
+ * Service gérant le téléversement et la suppression sécurisé des fichiers CSV utilisateurs.
+ */
 class FileUploadService
 {
+    /** @var srting $storageDir Le chemin absolu vers le dossier où les fichiers CSV seront stockés. */
     private string $storageDir;
 
+    /** Constructeur de service. Initialise le dossier de stockage de destination. */
     public function __construct()
     {
         $this->storageDir = __DIR__ . '/../../Storage';
     }
 
     /**
-     * Gère l'upload d'un fichier CSV.
-     * @throws \Exception En cas d'erreur ou de fichier invalide.
+     * Gère l'upload d'un fichier CSV, effectue des vérifications de sécurité (extension, type MIME) et déplace le fichier.
+     * @param array $file Le tableau contenant les informations du fichier uplaodé.
+     * @param int $userId L'identifiant de l'utilisateur qui téléverse le fichier.
+     * @return void
+     * @throws \Exception En cas d'erreur de transfert (code erreur HTTP), d'extension incorrecte, de type MIME invalide ou d'erreur d'écriture.
      */
     public function handleCsvUpload(array $file, int $userId): void
     {
@@ -53,7 +66,9 @@ class FileUploadService
     }
 
     /**
-     * Supprime le fichier CSV d'un utilisateur
+     * Supprime physiquement le fichier CSV associé à un utilisateur spécifique de l'espace de stockage.
+     * @param int $userId L'identifiant de l'utilisateur dont on veut supprimer le fichier CSV.
+     * @return bool Retourne true si le fichier a bien été supprimé, false sinon (ou s'il n'existait pas).
      */
     public function deleteUserCsv(int $userId): bool
     {
