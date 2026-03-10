@@ -1,7 +1,9 @@
 <?php
 namespace App\Controllers;
 
-use App\Services\EnergyCsvService;
+use App\Infrastructure\CsvReader;
+use App\Repositories\EnergyRepository;
+use App\Services\EnergyAnalyticsService;
 use App\Services\FileUploadService;
 use App\Services\PredictionService;
 
@@ -15,25 +17,44 @@ class EnergyController extends \App\Core\Controller {
         $to = (!empty($_GET['to'])) ? $this->sanitize($_GET['to']) : $from;
 
         try {
-            // 1. Initialiser les services avec l'ID de l'utilisateur
+            // 1. Déterminer le fichier cible (responsabilité d'infrastructure)
             $userId = $_SESSION['user']['id'] ?? null;
-            $csvService = new EnergyCsvService($userId ? (int)$userId : null);
-            $predictionService = new PredictionService($csvService);
+            $idSuffix = $userId ? (int)$userId : 'default';
+            $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
+            $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
+            $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
 
-            // 2. Récupérer les données passées
-            $realData = $csvService->getEnergyData($type, $city, $from, $to, $compare);
-            $finalData = $realData['data'] ?? []; 
+            // 2. Initialiser les nouveaux services (Respect du SRP)
+            $csvReader = new CsvReader($csvPath);
+            $energyRepository = new EnergyRepository($csvReader);
+            $analyticsService = new EnergyAnalyticsService($energyRepository);
             
-            // 3. Mode Backtest (Admin)
+            // Le PredictionService utilise maintenant l'AnalyticsService pour ses calculs de ratio
+            $predictionService = new PredictionService($analyticsService);
+
+            // 3. Récupérer les données brutes depuis le Repository
+            $rawData = $energyRepository->getEnergyData($type, $city, $from, $to, $compare);
+            
+            // 4. Formater la structure de base (Responsabilité du Contrôleur)
+            $realData = [
+                'type' => $type,
+                'city' => $city,
+                'from' => $from,
+                'to'   => $to,
+                'data' => $rawData
+            ];
+            
+            $finalData = $realData['data']; 
+            
+            // 5. Mode Backtest (Admin)
             $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
             $isAdmin = (is_array($_SESSION['user'] ?? null) && in_array($_SESSION['user']['role'] ?? '', ['admin', 'editor']));
 
             if ($isAdmin && $isBacktest) {
                 $targetType = ($type === 'all') ? 'solaire' : $type;
                 
-                // Appel au nouveau PredictionService !
+                // Appel au PredictionService
                 $simStandard = $predictionService->simulateStandard($targetType, $city, $from, $to);
-                foreach($simStandard['data'] as &$d) { $d['algo'] = 'standard'; }
                 
                 // NOTE: On intégrera l'appel à Prev_Deep_Learning ici plus tard !
                 
@@ -49,7 +70,7 @@ class EnergyController extends \App\Core\Controller {
 
                     $targetType = ($type === 'all') ? 'solaire' : $type;
                     
-                    // Appel au nouveau PredictionService !
+                    // Appel au PredictionService
                     $simulated = $predictionService->simulateStandard($targetType, $city, $simStart, $simEnd);
                     $finalData = array_merge($finalData, $simulated['data']);
                 }

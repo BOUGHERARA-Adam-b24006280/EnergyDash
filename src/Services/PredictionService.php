@@ -1,45 +1,29 @@
 <?php
-/**
- * Fichier : PredictionService.php
- * Rôle : Fichier contenant le service de prédiction standard.
- */
-
 namespace App\Services;
 
-/**
- * Service encapsulant l'algorithme de prédiction standard par calculs mathématiques.
- */
 class PredictionService 
 {
-    /** @var WeatherApiService $weatherApi L'instance du service permettant de requêter l'API météo externe. */
     private WeatherApiService $weatherApi;
+    
+    // 1. On remplace l'ancienne propriété par le nouveau service d'analyse
+    private EnergyAnalyticsService $analyticsService;
 
-    /** @var EnergyCsvService $csvService L'instance de service permettant d'accéder aux données historiques du fichier CSV. */
-    private EnergyCsvService $csvService;
-
-    /** 
-     * Constructeur injectant les services dépendants nécessaires aux calculs mathématiques de prédiction.
-     * @param EnergyCsvService $csvService L'instance du service CSV déjà initialisée.
-     */
-    public function __construct(EnergyCsvService $csvService)
+    // 2. On modifie le constructeur pour accepter le nouveau service
+    public function __construct(EnergyAnalyticsService $analyticsService)
     {
         $this->weatherApi = new WeatherApiService();
-        $this->csvService = $csvService;
+        $this->analyticsService = $analyticsService;
     }
 
     /**
-     * Simule la production énergétique d'une ville selon un algorithme empirique standard basé sur
-     * les données météorologiques et le ratio de performance historique (ou un ratio par défaut si introuvable).
-     * @param string $type Le type d'énergie à simuler.
-     * @param string $city La ville sur laquelle s'applique la simulation.
-     * @param string $startDate La date de début de la simulation au format 'Y-m-d'.
-     * @param string $endDate La date de fin de la simulation au format 'Y-m-d'.
-     * @return array Un tableau contenant les métadonnées de requête et la série temporelle ('data') des productions horaires estimées.
+     * Votre algorithme d'origine (sauvegardé et isolé ici !)
      */
     public function simulateStandard(string $type, string $city, string $startDate, string $endDate): array 
     {
         $weatherData = $this->weatherApi->getHourlyWeather($city, $startDate, $endDate);
-        $ratio = $this->csvService->getPerformanceRatio($type, $city);
+        
+        // 3. On appelle le nouveau service pour calculer le ratio
+        $ratio = $this->analyticsService->getPerformanceRatio($type, $city);
         
         if ($ratio <= 0) {
             if ($type === 'solaire') $ratio = 0.005; 
