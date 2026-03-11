@@ -28,8 +28,15 @@ class DashboardController extends \App\Core\Controller {
     public function __construct() {
         parent::__construct();
         
-        $userId = $_SESSION['user']['id'] ?? null;
-        $idSuffix = $userId ? (int)$userId : 'default';
+        $userSession = $_SESSION['user'] ?? [];
+        $userId = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
+        
+        if (is_numeric($userId)) {
+            $idSuffix = (int)$userId;
+        } else {
+            $idSuffix = 'default';
+        }
+
         $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
         $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
         $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;

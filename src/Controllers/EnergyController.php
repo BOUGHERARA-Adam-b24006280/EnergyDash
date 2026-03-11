@@ -23,15 +23,32 @@ class EnergyController extends \App\Core\Controller {
      * @return void Envoie une réponse JSON via App\Core\JsonResponse.
      */
     public function index(): void {
-        $type = $this->sanitize($_GET['type'] ?? 'all');
-        $city = $this->sanitize($_GET['city'] ?? 'all'); 
-        $compare = (!empty($_GET['compare'])) ? $this->sanitize($_GET['compare']) : null;
-        $from = $this->sanitize($_GET['from'] ?? date('Y-m-01'));
-        $to = (!empty($_GET['to'])) ? $this->sanitize($_GET['to']) : $from;
+        $typeParam = $_GET['type'] ?? 'all';
+        $type = $this->sanitize(is_string($typeParam) ? $typeParam : 'all');
+
+        $cityParam = $_GET['city'] ?? 'all';
+        $city = $this->sanitize(is_string($cityParam) ? $cityParam : 'all'); 
+
+        $compareParam = $_GET['compare'] ?? null;
+        $compare = (is_string($compareParam) && $compareParam !== '') ? $this->sanitize($compareParam) : null;
+
+        $fromParam = $_GET['from'] ?? date('Y-m-01');
+        $from = $this->sanitize(is_string($fromParam) ? $fromParam : date('Y-m-01'));
+
+        $toParam = $_GET['to'] ?? $from;
+        $to = (is_string($toParam) && $toParam !== '') ? $this->sanitize($toParam) : $from;
 
         try {
-            $userId = $_SESSION['user']['id'] ?? null;
-            $idSuffix = $userId ? (int)$userId : 'default';
+            $userSession = $_SESSION['user'] ?? null;
+            $userId = null;
+            $userRole = '';
+
+            if (is_array($userSession)) {
+                $userId = $userSession['id'] ?? null;
+                $userRole = is_string($userSession['role'] ?? null) ? $userSession['role'] : '';
+            }
+
+            $idSuffix = is_numeric($userId) ? (string)$userId : 'default';
             $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
             $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
             $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
@@ -45,7 +62,7 @@ class EnergyController extends \App\Core\Controller {
             $finalData = $rawData;
             
             $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
-            $isAdmin = (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin');
+            $isAdmin = ($userRole === 'admin');
 
             if ($isAdmin && $isBacktest) {
                 $targetType = ($type === 'all') ? 'solaire' : $type;
@@ -64,10 +81,16 @@ class EnergyController extends \App\Core\Controller {
                         
                         $sim = $tempAlgo->predict($targetType, $currentCity, $from, $to);
                         
-                        foreach ($sim['data'] as &$point) {
-                            $point['algo'] = $algoName;
+                        $simData = $sim['data'] ?? null;
+                        if (is_array($simData)) {
+                            foreach ($simData as &$point) {
+                                if (is_array($point)) {
+                                    $point['algo'] = $algoName;
+                                }
+                            }
+                            /** @var array<int, array<string, mixed>> $simData */
+                            $finalData = array_merge($finalData, $simData);
                         }
-                        $finalData = array_merge($finalData, $sim['data']);
                     }
                 }
             }
@@ -75,11 +98,17 @@ class EnergyController extends \App\Core\Controller {
                 $lastDateFound = empty($finalData) ? date('Y-m-d', strtotime($from . ' -1 day')) : substr(end($finalData)['date'], 0, 10);
 
                 if ($lastDateFound < $to && $city !== 'all') {
-                    $simStart = date('Y-m-d', strtotime($lastDateFound . ' +1 day'));
-                    $targetType = ($type === 'all') ? 'solaire' : $type;
+                    $tsNext = strtotime($lastDateFound . ' +1 day');
+                    $simStart = ($tsNext !== false) ? date('Y-m-d', $tsNext) : $lastDateFound;
                     
+                    $targetType = ($type === 'all') ? 'solaire' : $type;
                     $simulated = $predictionAlgorithm->predict($targetType, $city, $simStart, $to);
-                    $finalData = array_merge($finalData, $simulated['data']);
+                    
+                    $simData = $simulated['data'] ?? null;
+                    if (is_array($simData)) {
+                        /** @var array<int, array<string, mixed>> $simData */
+                        $finalData = array_merge($finalData, $simData);
+                    }
                 }
             }
             
@@ -103,13 +132,21 @@ class EnergyController extends \App\Core\Controller {
      */
     public function upload(): void {
         $this->requireLogin();
+        $csvFile = $_FILES['csv_file'] ?? null;
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
             try {
                 $this->validateCsrf();
-                $userId = (int)$_SESSION['user']['id'];
-                
+                $userSession = $_SESSION['user'] ?? null;
+                $userIdVal = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
+
+                if (!is_numeric($userIdVal)) {
+                    throw new \Exception("Utilisateur non identifié.");
+                }
+
+                $userId = (int)$userIdVal;
                 $uploadService = new FileUploadService();
-                $uploadService->handleCsvUpload($_FILES['csv_file'], $userId);
+                $uploadService->handleCsvUpload($csvFile, $userId);
                 
                 $this->flash('success', "Fichier importé avec succès !");
             } catch (\Exception $e) {
@@ -128,7 +165,14 @@ class EnergyController extends \App\Core\Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $this->validateCsrf();
-                $userId = (int)$_SESSION['user']['id'];
+                $userSession = $_SESSION['user'] ?? null;
+                $userIdVal = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
+
+                if (!is_numeric($userIdVal)) {
+                    throw new \Exception("Action impossible.");
+                }
+
+                $userId = (int)$userIdVal;
                 
                 $uploadService = new FileUploadService();
                 if ($uploadService->deleteUserCsv($userId)) {
