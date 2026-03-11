@@ -1,4 +1,9 @@
 <?php
+/**
+ * Fichier : EnergyController.php
+ * Rôle : Gère les actions liées aux données énergétiques, aux imports et aux algorithmes de prédiction.
+ */
+
 namespace App\Controllers;
 
 use App\Infrastructure\CsvReader;
@@ -7,8 +12,16 @@ use App\Services\EnergyAnalyticsService;
 use App\Services\FileUploadService;
 use App\Factories\PredictionFactory;
 
+/**
+ * Cette classe est responsable de la récupération des données d'énergie,
+ * de la gestion des fichiers CSV utilisateurs et de la configuration de l'algorithme de prédiction.
+ */
 class EnergyController extends \App\Core\Controller {
     
+    /**
+     * Gère l'affichage et la récupération des données énergétiques (réelles et prévisions).
+     * @return void Envoie une réponse JSON via App\Core\JsonResponse.
+     */
     public function index(): void {
         $type = $this->sanitize($_GET['type'] ?? 'all');
         $city = $this->sanitize($_GET['city'] ?? 'all'); 
@@ -17,7 +30,6 @@ class EnergyController extends \App\Core\Controller {
         $to = (!empty($_GET['to'])) ? $this->sanitize($_GET['to']) : $from;
 
         try {
-            // ... (Initialisation des services identique à votre code) ...
             $userId = $_SESSION['user']['id'] ?? null;
             $idSuffix = $userId ? (int)$userId : 'default';
             $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
@@ -29,35 +41,29 @@ class EnergyController extends \App\Core\Controller {
             $analyticsService = new EnergyAnalyticsService($energyRepository);
             $predictionAlgorithm = PredictionFactory::make($energyRepository, $analyticsService);
 
-            // 1. Récupérer les données réelles
             $rawData = $energyRepository->getEnergyData($type, $city, $from, $to, $compare);
             $finalData = $rawData;
             
             $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
             $isAdmin = (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin');
 
-            // 2. Correction : Gérer la simulation pour le Backtest
             if ($isAdmin && $isBacktest) {
                 $targetType = ($type === 'all') ? 'solaire' : $type;
                 
-                // On doit simuler pour la ville principale ET la ville de comparaison
                 $citiesToPredict = [$city];
                 if ($compare) $citiesToPredict[] = $compare;
 
                 foreach ($citiesToPredict as $currentCity) {
-                    if ($currentCity === 'all') continue; // L'algo ne gère pas 'all' directement
+                    if ($currentCity === 'all') continue;
 
-                    // Pour le backtest admin, on veut idéalement les deux algos pour comparer
                     $algos = ['standard', 'lstm'];
                     foreach ($algos as $algoName) {
-                        // Forcer l'algo pour cette simulation
                         $tempAlgo = ($algoName === 'lstm') 
                             ? new \App\Strategies\DeepLearningStrategy($energyRepository)
                             : new \App\Services\PredictionService($analyticsService);
                         
                         $sim = $tempAlgo->predict($targetType, $currentCity, $from, $to);
                         
-                        // On ajoute manuellement la clé 'algo' pour le JS
                         foreach ($sim['data'] as &$point) {
                             $point['algo'] = $algoName;
                         }
@@ -66,7 +72,6 @@ class EnergyController extends \App\Core\Controller {
                 }
             }
             else {
-                // Mode normal (Prédiction pour le futur uniquement)
                 $lastDateFound = empty($finalData) ? date('Y-m-d', strtotime($from . ' -1 day')) : substr(end($finalData)['date'], 0, 10);
 
                 if ($lastDateFound < $to && $city !== 'all') {
@@ -92,6 +97,10 @@ class EnergyController extends \App\Core\Controller {
         }
     }
 
+    /**
+     * Gère l'importation d'un fichier CSV personnalisé par un utilisateur.
+     * @return void Redirige vers le dashboard avec un message flash.
+     */
     public function upload(): void {
         $this->requireLogin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
@@ -110,6 +119,10 @@ class EnergyController extends \App\Core\Controller {
         $this->redirect('/dashboard');
     }
 
+    /**
+     * Supprime les données CSV personnalisées de l'utilisateur connecté.
+     * @return void Redirige vers le dashboard avec un message flash.
+     */
     public function delete(): void {
         $this->requireLogin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -131,8 +144,9 @@ class EnergyController extends \App\Core\Controller {
     }
 
     /**
-     * Sauvegarde le choix de l'algorithme (Standard ou Deep Learning) 
-     * depuis le formulaire d'administration.
+     * Enregistre le choix de l'algorithme de prédiction.
+     * @return void Redirige vers le dashboard avec un message flash.
+     * @throws \Exception En cas d'erreur d'écriture ou d'algorithme non reconnu.
      */
     public function setAlgorithm(): void {
         $this->requireLogin();
@@ -141,10 +155,8 @@ class EnergyController extends \App\Core\Controller {
             try {
                 $this->validateCsrf();
                 
-                // 1. On cherche bien $_POST['algo'] (comme dans votre HTML)
                 $algo = $_POST['algo'] ?? 'standard';
                 
-                // 2. On autorise 'lstm' au lieu de 'deep_learning'
                 $allowedAlgos = ['standard', 'lstm'];
                 
                 if (in_array($algo, $allowedAlgos)) {
@@ -166,7 +178,6 @@ class EnergyController extends \App\Core\Controller {
             }
         }
         
-        // On redirige bien vers le dashboard
         $this->redirect('/dashboard');
     }
 }

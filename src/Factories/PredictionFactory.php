@@ -1,4 +1,9 @@
 <?php
+/**
+ * Fichier : PredictionFactory.php
+ * Rôle : Responsable de l'instanciation dynamique des stratégies de prédiction.
+ */
+
 namespace App\Factories;
 
 use App\Contracts\PredictionStrategyInterface;
@@ -7,14 +12,23 @@ use App\Strategies\DeepLearningStrategy;
 use App\Services\EnergyAnalyticsService;
 use App\Repositories\EnergyRepository;
 
+/**
+ * Cette classe implémente la logique de sélection de l'algorithme.
+ */
 class PredictionFactory 
 {
+
+    /**
+     * Crée et retourne l'instance de la stratégie de prédiction active.
+     * @param EnergyRepository $repository Le dépôt de données pour l'accès aux historiques.
+     * @param EnergyAnalyticsService $analyticsService Le service d'analyse pour le calcul des ratios.
+     * @return PredictionStrategyInterface Une instance de l'algorithme choisi respectant l'interface commune.
+     */
     public static function make(EnergyRepository $repository, EnergyAnalyticsService $analyticsService): PredictionStrategyInterface 
     {
         $algoFile = __DIR__ . '/../../Storage/active_algo.txt';
         $activeAlgo = file_exists($algoFile) ? trim(file_get_contents($algoFile)) : 'standard';
 
-        // On vérifie le mot 'lstm' ici !
         if ($activeAlgo === 'lstm') {
             return new DeepLearningStrategy($repository);
         }

@@ -128,7 +128,8 @@ class DeepLearningPredictionService
                 'ville' => $city,
                 'meteo' => $meteoData[$i],
                 'temp' => $temp[$i],
-                'statut' => 'prevision'
+                'statut' => 'prevision',
+                'algo' => 'lstm'
             ];
         }
 

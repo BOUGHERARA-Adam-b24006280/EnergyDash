@@ -1,15 +1,25 @@
 <?php
+/**
+ * Fichier : CsvReader.php
+ * Rôle : Responsable uniquement de la lecture technique et de l'extraction des données d'un fichier CSV.
+ */
+
 namespace App\Infrastructure;
 
 /**
  * Classe responsable uniquement de la lecture technique d'un fichier CSV.
  */
 class CsvReader {
+
+    /** @var string Chemin absolu vers le fichier CSV cible. */
     private string $filePath;
+
+    /** @var string Délimiteur de colonnes détecté (par défaut la virgule). */
     private string $delimiter = ',';
 
     /**
-     * @param string $filePath Le chemin absolu vers le fichier CSV.
+     * Initialise le chemin du fichier et lance la détection automatique du délimiteur.
+     * @param string $filePath Le chemin complet vers le fichier à lire.
      */
     public function __construct(string $filePath) {
         $this->filePath = $filePath;
@@ -18,6 +28,11 @@ class CsvReader {
         }
     }
 
+    /**
+     * Analyse le fichier pour détecter le séparateur de colonnes.
+     * @param string $file Le chemin du fichier à analyser.
+     * @return string Le délimiteur détecté (';' ou ',').
+     */
     private function detectDelimiter(string $file): string {
         $handle = fopen($file, "r");
         if ($handle) {
@@ -28,11 +43,15 @@ class CsvReader {
         return ',';
     }
 
+    /**
+     * Nettoie et normalise les en-têtes du fichier CSV.
+     * @param array<int, string|null> $headers Les en-têtes bruts extraits du fichier.
+     * @return array<int, string> Les en-têtes nettoyés et normalisés.
+     */
     private function cleanHeaders(array $headers): array {
     if (empty($headers)) return [];
     $headersString = array_map('strval', $headers);
     
-    // Suppression explicite et robuste du BOM UTF-8
     $bom = pack('H*', 'EFBBBF');
     if (str_starts_with($headersString[0], $bom)) {
         $headersString[0] = substr($headersString[0], strlen($bom));
@@ -44,8 +63,8 @@ class CsvReader {
 }
 
     /**
-     * Lit le fichier ligne par ligne de manière optimisée (Générateur).
-     * @return \Generator|array[] Un générateur produisant des tableaux associatifs [colonne => valeur].
+     * Parcourt le fichier et retourne les lignes sous forme de tableaux associatifs.
+     * @return \Generator Un itérateur produisant des tableaux [colonne => valeur].
      */
     public function getRows(): \Generator {
         if (!file_exists($this->filePath)) return;
