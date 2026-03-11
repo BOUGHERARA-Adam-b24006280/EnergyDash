@@ -56,7 +56,6 @@ class DashboardController extends \App\Core\Controller {
 
         $this->initCsrf();
 
-        // 3. Utiliser le Repository au lieu de l'ancien CsvService
         $cities = $this->energyRepository->getAvailableCities();
         $energyMapping = $this->energyRepository->getCityEnergyMapping();
 

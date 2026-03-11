@@ -80,7 +80,6 @@ class CsvReader {
                 $headers = $this->cleanHeaders($rawHeaders);
                 
                 while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== false) {
-                    // On vérifie la correspondance des colonnes
                     if (count($row) === count($headers)) {
                         /** @var array<string, string> $combined */
                         $combined = array_combine($headers, $row);
