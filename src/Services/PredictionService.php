@@ -23,9 +23,9 @@ class PredictionService implements PredictionStrategyInterface
         $ratio = $this->analyticsService->getPerformanceRatio($type, $city);
         
         if ($ratio <= 0) {
-            if ($type === 'solaire') $ratio = 0.005; 
-            elseif ($type === 'eolien') $ratio = 0.1; 
-            else $ratio = 0.5;
+            if ($type === 'solaire') $ratio = 0.5; // 100 fois plus que 0.005
+            elseif ($type === 'eolien') $ratio = 15; // Production plus forte par km/h de vent
+            else $ratio = 5;
         }
 
         $predictions = [];
@@ -51,7 +51,8 @@ class PredictionService implements PredictionStrategyInterface
                 'ville' => $city,
                 'meteo' => $meteoValueForChart,
                 'temp' => $w['temp'],
-                'statut' => 'prevision'
+                'statut' => 'prevision',
+                'algo' => 'standard' // Ajoutez cette ligne
             ];
         }
 

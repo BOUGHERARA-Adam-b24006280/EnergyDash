@@ -90,7 +90,7 @@ class EnergyRepository {
             $dataVille = strtolower((string)($data['ville'] ?? ''));
             $dataMeteo = (float)($data['valeur_meteo'] ?? 0);
 
-            if ($dataType === strtolower($type) && $dataVille === strtolower($city) && $dataMeteo > 10) { 
+            if ($dataType === strtolower($type) && $dataVille === strtolower($city) && $dataMeteo > 0.1) { 
                 $results[] = [
                     'production' => (float)($data['production_kw'] ?? 0),
                     'meteo' => $dataMeteo

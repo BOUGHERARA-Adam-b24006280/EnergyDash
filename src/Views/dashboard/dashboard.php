@@ -202,7 +202,7 @@
         <div class="lg:col-span-8 space-y-6">
             <?php 
             $userRole = (is_array($user) && isset($user['role'])) ? $user['role'] : 'user';
-            $isAdmin = in_array($userRole, ['admin', 'editor']);
+            $isAdmin = in_array($userRole, ['admin']);
             
             // On lit l'algorithme actuel depuis le fichier texte (ou on met 'standard' par défaut)
             $algoFile = __DIR__ . '/../../../Storage/active_algo.txt';

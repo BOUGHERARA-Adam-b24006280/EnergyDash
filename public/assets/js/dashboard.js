@@ -238,7 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let errorSum = 0, errorCount = 0;
 
         dates.forEach(date => {
-            const pointsDate = rawData.filter(d => d.date === date && d.ville.toLowerCase() === mainCity.toLowerCase());
+            const pointsDate = rawData.filter(d => {
+                const dateMatch = d.date === date;
+                const cityMatch = (mainCity === 'all') ? true : (d.ville.toLowerCase() === mainCity.toLowerCase());
+                return dateMatch && cityMatch;
+            });
             
             const realPoints = pointsDate.filter(p => p.statut === 'reel');
             const realValue = realPoints.length > 0 ? realPoints.reduce((sum, p) => sum + parseFloat(p.production), 0) : null;

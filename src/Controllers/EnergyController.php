@@ -17,67 +17,75 @@ class EnergyController extends \App\Core\Controller {
         $to = (!empty($_GET['to'])) ? $this->sanitize($_GET['to']) : $from;
 
         try {
-            // 1. Déterminer le fichier cible
+            // ... (Initialisation des services identique à votre code) ...
             $userId = $_SESSION['user']['id'] ?? null;
             $idSuffix = $userId ? (int)$userId : 'default';
             $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
             $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
             $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
 
-            // 2. Initialiser les nouveaux services
             $csvReader = new CsvReader($csvPath);
             $energyRepository = new EnergyRepository($csvReader);
             $analyticsService = new EnergyAnalyticsService($energyRepository);
-            
-            // 3. ON UTILISE LA FACTORY ICI !
-            // Le contrôleur demande à la fabrique de lui donner le bon algorithme 
-            // (Standard ou IA) en fonction de ce qui a été choisi dans les réglages.
             $predictionAlgorithm = PredictionFactory::make($energyRepository, $analyticsService);
 
-            // 4. Récupérer les données brutes depuis le Repository
+            // 1. Récupérer les données réelles
             $rawData = $energyRepository->getEnergyData($type, $city, $from, $to, $compare);
+            $finalData = $rawData;
             
-            // 5. Formater la structure de base
-            $realData = [
-                'type' => $type,
-                'city' => $city,
-                'from' => $from,
-                'to'   => $to,
-                'data' => $rawData
-            ];
-            
-            $finalData = $realData['data']; 
-            
-            // 6. Mode Backtest (Admin)
             $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
-            // Seul l'admin pur a le droit au backtest
             $isAdmin = (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin');
 
+            // 2. Correction : Gérer la simulation pour le Backtest
             if ($isAdmin && $isBacktest) {
                 $targetType = ($type === 'all') ? 'solaire' : $type;
                 
-                // Appel UNIVERSEL de prédiction (via l'interface)
-                $simulated = $predictionAlgorithm->predict($targetType, $city, $from, $to);
-                $finalData = array_merge($finalData, $simulated['data']);
-            } 
+                // On doit simuler pour la ville principale ET la ville de comparaison
+                $citiesToPredict = [$city];
+                if ($compare) $citiesToPredict[] = $compare;
+
+                foreach ($citiesToPredict as $currentCity) {
+                    if ($currentCity === 'all') continue; // L'algo ne gère pas 'all' directement
+
+                    // Pour le backtest admin, on veut idéalement les deux algos pour comparer
+                    $algos = ['standard', 'lstm'];
+                    foreach ($algos as $algoName) {
+                        // Forcer l'algo pour cette simulation
+                        $tempAlgo = ($algoName === 'lstm') 
+                            ? new \App\Strategies\DeepLearningStrategy($energyRepository)
+                            : new \App\Services\PredictionService($analyticsService);
+                        
+                        $sim = $tempAlgo->predict($targetType, $currentCity, $from, $to);
+                        
+                        // On ajoute manuellement la clé 'algo' pour le JS
+                        foreach ($sim['data'] as &$point) {
+                            $point['algo'] = $algoName;
+                        }
+                        $finalData = array_merge($finalData, $sim['data']);
+                    }
+                }
+            }
             else {
-                // Mode normal (Futur)
+                // Mode normal (Prédiction pour le futur uniquement)
                 $lastDateFound = empty($finalData) ? date('Y-m-d', strtotime($from . ' -1 day')) : substr(end($finalData)['date'], 0, 10);
 
-                if ($lastDateFound < $to) {
+                if ($lastDateFound < $to && $city !== 'all') {
                     $simStart = date('Y-m-d', strtotime($lastDateFound . ' +1 day'));
-                    $simEnd = ($to > $simStart) ? $simStart : $to;
-
                     $targetType = ($type === 'all') ? 'solaire' : $type;
                     
-                    // Appel UNIVERSEL de prédiction (via l'interface)
-                    $simulated = $predictionAlgorithm->predict($targetType, $city, $simStart, $simEnd);
+                    $simulated = $predictionAlgorithm->predict($targetType, $city, $simStart, $to);
                     $finalData = array_merge($finalData, $simulated['data']);
                 }
             }
             
-            $realData['data'] = $finalData;
-            \App\Core\JsonResponse::send($realData);
+            \App\Core\JsonResponse::send([
+                'type' => $type,
+                'city' => $city,
+                'compare' => $compare,
+                'from' => $from,
+                'to'   => $to,
+                'data' => $finalData
+            ]);
 
         } catch (\Exception $e) {
             \App\Core\JsonResponse::error($e->getMessage(), 500);
