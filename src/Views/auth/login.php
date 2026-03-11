@@ -119,7 +119,7 @@ $action = is_string($uri)
                                     required aria-describedby="password-error">
                             </div>
                             <p class="mt-2 mb-4 text-sm text-gray-500 dark:text-neutral-500" id="hs-input-helper-text">
-                                Votre mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.
+                                Votre mot de passe doit contenir au moins 12 caractères, une majuscule et une minuscule.
                             </p>
                         </div>
                         <!-- End Form Group -->

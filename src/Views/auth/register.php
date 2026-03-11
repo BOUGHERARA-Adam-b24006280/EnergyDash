@@ -123,7 +123,7 @@ $action = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])
                             <div class="relative">
                                 <input type="password" id="confirm_password" name="confirm_password" placeholder="Mot de passe" class="py-2.5 sm:py-3 px-4 block w-full border-gray-200 rounded-lg sm:text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600" required aria-describedby="password-error">
                             </div>
-                            <p class="mt-2 mb-4 text-sm text-gray-500 dark:text-neutral-500" id="hs-input-helper-text">Votre mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.</p>
+                            <p class="mt-2 mb-4 text-sm text-gray-500 dark:text-neutral-500" id="hs-input-helper-text">Votre mot de passe doit contenir au moins 12 caractères, une majuscule et une minuscule.</p>
 
                         </div>
                         <!-- End Form Group -->
