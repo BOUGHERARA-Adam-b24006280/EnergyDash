@@ -174,7 +174,7 @@ class AuthController extends \App\Core\Controller {
                 'title' => 'Inscription',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token'],
-                'old' => $_POST //Pour réafficher les données saisies dans le formulaire
+                'old' => $_POST
             ]);
         }
     }

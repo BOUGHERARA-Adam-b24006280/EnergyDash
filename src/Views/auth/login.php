@@ -13,7 +13,7 @@ $action = is_string($uri)
     : '';
 ?>
 
-<?php if (!empty($success)): ?>
+<?php if (isset($success) && is_string($success) && !empty($success)): ?>
     <div class="bg-green-50 border border-green-200 text-sm text-green-800 rounded-lg p-4 dark:bg-green-800/10 dark:border-green-900 dark:text-green-500 mx-2 mb-4"
         role="alert" tabindex="-1" aria-labelledby="hs-success-label">
         <div class="flex">

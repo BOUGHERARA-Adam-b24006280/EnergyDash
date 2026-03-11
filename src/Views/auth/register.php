@@ -8,7 +8,7 @@
  * @var array<string, string> $old Données précédemment saisies
  */
 
-$old = $old ?? []; // Assure que $old existe
+$old = $old ?? [];
 
 $first  = htmlspecialchars($old['first_name'] ?? '', ENT_QUOTES, 'UTF-8');
 $last   = htmlspecialchars($old['last_name'] ?? '',  ENT_QUOTES, 'UTF-8');

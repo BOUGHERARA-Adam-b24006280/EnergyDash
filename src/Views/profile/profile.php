@@ -4,8 +4,14 @@
  * Rôle : Vue du profil utilisateur standard.
  *
  * @var array{first_name: string, last_name: string, email: string} $user Informations de l'utilisateur
+ * @var mixed $csrf_token Jetons CSRF injecté
  */
+
+    $tokenFromSession = $_SESSION['csrf_token'] ?? '';
+    $rawToken = $csrf_token ?? $tokenFromSession;
+    $safeCsrf = is_string($rawToken) ? $rawToken : '';
 ?>
+
 <?php if (!empty($_SESSION['success']) && is_string($_SESSION['success'])): ?>
     <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?></div>
 <?php elseif (!empty($_SESSION['error']) && is_string($_SESSION['error'])): ?>
@@ -28,7 +34,7 @@
             </div>
 
             <form method="POST" action="/profile/update">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($safeCsrf, ENT_QUOTES, 'UTF-8') ?>">
 
                 <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 

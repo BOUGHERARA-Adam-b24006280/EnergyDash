@@ -5,6 +5,7 @@
  */
 
 namespace App\Models;
+use PDOException;
 
 /**
  * Classe UserModel qui gère les interactions avec la table 'users'
