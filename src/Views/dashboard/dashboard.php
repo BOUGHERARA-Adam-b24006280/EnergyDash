@@ -222,7 +222,7 @@
             <?php if ($isAdmin): ?>
                 <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 dark:bg-blue-900/20 dark:border-blue-800">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                        <h3 class="text-md font-bold text-blue-800 dark:text-blue-300">Panneau de contrôle IA (Administrateur)</h3>
+                        <h3 class="text-md font-bold text-blue-800 dark:text-blue-300">Panneau de contrôle (Administrateur)</h3>
                         
                         <label id="backtestContainer" class="inline-flex items-center cursor-pointer bg-white dark:bg-neutral-800 px-4 py-2 rounded-lg border border-gray-200 shadow-sm transition-colors duration-300">
                             <input type="checkbox" id="backtestToggle" class="sr-only peer">
@@ -266,7 +266,7 @@
                             Graphique de production
                         </h3>
                         <span class="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded dark:bg-blue-900 dark:text-blue-300">
-                            Propulsé par IA (<?= strtoupper($activeAlgo) ?>)
+                            Algorithme de prévision : (<?= strtoupper($activeAlgo) ?>)
                         </span>
                     </div>
                     <div class="relative flex-1 w-full">
