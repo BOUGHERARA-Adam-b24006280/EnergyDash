@@ -11,7 +11,7 @@ namespace App\Services;
  */
 class FileUploadService
 {
-    /** @var srting $storageDir Le chemin absolu vers le dossier où les fichiers CSV seront stockés. */
+    /** @var string Le chemin absolu vers le dossier où les fichiers CSV seront stockés. */
     private string $storageDir;
 
     /** Constructeur de service. Initialise le dossier de stockage de destination. */
@@ -22,16 +22,21 @@ class FileUploadService
 
     /**
      * Gère l'upload d'un fichier CSV, effectue des vérifications de sécurité (extension, type MIME) et déplace le fichier.
-     * @param array $file Le tableau contenant les informations du fichier uplaodé.
+     * @param array<string, mixed> $file Le tableau contenant les informations du fichier uplaodé.
      * @param int $userId L'identifiant de l'utilisateur qui téléverse le fichier.
      * @return void
      * @throws \Exception En cas d'erreur de transfert (code erreur HTTP), d'extension incorrecte, de type MIME invalide ou d'erreur d'écriture.
      */
     public function handleCsvUpload(array $file, int $userId): void
     {
-        $error = (int)$file['error'];
-        $name = (string)$file['name'];
-        $tmpName = (string)$file['tmp_name'];
+        $errorVal = $file['error'] ?? UPLOAD_ERR_NO_FILE;
+        $error = is_numeric($errorVal) ? (int)$errorVal : UPLOAD_ERR_NO_FILE;
+
+        $nameVal = $file['name'] ?? '';
+        $name = is_string($nameVal) ? $nameVal : '';
+
+        $tmpNameVal = $file['tmp_name'] ?? '';
+        $tmpName = is_string($tmpNameVal) ? $tmpNameVal : '';
 
         if ($error !== UPLOAD_ERR_OK) {
             throw new \Exception("Erreur lors du transfert du fichier (Code: $error)");

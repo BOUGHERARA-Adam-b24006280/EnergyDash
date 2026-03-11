@@ -40,42 +40,58 @@ class PredictionService implements PredictionStrategyInterface
     public function predict(string $type, string $city, string $startDate, string $endDate): array 
     {
         $weatherData = $this->weatherApi->getHourlyWeather($city, $startDate, $endDate);
-        $ratio = $this->analyticsService->getPerformanceRatio($type, $city);
+        $ratio = (float)$this->analyticsService->getPerformanceRatio($type, $city);
         
         if ($ratio <= 0) {
             if ($type === 'solaire') $ratio = 0.5;
-            elseif ($type === 'eolien') $ratio = 15;
-            else $ratio = 5;
+            elseif ($type === 'eolien') $ratio = 15.0;
+            else $ratio = 5.0;
         }
 
         $predictions = [];
         foreach ($weatherData as $w) {
-            $predictedProd = 0;
-            $meteoValueForChart = 0;
+            $sun  = $w['sun'];
+            $wind = $w['wind'];
+            $rain = $w['rain'];
+            $temp = $w['temp'];
+            $date = $w['date'];
+
+            $predictedProd = 0.0;
+            $meteoValueForChart = 0.0;
 
             if ($type === 'solaire') {
-                $predictedProd = $w['sun'] * $ratio;
-                if ($w['temp'] > 25) $predictedProd *= 0.95; 
-                $meteoValueForChart = $w['sun'];
+                $predictedProd = $sun * $ratio;
+                if ($temp > 25) {
+                    $predictedProd *= 0.95;
+                }
+                $meteoValueForChart = $sun;
             } elseif ($type === 'eolien') {
-                if ($w['wind'] > 10) $predictedProd = $w['wind'] * $ratio;
-                $meteoValueForChart = $w['wind'];
+                if ($wind > 10) {
+                    $predictedProd = $wind * $ratio;
+                }
+                $meteoValueForChart = $wind;
             } elseif ($type === 'hydraulique') {
-                $predictedProd = 5.0 + ($w['rain'] * $ratio * 10);
-                $meteoValueForChart = $w['rain'];
+                $predictedProd = 5.0 + ($rain * $ratio * 10);
+                $meteoValueForChart = $rain;
             }
 
             $predictions[] = [
-                'date' => $w['date'],
+                'date' => $date,
                 'production' => round($predictedProd, 2),
                 'ville' => $city,
                 'meteo' => $meteoValueForChart,
-                'temp' => $w['temp'],
+                'temp' => $temp,
                 'statut' => 'prevision',
                 'algo' => 'standard'
             ];
         }
 
-        return ['type' => $type, 'city' => $city, 'from' => $startDate, 'to' => $endDate, 'data' => $predictions];
+        return [
+            'type' => $type, 
+            'city' => $city, 
+            'from' => $startDate, 
+            'to' => $endDate, 
+            'data' => $predictions
+        ];
     }
 }

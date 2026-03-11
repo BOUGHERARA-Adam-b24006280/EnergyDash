@@ -95,7 +95,13 @@ class EnergyController extends \App\Core\Controller {
                 }
             }
             else {
-                $lastDateFound = empty($finalData) ? date('Y-m-d', strtotime($from . ' -1 day')) : substr(end($finalData)['date'], 0, 10);
+                if (empty($finalData)) {
+                    $ts = strtotime($from . ' -1 day');
+                    $lastDateFound = ($ts !== false) ? date('Y-m-d', $ts) : $from;
+                } else {
+                    $lastItem = end($finalData);
+                    $lastDateFound = substr($lastItem['date'], 0, 10);
+                }
 
                 if ($lastDateFound < $to && $city !== 'all') {
                     $tsNext = strtotime($lastDateFound . ' +1 day');
@@ -134,7 +140,7 @@ class EnergyController extends \App\Core\Controller {
         $this->requireLogin();
         $csvFile = $_FILES['csv_file'] ?? null;
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && is_array($csvFile)) {
             try {
                 $this->validateCsrf();
                 $userSession = $_SESSION['user'] ?? null;
@@ -146,6 +152,8 @@ class EnergyController extends \App\Core\Controller {
 
                 $userId = (int)$userIdVal;
                 $uploadService = new FileUploadService();
+                
+                /** @var array<string, mixed> $csvFile */
                 $uploadService->handleCsvUpload($csvFile, $userId);
                 
                 $this->flash('success', "Fichier importé avec succès !");

@@ -100,7 +100,7 @@ abstract class Controller {
      * Valide le token CRSF réçu en POST.
      * Compare le token de la requête POST avec celui stocké en session.
      * 
-     * @throws /Exception Si le token est invalide ou manquant.
+     * @throws \Exception Si le token est invalide ou manquant.
      * @return void
      */
     protected function validateCsrf(): void {

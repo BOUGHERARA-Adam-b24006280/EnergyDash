@@ -64,19 +64,27 @@ class CsvReader {
 
     /**
      * Parcourt le fichier et retourne les lignes sous forme de tableaux associatifs.
-     * @return \Generator Un itérateur produisant des tableaux [colonne => valeur].
+     *
+     * @return \Generator<int, array<string, string>, mixed, void>
      */
     public function getRows(): \Generator {
-        if (!file_exists($this->filePath)) return;
+        if (!file_exists($this->filePath)) {
+            return;
+        }
         
         $handle = fopen($this->filePath, "r");
         if ($handle !== false) {
             $rawHeaders = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\");
+            
             if ($rawHeaders !== false) {
                 $headers = $this->cleanHeaders($rawHeaders);
-                while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== FALSE) {
+                
+                while (($row = fgetcsv($handle, 1000, $this->delimiter, "\"", "\\")) !== false) {
+                    // On vérifie la correspondance des colonnes
                     if (count($row) === count($headers)) {
-                        yield array_combine($headers, $row);
+                        /** @var array<string, string> $combined */
+                        $combined = array_combine($headers, $row);
+                        yield $combined;
                     }
                 }
             }

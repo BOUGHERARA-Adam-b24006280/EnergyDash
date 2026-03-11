@@ -25,18 +25,18 @@ class DeepLearningPredictionService
     /** @var Pipeline $estimator Le réseau de neurones artificiels utilisé pour faire l'apprentissage et la prédiction. */
     private Pipeline $estimator;
 
-    /** @var array $samples Le tableau des données d'entrainement. */
+    /** @var array<int, array<int, mixed>> $samples Le tableau des données d'entrainement. */
     private array $samples = [];
 
-    /** @var array $labels Le tableau des étiquettes d'entrainement cible. */
+    /** @var array<int, float|int|string> $labels Le tableau des étiquettes d'entrainement cible. */
     private array $labels = [];
 
     /**
      * Contruit le modèle de prédiction et l'entraine immédiatement avec les données d'archives fournies.
-     * @param array $meteoType Le tableau listant les types d'énergie associés aux archives (ex : ['solaire', 'eolien', ...]).
-     * @param array $temp Le tableau des températures archivées.
-     * @param array $meteoData Le tableau des données météo principales (vent, pluie, soleil) archivées.
-     * @param array $archiveData Le tableau de la production d'énergie réelle (label/cible) associée à chaque entrée météo.
+     * @param array<int, string> $meteoType Le tableau listant les types d'énergie associés aux archives (ex : ['solaire', 'eolien', ...]).
+     * @param array<int, float|int> $temp Le tableau des températures archivées.
+     * @param array<int, float|int> $meteoData Le tableau des données météo principales (vent, pluie, soleil) archivées.
+     * @param array<int, float|int> $archiveData Le tableau de la production d'énergie réelle (label/cible) associée à chaque entrée météo.
      * @throws \InvalidArgumentException Si les tableaux d'entrée n'ont pas la même taille (incohérence des données).
      */
     public function __construct(array $meteoType, array $temp, array $meteoData, array $archiveData)
@@ -68,10 +68,10 @@ class DeepLearningPredictionService
 
     /**
      * Formate les tableaux bruts d'entrée pour les transformer en structures lisibles par l'estimateur ($samples et $labels).
-     * @param array $meteoType Le tableau des types d'énergies.
-     * @param array $temp Le tableau des températures correspondantes.
-     * @param array $meteoData Le tableau des valeurs météos spécifiques correspondantes.
-     * @param array $archiveData Le tableau de la production d'énergie cible.
+     * @param array<int, string> $meteoType Le tableau des types d'énergies.
+     * @param array<int, float|int> $temp Le tableau des températures correspondantes.
+     * @param array<int, float|int> $meteoData Le tableau des valeurs météos spécifiques correspondantes.
+     * @param array<int, float|int> $archiveData Le tableau de la production d'énergie cible.
      * @return void
      */
     private function shapeData(array $meteoType, array $temp, array $meteoData, array $archiveData) : void
@@ -94,12 +94,12 @@ class DeepLearningPredictionService
 
     /**
      * Prédit la production d'énergie future à partir des prévisions météorologiques en utilisant le modèle entraîné.
-     * @param array $meteoType Le tableau des types d'énergies pour lesquels on veut prédire.
-     * @param array $temp Le tableau des prévisions de températures.
-     * @param array $meteoData Le tableau des prévisions de données météo principales (soleil, pluie, vent).
-     * @param array $dateString Le tableau des dates et heures associées aux prédictions.
+     * @param array<int, string> $meteoType Le tableau des types d'énergies pour lesquels on veut prédire.
+     * @param array<int, float> $temp Le tableau des prévisions de températures.
+     * @param array<int, float> $meteoData Le tableau des prévisions de données météo principales (soleil, pluie, vent).
+     * @param array<int, string> $dateString Le tableau des dates et heures associées aux prédictions.
      * @param string $city La ville ciblée pour la prédiction (sera injectée dans la réponse).
-     * @return array Un tableau structuré contenant les productions horaires estimées formatées pour le tableau de bord.
+     * @return array<int, array<string, mixed>> Un tableau structuré contenant les productions horaires estimées formatées pour le tableau de bord.
      */
     public function predict(array $meteoType, array $temp, array $meteoData, array $dateString, string $city) : array
     {
@@ -122,9 +122,12 @@ class DeepLearningPredictionService
          */
         $prediction = [];
         for ($i = 0; $i < count($samples); $i++) {
+            $val = $previewData[$i] ?? 0.0;
+            $productionValue = is_numeric($val) ? (float)$val : 0.0;
+
             $prediction[$i] = [
                 'date' => $dateString[$i],
-                'production' => round($previewData[$i], 2),
+                'production' => round($productionValue, 2),
                 'ville' => $city,
                 'meteo' => $meteoData[$i],
                 'temp' => $temp[$i],

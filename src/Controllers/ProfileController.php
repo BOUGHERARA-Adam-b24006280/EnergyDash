@@ -67,7 +67,12 @@ class ProfileController extends \App\Core\Controller {
     public function update(): void {
         
         $this->requireLogin();
-        if (!isset($_SESSION['user'])) return;
+        
+        $userSession = $_SESSION['user'] ?? null;
+        if (!is_array($userSession)) {
+            $this->redirect('/login');
+            return;
+        }
 
         try {
             $this->validateCsrf();
@@ -77,18 +82,13 @@ class ProfileController extends \App\Core\Controller {
             return;
         }
 
-        if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
-            $this->redirect('/login');
-            return;
-        }
-
-        $userId = $_SESSION['user']['id'] ?? 0;
-        if (!is_numeric($userId)) {
+        $userIdVal = $userSession['id'] ?? null;
+        if (!is_numeric($userIdVal)) {
             $this->flash('error', "ID utilisateur invalide.");
             $this->redirect('/logout');
             return;
         }
-        $id = (int)$userId;
+        $id = (int)$userIdVal;
 
         $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
         
@@ -116,9 +116,11 @@ class ProfileController extends \App\Core\Controller {
                 $password
             );
 
-            $_SESSION['user']['first_name'] = $firstName;
-            $_SESSION['user']['last_name']  = $lastName;
-            $_SESSION['user']['email']      = $email;
+            $userSession['first_name'] = $firstName;
+            $userSession['last_name']  = $lastName;
+            $userSession['email']      = $email;
+
+            $_SESSION['user'] = $userSession;
 
             $this->flash('success', "Profil mis à jour avec succès.");
         } catch (\Exception $e) {
@@ -259,7 +261,8 @@ class ProfileController extends \App\Core\Controller {
             return;
         }
 
-        $currentUserId = $_SESSION['user']['id'] ?? null;
+        $userSession = $_SESSION['user'] ?? null;
+        $currentUserId = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
 
         if ($id === $currentUserId) {
             $this->flash('error', "Vous ne pouvez pas supprimer votre propre compte.");

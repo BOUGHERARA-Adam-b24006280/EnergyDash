@@ -27,7 +27,14 @@ class PredictionFactory
     public static function make(EnergyRepository $repository, EnergyAnalyticsService $analyticsService): PredictionStrategyInterface 
     {
         $algoFile = __DIR__ . '/../../Storage/active_algo.txt';
-        $activeAlgo = file_exists($algoFile) ? trim(file_get_contents($algoFile)) : 'standard';
+        $activeAlgo = 'standard';
+
+        if (file_exists($algoFile)) {
+            $content = file_get_contents($algoFile);
+            if (is_string($content)) {
+                $activeAlgo = trim($content);
+            }
+        }
 
         if ($activeAlgo === 'lstm') {
             return new DeepLearningStrategy($repository);

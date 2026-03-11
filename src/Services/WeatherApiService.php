@@ -12,7 +12,7 @@ namespace App\Services;
 class WeatherApiService 
 {
 
-    /** @var array $coordinates Tableau associatif statique stockant la latitude et la longitude des villes prédéfinies. */
+    /** @var array<string, array{lat: float, lon: float}> $coordinates Tableau associatif statique stockant la latitude et la longitude des villes prédéfinies. */
     private array $coordinates = [
         'lyon'      => ['lat' => 45.76, 'lon' => 4.83],
         'paris'     => ['lat' => 48.85, 'lon' => 2.35],
@@ -27,7 +27,7 @@ class WeatherApiService
      * @param string $city Le nom de la ville pour laquelle on souhaite la météo.
      * @param string $startDate La date de début de l'extraction au format 'Y-m-d'.
      * @param string $endDate La date de fin de l'extraction au format 'Y-m-d'.
-     * @return array Un tableau contenant la liste formatée des relevés météo horaires. Retourne un tableau vide en cas d'erreur de l'API.
+     * @return array<int, array{date: string, temp: float, rain: float, wind: float, sun: float}> Un tableau contenant la liste formatée des relevés météo horaires. Retourne un tableau vide en cas d'erreur de l'API.
      */
     public function getHourlyWeather(string $city, string $startDate, string $endDate): array 
     {
@@ -55,21 +55,25 @@ class WeatherApiService
             return [];
         }
 
-        return $this->formatWeatherData($apiData['hourly'], $startDate, $endDate);
+        /** @var array<string, array<int, mixed>> $hourlyData */
+        $hourlyData = $apiData['hourly'];
+
+        return $this->formatWeatherData($hourlyData, $startDate, $endDate);
     }
 
     /**
      * Nettoie et formate les données brutes reçues de l'API Open-Meteo en une structure plus lisible et normalisée.
-     * @param array $hourly Le tableau multidimensionnel brut retourné par la clé 'hourly' de l'API Open-Meteo.
+     * @param array<string, array<int, mixed>> $hourly Le tableau multidimensionnel brut retourné par la clé 'hourly' de l'API Open-Meteo.
      * @param string $startDate La date de début au format 'Y-m-d' utilisée pour filtrer et conserver uniquement les jours demandés.
      * @param string $endDate La date de fin au format 'Y-m-d' utilisée pour filtrer et conserver uniquement les jours demandés.
-     * @return array Un tableau indexé de relevés météo horaires contenant les clés 'date', 'temp', 'rain', 'wind', et 'sun'.
+     * @return array<int, array{date: string, temp: float, rain: float, wind: float, sun: float}> Un tableau indexé de relevés météo horaires contenant les clés 'date', 'temp', 'rain', 'wind', et 'sun'.
      */
     private function formatWeatherData(array $hourly, string $startDate, string $endDate): array
     {
         $weatherList = [];
+        $timeData = $hourly['time'] ?? null;
 
-        if (isset($hourly['time']) && is_array($hourly['time'])) {
+        if ($timeData !== null) {
             foreach ($hourly['time'] as $index => $isoDate) {
                 if (!is_string($isoDate)) continue;
 
@@ -78,12 +82,17 @@ class WeatherApiService
                 
                 if ($dayOnly < $startDate || $dayOnly > $endDate) continue;
 
+                $temp = $hourly['temperature_2m'][$index] ?? 0.0;
+                $rain = $hourly['precipitation'][$index] ?? 0.0;
+                $wind = $hourly['wind_speed_10m'][$index] ?? 0.0;
+                $sun  = $hourly['shortwave_radiation'][$index] ?? 0.0;
+
                 $weatherList[] = [
                     'date' => $dateString,
-                    'temp' => (float)($hourly['temperature_2m'][$index] ?? 0.0),
-                    'rain' => (float)($hourly['precipitation'][$index] ?? 0.0),
-                    'wind' => (float)($hourly['wind_speed_10m'][$index] ?? 0.0),
-                    'sun'  => (float)($hourly['shortwave_radiation'][$index] ?? 0.0)
+                    'temp' => is_numeric($temp) ? (float)$temp : 0.0,
+                    'rain' => is_numeric($rain) ? (float)$rain : 0.0,
+                    'wind' => is_numeric($wind) ? (float)$wind : 0.0,
+                    'sun'  => is_numeric($sun) ? (float)$sun : 0.0
                 ];
             }
         }

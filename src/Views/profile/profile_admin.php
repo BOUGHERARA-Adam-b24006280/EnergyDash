@@ -6,6 +6,9 @@
  * @var array{id: int, first_name: string, last_name: string, email: string, role: string} $user L'utilisateur connecté
  * @var array<int, array{id: int, first_name: string, last_name: string, email: string, role: string}> $users Liste complète des utilisateurs
  */
+
+    $rawToken = $csrf_token ?? $_SESSION['csrf_token'] ?? '';
+    $safeCsrf = is_string($rawToken) ? $rawToken : '';
 ?>
 
 <div class="fixed left-0 top-0 -z-10 h-full w-full">
@@ -26,7 +29,7 @@
                 </div>
 
                 <form method="POST" action="/profile/update">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($safeCsrf, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="grid sm:grid-cols-12 gap-2 sm:gap-6">
 
@@ -99,7 +102,7 @@
             
             <div class="p-4 sm:p-6">
                 <form method="POST" action="/profile/createUser">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($safeCsrf, ENT_QUOTES, 'UTF-8') ?>">
 
                     <div class="grid sm:grid-cols-2 gap-4 mb-4">
                         <div>
@@ -170,7 +173,7 @@
                                     <td class="py-4">
                                         <form method="POST" action="/profile/updateRole" class="d-flex justify-content-center" id="edit-<?= $u['id'] ?>">
                                             <input type="hidden" name="id" value="<?= $u['id'] ?>">
-                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($safeCsrf, ENT_QUOTES, 'UTF-8') ?>">
                                             <select name="role" data-hs-select='{
                                                             "placeholder": "Choisir une option...",
                                                             "toggleTag": "<button type=\"button\" aria-expanded=\"false\"></button>",
@@ -202,7 +205,7 @@
                                         
                                         <form method="POST" action="/profile/deleteUser" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement cet utilisateur ? Cette action est irréversible.');" class="inline-block m-0 p-0">
                                             <input type="hidden" name="id" value="<?= $u['id'] ?>">
-                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? $_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($safeCsrf, ENT_QUOTES, 'UTF-8') ?>">
                                             <button type="submit" class="inline-flex items-center gap-x-1 text-sm font-semibold rounded-lg border border-transparent text-red-600 hover:text-red-800 focus:outline-hidden focus:text-red-800 disabled:opacity-50 disabled:pointer-events-none dark:text-red-500 dark:hover:text-red-400 dark:focus:text-red-400">
                                                 Supprimer
                                             </button>
