@@ -52,10 +52,8 @@ class WeatherApiService
         $coords = $this->coordinates[$cityKey] ?? $this->coordinates['lyon'];
         $today = date('Y-m-d');
 
-        // Génération du nom de fichier de cache unique pour la requête
         $cacheFile = $this->cachePath . "{$cityKey}_{$startDate}_{$endDate}.json";
 
-        // 1. Tentative de lecture du cache (validité de 24 heures : 86400 secondes)
         if (file_exists($cacheFile)) {
             $mtime = filemtime($cacheFile);
             if ($mtime !== false && (time() - $mtime < 86400)) {
@@ -70,7 +68,6 @@ class WeatherApiService
             }
         }
 
-        // 2. Préparation de l'URL de l'API (en utilisant '&' sans conversion HTML pour éviter les erreurs d'URL)
         if ($endDate < $today) {
             $apiUrl = "https://archive-api.open-meteo.com/v1/archive?latitude={$coords['lat']}&longitude={$coords['lon']}&start_date={$startDate}&end_date={$endDate}&hourly=temperature_2m,precipitation,wind_speed_10m,shortwave_radiation&timezone=Europe%2FParis";
         } else {
@@ -81,17 +78,14 @@ class WeatherApiService
             "ssl" => ["verify_peer" => false, "verify_peer_name" => false],
             "http" => [
                 "timeout" => 5,
-                "ignore_errors" => true, // Empêche le warning PHP sur les erreurs HTTP (ex: 429)
+                "ignore_errors" => true,
                 "header" => "User-Agent: EnergyDash-App/1.0\r\n"
             ]
         ]);
 
         $json = @file_get_contents($apiUrl, false, $context);
 
-        // 3. Gestion d'erreur de l'API (incluant le code 429 Too Many Requests)
-        // On vérifie si $json est faux ou si le header HTTP n'indique pas 200 OK
-        if ($json === false || (isset($http_response_header) && strpos($http_response_header[0], '200') === false)) {
-            // En cas d'échec API, on tente d'abord de renvoyer un cache expiré s'il existe
+        if ($json === false || strpos($http_response_header[0], '200') === false) {
             if (file_exists($cacheFile)) {
                 $staleContent = file_get_contents($cacheFile);
                 if ($staleContent !== false) {
@@ -102,7 +96,6 @@ class WeatherApiService
                     }
                 }
             }
-            // Si aucun cache n'est disponible, on utilise les données de secours pour ne pas bloquer les prévisions
             return $this->generateRescueData($startDate, $endDate);
         }
 
@@ -118,7 +111,6 @@ class WeatherApiService
 
         $formattedData = $this->formatWeatherData($hourlyData, $startDate, $endDate);
 
-        // 4. Mise en cache des données formatées si le résultat est valide
         if (!empty($formattedData)) {
             file_put_contents($cacheFile, json_encode($formattedData));
         }
@@ -173,7 +165,7 @@ class WeatherApiService
         $weatherList = [];
         $timeData = $hourly['time'] ?? null;
 
-        if ($timeData !== null && is_array($timeData)) {
+        if ($timeData !== null) {
             foreach ($timeData as $index => $isoDate) {
                 if (!is_string($isoDate)) continue;
 
