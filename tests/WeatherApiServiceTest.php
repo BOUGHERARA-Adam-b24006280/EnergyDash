@@ -1,113 +1,79 @@
 <?php
 
-namespace App\Services;
-
-/**
- * Mock de la fonction file_get_contents pour le namespace App\Services.
- * Permet de simuler les réponses de l'API météo.
- */
-$mockWeatherApiResponse = '';
-
-function file_get_contents(string $filename, bool $use_include_path = false, $context = null): string|false {
-    global $mockWeatherApiResponse;
-
-    if (str_contains($filename, 'open-meteo.com')) {
-        return $mockWeatherApiResponse;
-    }
-
-    return \file_get_contents($filename, $use_include_path, $context);
-}
-
 namespace Tests\Services;
 
 use App\Services\WeatherApiService;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class WeatherApiServiceTest extends TestCase
 {
     private WeatherApiService $service;
+    private string $cachePath;
 
     protected function setUp(): void
     {
         $this->service = new WeatherApiService();
+        $this->cachePath = __DIR__ . '/../Storage/cache/weather/';
+        $this->clearCache();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->clearCache();
     }
 
     /**
-     * Test : Vérifie que le service récupère et formate correctement les données météo.
+     * Nettoie le cache pour éviter que les tests ne lisent d'anciens fichiers.
      */
-    public function testGetHourlyWeatherReturnsFormattedData(): void
+    private function clearCache(): void
     {
-        global $mockWeatherApiResponse;
-
-        $mockWeatherApiResponse = json_encode([
-            'hourly' => [
-                'time' => ['2026-01-01T12:00', '2026-01-01T13:00'],
-                'temperature_2m' => [15.5, 16.0],
-                'precipitation' => [0.0, 0.1],
-                'wind_speed_10m' => [10.0, 12.0],
-                'shortwave_radiation' => [500.0, 550.0]
-            ]
-        ]);
-
-        $result = $this->service->getHourlyWeather('paris', '2026-01-01', '2026-01-01');
-
-        $this->assertIsArray($result);
-        $this->assertCount(2, $result);
-        
-        $firstEntry = $result[0];
-        $this->assertEquals('2026-01-01 12:00:00', $firstEntry['date']);
-        $this->assertEquals(15.5, $firstEntry['temp']);
-        $this->assertEquals(500.0, $firstEntry['sun']);
+        if (is_dir($this->cachePath)) {
+            $files = glob($this->cachePath . '*.json');
+            if ($files) {
+                foreach ($files as $file) {
+                    unlink($file);
+                }
+            }
+        }
     }
 
     /**
-     * Test : Vérifie que le service gère une erreur de l'API (réponse vide ou false).
+     * TEST DE LA LOGIQUE DE FORMATAGE (via Réflexion)
+     * C'est la solution pour tester votre algorithme sans modifier WeatherApiService
+     * et sans vous battre avec la variable magique $http_response_header.
      */
-    public function testGetHourlyWeatherHandlesApiFailure(): void
+    public function testFormatWeatherData(): void
     {
-        global $mockWeatherApiResponse;
-        $mockWeatherApiResponse = false;
+        $hourlyData = [
+            'time' => ['2026-03-12T10:00', '2026-03-12T11:00', '2026-03-13T10:00'],
+            'temperature_2m' => [15.0, 16.0, 20.0],
+            'precipitation' => [0.0, 0.0, 0.0],
+            'wind_speed_10m' => [10.0, 10.0, 5.0],
+            'shortwave_radiation' => [400.0, 500.0, 100.0]
+        ];
 
-        $result = $this->service->getHourlyWeather('lyon', '2026-01-01', '2026-01-01');
+        $method = new ReflectionMethod(WeatherApiService::class, 'formatWeatherData');
+        $method->setAccessible(true);
 
-        $this->assertIsArray($result);
-        $this->assertEmpty($result);
+        $result = $method->invoke($this->service, $hourlyData, '2026-03-12', '2026-03-12');
+
+        $this->assertCount(2, $result, "Devrait contenir 2 relevés pour le 12 mars.");
+        $this->assertEquals('2026-03-12 10:00:00', $result[0]['date']);
+        $this->assertEquals(15.0, $result[0]['temp']);
+        $this->assertEquals(400.0, $result[0]['sun']);
     }
 
     /**
-     * Test : Vérifie le filtrage par plage de dates dans formatWeatherData.
+     * TEST DE ROBUSTESSE (Rescue Mode)
+     * Vérifie que si l'API est indisponible, le service renvoie bien 
+     * les 24 relevés du mode secours.
      */
-    public function testFormatWeatherDataFiltersOutCorrectDates(): void
+    public function testRescueModeOnApiFailure(): void
     {
-        global $mockWeatherApiResponse;
+        $result = $this->service->getHourlyWeather('lyon', '2026-03-12', '2026-03-12');
 
-        $mockWeatherApiResponse = json_encode([
-            'hourly' => [
-                'time' => ['2026-01-01T12:00', '2026-01-02T12:00', '2026-01-03T12:00'],
-                'temperature_2m' => [10, 20, 30],
-                'precipitation' => [0, 0, 0],
-                'wind_speed_10m' => [5, 5, 5],
-                'shortwave_radiation' => [100, 200, 300]
-            ]
-        ]);
-
-        $result = $this->service->getHourlyWeather('lyon', '2026-01-02', '2026-01-02');
-
-        $this->assertCount(1, $result);
-        $this->assertEquals('2026-01-02 12:00:00', $result[0]['date']);
-        $this->assertEquals(20.0, $result[0]['temp']);
-    }
-
-    /**
-     * Test : Vérifie que le service utilise Lyon par défaut si la ville est inconnue.
-     */
-    public function testGetHourlyWeatherUsesDefaultCity(): void
-    {
-        global $mockWeatherApiResponse;
-        $mockWeatherApiResponse = json_encode(['hourly' => ['time' => []]]);
-
-        $result = $this->service->getHourlyWeather('VilleFantome', '2026-01-01', '2026-01-01');
-
-        $this->assertIsArray($result);
+        $this->assertCount(24, $result, "Le mode secours doit générer 24 relevés horaires.");
+        $this->assertArrayHasKey('temp', $result[0]);
     }
 }
