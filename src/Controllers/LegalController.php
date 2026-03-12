@@ -6,15 +6,13 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-
 /**
  * Contrôleur LegalController
  * Gère l'affichage des pages légales (Mentions légales, CGU, etc.).
  *
  * @package App\Controllers
  */
-class LegalController extends Controller {
+class LegalController extends \App\Core\Controller {
 
     /**
      * Affiche les mentions légales.
@@ -23,6 +21,6 @@ class LegalController extends Controller {
      * @return void
      */
     public function index(): void {
-        $this->render('legal/mentions', ['title' => 'Mentions Légales']);
+        $this->view->render('legal/mentions', ['title' => 'Mentions Légales']);
     }
 }

@@ -6,15 +6,13 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-
 /**
  * Contrôleur ErrorController
  * Gère l'affichage des pages d'erreur (404, 500).
  *
  * @package App\Controllers
  */
-class ErrorController extends Controller {
+class ErrorController extends \App\Core\Controller {
     
     /**
      * Affiche la page d'erreur 404 (Non trouvé).
@@ -23,7 +21,7 @@ class ErrorController extends Controller {
      */
     public function error404page(): void {
         http_response_code(404);
-        $this->render('error/404', ['title' => 'Page non trouvée']);
+        $this->view->render('error/404', ['title' => 'Page non trouvée']);
     }
 
     /**
@@ -34,7 +32,7 @@ class ErrorController extends Controller {
      */
     public function error500page(): void {
         http_response_code(500);
-        $this->render('error/500', ['title' => 'Erreur interne du serveur']);
+        $this->view->render('error/500', ['title' => 'Erreur interne du serveur']);
         exit;
     }
 }

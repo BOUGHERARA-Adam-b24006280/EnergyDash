@@ -1,6 +1,6 @@
 # EnergyDash - Tableau de Bord Énergie Renouvelable
 
-![PHP Version](https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=flat&logo=php&logoColor=white)
+![PHP Version](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat&logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Development-orange)
 
@@ -26,7 +26,7 @@ Ce projet est construit sans framework lourd, selon une architecture **MVC (Mod�
 
 | Domaine | Technologies |
 | :--- | :--- |
-| **Backend** | PHP 7.4+, Composer (Autoloading PSR-4) |
+| **Backend** | PHP 8.4, Composer (Autoloading PSR-4) |
 | **Frontend** | HTML5, Tailwind CSS (via Preline UI), JavaScript |
 | **Visualisation** | Charts.js |
 | **Base de données** | MySQL |
@@ -54,12 +54,42 @@ EnergyDash/
 └── .env.example         # Template de configuration
 ```
 
-## � Prérequis
+## Prérequis
 
-- PHP 7.4 ou supérieur
+- PHP 8.4 ou supérieur
 - Composer
 - Serveur web (Apache, Nginx) ou XAMPP/WAMP
 - Base de données MySQL/MariaDB
+
+---
+
+## ⚙️ Configuration PHP (php.ini)
+
+### Extensions nécessaires
+
+Assurez-vous que les extensions PHP suivantes sont activées dans votre fichier `php.ini` :
+
+- `extension=pdo_mysql` : Pour la connexion à MySQL/MariaDB
+- `extension=curl` : Pour les requêtes HTTP (API Open-Meteo)
+- `extension=json` : Pour la manipulation des données JSON
+- `extension=mbstring` : Pour le traitement des chaînes de caractères UTF-8
+- `extension=fileinfo` : Pour la validation des types de fichiers uploadés
+
+### Comment activer les extensions
+
+1. Localisez votre fichier `php.ini` 
+2. Ouvrez le fichier avec un éditeur de texte
+
+3. Recherchez et décommentez les lignes suivantes (supprimez le `;` au début) :
+   ```ini
+   extension=pdo_mysql
+   extension=curl
+   extension=json
+   extension=mbstring
+   extension=fileinfo
+   ```
+
+4. Redémarrez votre serveur web pour que les modifications prennent effet
 
 ---
 

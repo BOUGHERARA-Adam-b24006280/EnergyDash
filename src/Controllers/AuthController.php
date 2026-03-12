@@ -1,19 +1,15 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Models\UserModel;
-use Exception;
-
 /**
  * Contrôleur AuthController
  * Centralise la logique de sécurité liée aux utilisateurs.
  *
  * @package App\Controllers
  */
-class AuthController extends Controller {
-    /** @var UserModel Modèle pour la gestion des utilisateurs. */
-    private UserModel $userModel;
+class AuthController extends \App\Core\Controller {
+    /** @var \App\Models\UserModel Modèle pour la gestion des utilisateurs. */
+    private \App\Models\UserModel $userModel;
 
     /** @var ErrorController Contrôleur pour gérer les redirections d'erreur */
     private ErrorController $errorController;
@@ -24,7 +20,7 @@ class AuthController extends Controller {
      */
     public function __construct() {
         parent::__construct();
-        $this->userModel = new UserModel();
+        $this->userModel = new \App\Models\UserModel();
         $this->errorController = new ErrorController();
     }
 
@@ -39,7 +35,7 @@ class AuthController extends Controller {
      */
     public function showLogin(): void {
         $this->initCsrf();
-        $this->render('auth/login', [
+        $this->view->render('auth/login', [
             'title' => 'Connexion',
             'csrf_token' => $_SESSION['csrf_token']
         ]);
@@ -67,7 +63,7 @@ class AuthController extends Controller {
 
             if (!$user) {
                 usleep(500000); // 0.5 seconde de délai pour ralentir les attaques par force brute
-                throw new Exception("Identifiants incorrects.");
+                throw new \Exception("Identifiants incorrects.");
             }
 
             /** @var array{id: int|string, email: string, first_name: string, last_name: string, role?: string} $user */
@@ -75,8 +71,8 @@ class AuthController extends Controller {
 
             $this->redirect('/dashboard');
 
-        } catch (Exception $e) {
-            $this->render('auth/login', [
+        } catch (\Exception $e) {
+            $this->view->render('auth/login', [
                 'title' => 'Connexion',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token']
@@ -124,7 +120,7 @@ class AuthController extends Controller {
      */
     public function showRegister(): void {
         $this->initCsrf();
-        $this->render('auth/register', [
+        $this->view->render('auth/register', [
             'title' => 'Inscription',
             'csrf_token' => $_SESSION['csrf_token']
         ]);
@@ -162,7 +158,7 @@ class AuthController extends Controller {
 
             // Validation unicité de l'email
             if ($this->userModel->emailExists($data['email'])) {
-                throw new Exception("Un compte avec cette adresse e-mail existe déjà.");
+                throw new \Exception("Un compte avec cette adresse e-mail existe déjà.");
             }
 
             // Création du compte
@@ -170,15 +166,15 @@ class AuthController extends Controller {
                 unset($_SESSION['csrf_token']);
                 $this->redirect('/login?registered=1');
             } else {
-                throw new Exception("Erreur technique lors de l'inscription.");
+                throw new \Exception("Erreur technique lors de l'inscription.");
             }
 
-        } catch (Exception $e) {
-            $this->render('auth/register', [
+        } catch (\Exception $e) {
+            $this->view->render('auth/register', [
                 'title' => 'Inscription',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token'],
-                'old' => $_POST //Pour réafficher les données saisies dans le formulaire
+                'old' => $_POST
             ]);
         }
     }
@@ -200,7 +196,7 @@ class AuthController extends Controller {
             $success = "Si ce compte existe, un email a été envoyé.";
         }
         
-        $this->render('auth/forgot', [
+        $this->view->render('auth/forgot', [
             'title' => 'Mot de passe oublié',
             'csrf_token' => $_SESSION['csrf_token'],
             'success' => $success
@@ -225,7 +221,7 @@ class AuthController extends Controller {
             $email = is_string($rawEmail) ? trim($rawEmail) : '';
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-                throw new Exception("Email invalide.");
+                throw new \Exception("Email invalide.");
 
             $result = $this->userModel->createResetTokenForEmail($email);
 
@@ -253,7 +249,7 @@ class AuthController extends Controller {
 
             $success = "Si ce compte existe, un email a été envoyé.";
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $success = "Si ce compte existe, un email a été envoyé.";
         }
 
@@ -290,7 +286,7 @@ class AuthController extends Controller {
             return;
         }
 
-        $this->render('auth/reset', [
+        $this->view->render('auth/reset', [
             'title' => 'Réinitialisation',
             'errors' => $errors,
             'csrf_token' => $_SESSION['csrf_token'],
@@ -320,7 +316,7 @@ class AuthController extends Controller {
             $confirm = is_string($pConfirm) ? $pConfirm : '';
 
             if (empty($token))
-                throw new Exception("Token manquant.");
+                throw new \Exception("Token manquant.");
 
             $hashedToken = hash('sha256', $token);
             $user = $this->userModel->getUserByToken($hashedToken);
@@ -332,16 +328,16 @@ class AuthController extends Controller {
             }
 
             if ($password !== $confirm) {
-                throw new Exception("Les mots de passe ne correspondent pas.");
+                throw new \Exception("Les mots de passe ne correspondent pas.");
             }
 
-            if (!UserModel::isPasswordStrong($password)) {
-                throw new Exception("Le mot de passe n'est pas assez sécurisé.");
+            if (!\App\Models\UserModel::isPasswordStrong($password)) {
+                throw new \Exception("Le mot de passe n'est pas assez sécurisé.");
             }
 
             $userId = $user['id'] ?? 0;
             if (!is_numeric($userId)) {
-                 throw new Exception("ID utilisateur invalide.");
+                 throw new \Exception("ID utilisateur invalide.");
             }
 
             $this->userModel->updatePassword((int)$userId, $password);
@@ -350,8 +346,8 @@ class AuthController extends Controller {
             $this->flash('success', "Mot de passe modifié avec succès. Vous pouvez vous connecter.");
             $this->redirect('/login');
 
-        } catch (Exception $e) {
-            $this->render('auth/reset', [
+        } catch (\Exception $e) {
+            $this->view->render('auth/reset', [
                 'title' => 'Réinitialisation',
                 'errors' => [$e->getMessage()],
                 'csrf_token' => $_SESSION['csrf_token'],
@@ -381,56 +377,27 @@ class AuthController extends Controller {
     }
 
     /**
-     * Initialise le token CSRF s'il n'existe pas déjà.
-     *
-     * @return void
-     */
-    private function initCsrf(): void {
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
-    }
-
-    /**
-     * Valide le token CSRF reçu en POST.
-     *
-     * @throws Exception Si le token est invalide ou manquant.
-     * @return void
-     */
-    private function validateCsrf(): void {
-        $rawToken = $_POST['csrf_token'] ?? '';
-        $token = is_string($rawToken) ? $rawToken : '';
-        
-        $rawSession = $_SESSION['csrf_token'] ?? '';
-        $sessionToken = is_string($rawSession) ? $rawSession : '';
-
-        if (empty($sessionToken) || !hash_equals($sessionToken, $token)) {
-            throw new Exception("Session expirée. Veuillez recharger la page.");
-        }
-    }
-
-    /**
      * Valide les données d'inscription.
      *
      * @param array{first_name: string, last_name: string, email: string, password: string, confirm: string} $data
-     * @throws Exception Si une validation échoue.
+     * @throws \Exception Si une validation échoue.
      * @return void
      */
     private function validateRegisterInput(array $data): void{
         if (empty($data['first_name']) || mb_strlen($data['first_name']) > 100) {
-            throw new Exception("Prénom invalide.");
+            throw new \Exception("Prénom invalide.");
         }
         if (empty($data['last_name']) || mb_strlen($data['last_name']) > 100) {
-            throw new Exception("Nom invalide.");
+            throw new \Exception("Nom invalide.");
         }
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            throw new Exception("Email invalide.");
+            throw new \Exception("Email invalide.");
         }
         if ($data['password'] !== $data['confirm']) {
-            throw new Exception("Les mots de passe ne correspondent pas.");
+            throw new \Exception("Les mots de passe ne correspondent pas.");
         }
-        if (!UserModel::isPasswordStrong($data['password'])) {
-            throw new Exception("Le mot de passe n'est pas assez sécurisé.");
+        if (!\App\Models\UserModel::isPasswordStrong($data['password'])) {
+            throw new \Exception("Le mot de passe n'est pas assez sécurisé.");
         }
     }
 }

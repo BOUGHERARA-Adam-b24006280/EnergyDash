@@ -1,23 +1,25 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use App\Controllers\ErrorController;
-
-class ErrorControllerTest extends TestCase {
+class ErrorControllerTest extends \PHPUnit\Framework\TestCase {
 
     /**
      * Teste que la page 404 définit le bon code HTTP et appelle la bonne vue.
      */
     public function testError404Page() {
-        $controller = $this->getMockBuilder(ErrorController::class)->onlyMethods(['render'])->getMock();
+        $controller = new \App\Controllers\ErrorController();
 
-        $controller->expects($this->once())->method('render')->with(
-                       $this->equalTo('error/404'), // Vérifie le chemin de la vue
+        $viewMock = $this->createMock(\App\Core\View::class);
+        $viewMock->expects($this->once())->method('render')->with(
+                       $this->equalTo('error/404'),
                        $this->callback(function($data) {
-                           // Vérifie le titre passé à la vue
                            return isset($data['title']) && $data['title'] === 'Page non trouvée';
                        })
                    );
+
+        $reflection = new ReflectionClass(\App\Controllers\ErrorController::class);
+        $property = $reflection->getProperty('view');
+        $property->setAccessible(true);
+        $property->setValue($controller, $viewMock);
 
         $controller->error404page();
 

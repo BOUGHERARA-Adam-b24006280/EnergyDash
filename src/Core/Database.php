@@ -6,15 +6,12 @@
 
 namespace App\Core;
 
-use PDO;
-use PDOException;
-
 /**
  * Classe Database qui gère la connexion avec la BDD
  */
 class Database {
-    /** @var PDO|null Instance de la connexion PDO, ou null si non init */
-    private ?PDO $pdo = null;
+    /** @var \PDO|null Instance de la connexion PDO, ou null si non init */
+    private ?\PDO $pdo = null;
     /** @var string Nom d'hôte du serveur de la BDD */
     private string $host;
     /** @var string Nom de la BDD */
@@ -24,16 +21,16 @@ class Database {
     /** @var string Mot de passe associé à l'utilisateur */
     private string $password;
     
-    /** @var PDO|null Instance unique de la connexion PDO (Singleton) */
-    private static ?PDO $instance = null;
+    /** @var \PDO|null Instance unique de la connexion PDO (Singleton) */
+    private static ?\PDO $instance = null;
 
     /**
      * Récupère l'instance unique de la connexion PDO.
      * Crée la connexion si elle n'existe pas encore.
      *
-     * @return PDO
+     * @return \PDO
      */
-    public static function getInstance(): PDO {
+    public static function getInstance(): \PDO {
         if (self::$instance === null) {
             $db = new self();
             self::$instance = $db->getConnection();
@@ -44,8 +41,7 @@ class Database {
     /**
      * Constructeur qui initialise les informations de connexion à partir des variables d'environnement
      */
-    public function __construct()
-    {
+    public function __construct() {
         // Récupération sécurisée des variables d'environnement
         $host = $_ENV['DATABASE_HOST'] ?? NULL;
         $dbname = $_ENV['DATABASE_NAME'] ?? NULL;
@@ -65,16 +61,16 @@ class Database {
 
 
     /**
-     * @return PDO Objet de la connexion à la BDD
-     * @throws PDOException En cas d'erreur de connexion
+     * @return \PDO Objet de la connexion à la BDD
+     * @throws \PDOException En cas d'erreur de connexion
      */
-    public function getConnection(): PDO {
+    public function getConnection(): \PDO {
         if ($this->pdo === null) {
             try {
                 $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
-                $this->pdo = new PDO($dsn, $this->username, $this->password);
-                $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            } catch (PDOException $e) {
+                $this->pdo = new \PDO($dsn, $this->username, $this->password);
+                $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            } catch (\PDOException $e) {
                 throw new \RuntimeException('Erreur de connexion à la base de données.', 0, $e);
             }
 

@@ -2,58 +2,73 @@
 
 namespace Tests\Controllers;
 
-use PHPUnit\Framework\TestCase;
 use App\Controllers\DashboardController;
-use App\Services\EnergyCsvService;
+use App\Repositories\EnergyRepository;
+use App\Core\View;
+use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
-class DashboardControllerTest extends TestCase
-{
+class DashboardControllerTest extends TestCase {
     private $controller;
-    private $energyServiceMock;
+    private $energyRepoMock;
+    private $viewMock;
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         $_SESSION = [];
+        $_SESSION['csrf_token'] = 'test_token_123';
 
-        $this->energyServiceMock = $this->createMock(EnergyCsvService::class);
+        $this->energyRepoMock = $this->createMock(EnergyRepository::class);
+        $this->viewMock = $this->createMock(View::class);
 
         $this->controller = $this->getMockBuilder(DashboardController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['render', 'requireLogin'])
+            ->onlyMethods(['requireLogin', 'initCsrf'])
             ->getMock();
 
         $reflection = new ReflectionClass(DashboardController::class);
-        $property = $reflection->getProperty('energyService');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $this->energyServiceMock);
+
+        $repoProp = $reflection->getProperty('energyRepository');
+        $repoProp->setAccessible(true);
+        $repoProp->setValue($this->controller, $this->energyRepoMock);
+
+        $viewProp = $reflection->getProperty('view');
+        $viewProp->setAccessible(true);
+        $viewProp->setValue($this->controller, $this->viewMock);
     }
 
     /**
-     * Test : index() récupère les villes et affiche la vue dashboard.
+     * Test : index() récupère les données et affiche la vue dashboard avec les bons paramètres.
      */
-    public function testIndexLoadsCitiesAndRendersView(): void
-    {
-        $fakeCities = ['Paris', 'Lyon', 'Marseille'];
+    public function testIndexLoadsDataAndRendersView(): void {
+        $fakeCities = ['Paris', 'Lyon', 'Bordeaux'];
+        $fakeMapping = [
+            'Paris' => ['solaire', 'eolien'],
+            'Lyon'  => ['solaire']
+        ];
 
-        $this->energyServiceMock->expects($this->once())
+        $this->energyRepoMock->expects($this->once())
             ->method('getAvailableCities')
             ->willReturn($fakeCities);
 
-        $this->controller->expects($this->once())
-            ->method('requireLogin');
+        $this->energyRepoMock->expects($this->once())
+            ->method('getCityEnergyMapping')
+            ->willReturn($fakeMapping);
 
-        $this->controller->expects($this->once())
+        $this->controller->expects($this->once())->method('requireLogin');
+        $this->controller->expects($this->once())->method('initCsrf');
+
+        $this->viewMock->expects($this->once())
             ->method('render')
             ->with(
                 'dashboard/dashboard',
-                $this->callback(function ($data) use ($fakeCities) {
-                    return isset($data['cities']) 
+                $this->callback(function ($data) use ($fakeCities, $fakeMapping) {
+                    return $data['title'] === 'Tableau de bord - EnergyDash'
                         && $data['cities'] === $fakeCities
-                        && $data['title'] === 'Tableau de bord - EnergyDash';
+                        && $data['energyMapping'] === $fakeMapping
+                        && $data['csrf_token'] === 'test_token_123';
                 })
             );
 

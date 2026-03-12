@@ -1,222 +1,235 @@
 <?php
 /**
  * Fichier : EnergyController.php
- * Rôle : API JSON et Upload CSV.
+ * Rôle : Gère les actions liées aux données énergétiques, aux imports et aux algorithmes de prédiction.
  */
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Services\EnergyCsvService;
-use App\Core\JsonResponse;
+use App\Infrastructure\CsvReader;
+use App\Repositories\EnergyRepository;
+use App\Services\EnergyAnalyticsService;
+use App\Services\FileUploadService;
+use App\Factories\PredictionFactory;
 
 /**
- * Contrôleur EnergyController
- * Gère les données énergétiques (API pour graphiques) et l'import de données (CSV).
- *
- * @package App\Controllers
+ * Cette classe est responsable de la récupération des données d'énergie,
+ * de la gestion des fichiers CSV utilisateurs et de la configuration de l'algorithme de prédiction.
  */
-class EnergyController extends Controller
-{
-    private EnergyCsvService $energyService;
-
-    public function __construct() {
-        parent::__construct();
-        $this->energyService = new EnergyCsvService();
-    }
-
+class EnergyController extends \App\Core\Controller {
+    
     /**
-     * API : Renvoie les données énergétiques au format JSON pour le graphique.
-     * Supporte le filtrage par type, ville, date et la comparaison de ville.
-     * Route: GET /api/energy
-     * 
-     * @return void
+     * Gère l'affichage et la récupération des données énergétiques (réelles et prévisions).
+     * @return void Envoie une réponse JSON via App\Core\JsonResponse.
      */
-    public function index(): void
-    {
-        // 1. Récupération des filtres
-        $rawType = $_GET['type'] ?? null;
-        $type = is_string($rawType) ? $this->sanitize($rawType) : 'all';
+    public function index(): void {
+        $typeParam = $_GET['type'] ?? 'all';
+        $type = $this->sanitize(is_string($typeParam) ? $typeParam : 'all');
 
-        $rawCity = $_GET['city'] ?? null;
-        $city = is_string($rawCity) ? $this->sanitize($rawCity) : 'all'; 
+        $cityParam = $_GET['city'] ?? 'all';
+        $city = $this->sanitize(is_string($cityParam) ? $cityParam : 'all'); 
 
-        $rawCompare = $_GET['compare'] ?? null;
-        $compare = (!empty($rawCompare) && is_string($rawCompare)) ? $this->sanitize($rawCompare) : null;
-        
-        $rawFrom = $_GET['from'] ?? null;
-        $from = (is_string($rawFrom)) ? $this->sanitize($rawFrom) : date('Y-m-01');
-        
-        $rawTo = $_GET['to'] ?? null;
-        $to = (!empty($rawTo) && is_string($rawTo)) ? $this->sanitize($rawTo) : $from;
+        $compareParam = $_GET['compare'] ?? null;
+        $compare = (is_string($compareParam) && $compareParam !== '') ? $this->sanitize($compareParam) : null;
+
+        $fromParam = $_GET['from'] ?? date('Y-m-01');
+        $from = $this->sanitize(is_string($fromParam) ? $fromParam : date('Y-m-01'));
+
+        $toParam = $_GET['to'] ?? $from;
+        $to = (is_string($toParam) && $toParam !== '') ? $this->sanitize($toParam) : $from;
 
         try {
-            // 2. On récupère d'abord les données RÉELLES (CSV) via le Service
-            $realData = $this->energyService->getEnergyData($type, $city, $from, $to, $compare);
-            /** @var array<int, array<string, mixed>> $finalData */
-            $finalData = isset($realData['data']) && is_array($realData['data']) ? $realData['data'] : []; // Les données brutes
-            
-            // On cherche la dernière date connue dans le CSV
-            $lastDateFound = $from; 
-            if (!empty($finalData)) {
-                $lastItem = end($finalData);
-                $dateVal = $lastItem['date'] ?? null;
-                if (is_string($dateVal)) {
-                    $lastDateFound = substr($dateVal, 0, 10);
-                }
-            } else {
-                // Si CSV vide, on simule depuis le début - 1 jour
-                $lastDateFound = date('Y-m-d', (int)strtotime($from . ' -1 day'));
+            $userSession = $_SESSION['user'] ?? null;
+            $userId = null;
+            $userRole = '';
+
+            if (is_array($userSession)) {
+                $userId = $userSession['id'] ?? null;
+                $userRole = is_string($userSession['role'] ?? null) ? $userSession['role'] : '';
             }
 
-            if ($lastDateFound < $to) {
-                $simStart = date('Y-m-d', (int)strtotime($lastDateFound . ' +1 day'));
-                $simEnd = $to;
-                
-                // Sécurité : Max 3 jours de prévision pour ne pas surcharger l'API
-                $maxSimDate = date('Y-m-d', (int)strtotime($simStart . ' +3 days'));
-                if ($simEnd > $maxSimDate) $simEnd = $maxSimDate; 
+            $idSuffix = is_numeric($userId) ? (string)$userId : 'default';
+            $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
+            $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
+            $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
 
-                if ($simStart <= $simEnd) {
-                    // On détermine le type principal pour la simulation
+            $csvReader = new CsvReader($csvPath);
+            $energyRepository = new EnergyRepository($csvReader);
+            $analyticsService = new EnergyAnalyticsService($energyRepository);
+            $predictionAlgorithm = PredictionFactory::make($energyRepository, $analyticsService);
+
+            $rawData = $energyRepository->getEnergyData($type, $city, $from, $to, $compare);
+            $finalData = $rawData;
+            
+            $isBacktest = ($_GET['backtest'] ?? 'false') === 'true';
+            $isAdmin = ($userRole === 'admin');
+
+            if ($isAdmin && $isBacktest) {
+                $targetType = ($type === 'all') ? 'solaire' : $type;
+                
+                $citiesToPredict = [$city];
+                if ($compare) $citiesToPredict[] = $compare;
+
+                foreach ($citiesToPredict as $currentCity) {
+                    if ($currentCity === 'all') continue;
+
+                    $algos = ['standard', 'lstm'];
+                    foreach ($algos as $algoName) {
+                        $tempAlgo = ($algoName === 'lstm') 
+                            ? new \App\Strategies\DeepLearningStrategy($energyRepository)
+                            : new \App\Services\PredictionService($analyticsService);
+                        
+                        $sim = $tempAlgo->predict($targetType, $currentCity, $from, $to);
+                        
+                        $simData = $sim['data'] ?? null;
+                        if (is_array($simData)) {
+                            foreach ($simData as &$point) {
+                                if (is_array($point)) {
+                                    $point['algo'] = $algoName;
+                                }
+                            }
+                            /** @var array<int, array<string, mixed>> $simData */
+                            $finalData = array_merge($finalData, $simData);
+                        }
+                    }
+                }
+            }
+            else {
+                if (empty($finalData)) {
+                    $ts = strtotime($from . ' -1 day');
+                    $lastDateFound = ($ts !== false) ? date('Y-m-d', $ts) : $from;
+                } else {
+                    $lastItem = end($finalData);
+                    $lastDateFound = substr($lastItem['date'], 0, 10);
+                }
+
+                if ($lastDateFound < $to && $city !== 'all') {
+                    $tsNext = strtotime($lastDateFound . ' +1 day');
+                    $simStart = ($tsNext !== false) ? date('Y-m-d', $tsNext) : $lastDateFound;
+                    
                     $targetType = ($type === 'all') ? 'solaire' : $type;
+                    $simulated = $predictionAlgorithm->predict($targetType, $city, $simStart, $to);
                     
-                    $simulated = $this->energyService->simulateDataFromWeather($targetType, $city, $simStart, $simEnd);
-                    
-                    // Fusion : CSV + IA
-                    if (isset($simulated['data']) && is_array($simulated['data']) && !empty($simulated['data'])) {
+                    $simData = $simulated['data'] ?? null;
+                    if (is_array($simData)) {
                         /** @var array<int, array<string, mixed>> $simData */
-                        $simData = $simulated['data'];
                         $finalData = array_merge($finalData, $simData);
                     }
                 }
             }
             
-            // On prépare la réponse finale
-            $response = $realData;
-            $response['data'] = $finalData;
-            
-            JsonResponse::send($response);
+            \App\Core\JsonResponse::send([
+                'type' => $type,
+                'city' => $city,
+                'compare' => $compare,
+                'from' => $from,
+                'to'   => $to,
+                'data' => $finalData
+            ]);
 
         } catch (\Exception $e) {
-            JsonResponse::error($e->getMessage(), 500);
+            \App\Core\JsonResponse::error($e->getMessage(), 500);
         }
     }
 
     /**
-     * Action : Traite l'upload d'un fichier CSV avec sécurité MIME.
-     * Route: POST /energy/upload
+     * Gère l'importation d'un fichier CSV personnalisé par un utilisateur.
+     * @return void Redirige vers le dashboard avec un message flash.
      */
-    public function upload(): void
-    {
+    public function upload(): void {
         $this->requireLogin();
+        $csvFile = $_FILES['csv_file'] ?? null;
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['csv_file'])) {
-            /** @var array{name: string, type: string, tmp_name: string, error: int, size: int} $file */
-            $file = $_FILES['csv_file'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && is_array($csvFile)) {
+            try {
+                $this->validateCsrf();
+                $userSession = $_SESSION['user'] ?? null;
+                $userIdVal = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
 
-            $error = (int)$file['error'];
-            $name = (string)$file['name'];
-            $tmpName = (string)$file['tmp_name'];
+                if (!is_numeric($userIdVal)) {
+                    throw new \Exception("Utilisateur non identifié.");
+                }
 
-            if ($error !== UPLOAD_ERR_OK) {
-                 $this->flash('error', "Erreur lors du transfert du fichier (Code: $error)");
-                 $this->redirect('/dashboard');
-                 return;
-            }
-
-            // 1. Erreur technique
-            $ext = pathinfo($name, PATHINFO_EXTENSION);
-            if (strtolower($ext) !== 'csv') {
-                $this->flash('error', "Format incorrect. Veuillez envoyer un fichier .csv");
-                $this->redirect('/dashboard');
-                return;
-            }
-
-            // 2. Vérification de l'extension
-            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-            if (strtolower($ext) !== 'csv') {
-                $this->flash('error', "Format incorrect. Veuillez envoyer un fichier .csv");
-                $this->redirect('/dashboard');
-                return;
-            }
-
-            // 3. (AJOUT) Vérification de sécurité du contenu réel (MIME Type)
-            $finfo = \finfo_open(FILEINFO_MIME_TYPE);
-
-            if ($finfo === false) {
-                $this->flash('error', "Erreur interne lors de l'analyse du fichier.");
-                $this->redirect('/dashboard');
-                return; 
-            }
-
-            $mimeType = \finfo_file($finfo, $file['tmp_name']);
-            $allowedMimes = [
-                'text/csv', 'text/plain', 'application/vnd.ms-excel', 
-                'application/csv', 'text/x-csv', 'application/x-csv', 
-                'text/x-comma-separated-values', 'text/comma-separated-values'
-            ];
-
-            if ($mimeType === false || !in_array($mimeType, $allowedMimes)) {
-                $this->flash('error', "Fichier invalide détecté. Seuls les vrais CSV sont acceptés.");
-                $this->redirect('/dashboard');
-            }
-
-            // 4. Déplacement
-            /** @var array{id: int|string}|null $user */
-            $user = $_SESSION['user'] ?? null;
-
-            if (!is_array($user)) {
-                $this->redirect('/login');
-                return;
-            }
-
-            $userId = (int)$user['id'];
-            $targetDir = __DIR__ . '/../../Storage';
-            $targetPath = $targetDir . '/energy_user_' . $userId . '.csv';
-
-            if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                $userId = (int)$userIdVal;
+                $uploadService = new FileUploadService();
+                
+                /** @var array<string, mixed> $csvFile */
+                $uploadService->handleCsvUpload($csvFile, $userId);
+                
                 $this->flash('success', "Fichier importé avec succès !");
-            } else {
-                $this->flash('error', "Impossible d'écrire le fichier sur le disque.");
+            } catch (\Exception $e) {
+                $this->flash('error', $e->getMessage());
             }
         }
         $this->redirect('/dashboard');
     }
 
     /**
-     * Action : Supprime le fichier CSV de l'utilisateur.
-     * Permet de repasser en mode "Prévision pure" (IA).
-     * Route: POST /energy/delete
-     * 
-     * @return void
+     * Supprime les données CSV personnalisées de l'utilisateur connecté.
+     * @return void Redirige vers le dashboard avec un message flash.
      */
-    public function delete(): void
-    {
+    public function delete(): void {
         $this->requireLogin();
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            /** @var array{id: int|string}|null $user */
-            $user = $_SESSION['user'] ?? null;
+            try {
+                $this->validateCsrf();
+                $userSession = $_SESSION['user'] ?? null;
+                $userIdVal = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
 
-            if (!is_array($user)) {
-                $this->redirect('/login');
-                return;
-            }
-            
-            $userId = (int)$user['id'];
-            $targetPath = __DIR__ . '/../../Storage/energy_user_' . $userId . '.csv';
+                if (!is_numeric($userIdVal)) {
+                    throw new \Exception("Action impossible.");
+                }
 
-            if (file_exists($targetPath)) {
-                if (unlink($targetPath)) {
+                $userId = (int)$userIdVal;
+                
+                $uploadService = new FileUploadService();
+                if ($uploadService->deleteUserCsv($userId)) {
                     $this->flash('success', "Données supprimées. Mode Prévision activé !");
                 } else {
-                    $this->flash('error', "Erreur technique lors de la suppression.");
+                    $this->flash('error', "Aucun fichier à supprimer ou erreur technique.");
                 }
-            } else {
-                $this->flash('error', "Aucun fichier à supprimer.");
+            } catch (\Exception $e) {
+                $this->flash('error', $e->getMessage());
             }
         }
+        $this->redirect('/dashboard');
+    }
+
+    /**
+     * Enregistre le choix de l'algorithme de prédiction.
+     * @return void Redirige vers le dashboard avec un message flash.
+     * @throws \Exception En cas d'erreur d'écriture ou d'algorithme non reconnu.
+     */
+    public function setAlgorithm(): void {
+        $this->requireLogin();
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $this->validateCsrf();
+                
+                $algo = $_POST['algo'] ?? 'standard';
+                
+                $allowedAlgos = ['standard', 'lstm'];
+                
+                if (in_array($algo, $allowedAlgos)) {
+                    $baseDir = realpath(__DIR__ . '/../../');
+                    $file = $baseDir ? $baseDir . '/Storage/active_algo.txt' : __DIR__ . '/../../Storage/active_algo.txt';
+                    
+                    $result = @file_put_contents($file, $algo);
+                    
+                    if ($result === false) {
+                        throw new \Exception("Erreur de permission : Impossible d'écrire dans le fichier active_algo.txt");
+                    }
+                    
+                    $this->flash('success', "L'algorithme de prédiction a été mis à jour avec succès !");
+                } else {
+                    $this->flash('error', "Algorithme non reconnu.");
+                }
+            } catch (\Exception $e) {
+                $this->flash('error', $e->getMessage());
+            }
+        }
+        
         $this->redirect('/dashboard');
     }
 }

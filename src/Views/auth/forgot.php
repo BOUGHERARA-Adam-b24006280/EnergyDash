@@ -1,11 +1,16 @@
 <?php
 /**
  * Fichier : forgot.php
- * Rôle : Vue du formulaire de demande de réinitialisation de mot de passe (oubli de mot de passe).
+ * Rôle : Vue du formulaire de demande de réinitialisation de mot de passe.
+ * @var mixed $errors      Injecté par le contrôleur
+ * @var mixed $success     Injecté par le contrôleur
+ * @var mixed $csrf_token  Injecté par le contrôleur
  */
 ?>
 
-<?php if (!empty($errors)): ?>
+<?php 
+if (isset($errors) && is_array($errors) && !empty($errors)):
+?>
     <div class="bg-red-50 border border-red-200 text-sm text-red-800 rounded-lg p-4 dark:bg-red-800/10 dark:border-red-900 dark:text-red-500 mx-2"
         role="alert" tabindex="-1" aria-labelledby="hs-with-list-label">
         <div class="flex">
@@ -25,7 +30,9 @@
                 <div class="mt-2 text-sm text-red-700 dark:text-red-400">
                     <ul class="list-disc space-y-1 ps-5">
                         <?php foreach ($errors as $err): ?>
-                            <li><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></li>
+                            <?php if (is_string($err)): ?>
+                                <li><?= htmlspecialchars($err, ENT_QUOTES, 'UTF-8') ?></li>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -34,7 +41,9 @@
     </div>
 <?php endif; ?>
 
-<?php if (!empty($success)): ?>
+<?php
+if (isset($success) && is_string($success) && !empty($success)):
+?>
     <div class="bg-green-50 border border-green-200 text-sm text-green-800 rounded-lg p-4 dark:bg-green-800/10 dark:border-green-900 dark:text-green-500 mx-2 mb-4"
         role="alert">
         <div class="flex">
@@ -74,7 +83,16 @@
 
             <div class="mt-5">
                 <form method="post" action="/forgot">
-                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
+                    
+                    <?php 
+                    $safeToken = '';
+                    if (isset($csrf_token) && is_string($csrf_token)) {
+                        $safeToken = $csrf_token;
+                    }
+                    ?>
+                    
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($safeToken, ENT_QUOTES, 'UTF-8') ?>">
+
                     <div class="grid gap-y-4">
                         <div>
                             <label for="email" class="block text-sm mb-2 dark:text-white">Adresse-mail</label>
@@ -92,3 +110,5 @@
         </div>
     </div>
 </main>
+
+<script src="/assets/js/auth.js"></script>

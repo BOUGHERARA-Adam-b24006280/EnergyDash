@@ -13,7 +13,7 @@ $action = is_string($uri)
     : '';
 ?>
 
-<?php if (!empty($success)): ?>
+<?php if (isset($success) && is_string($success) && !empty($success)): ?>
     <div class="bg-green-50 border border-green-200 text-sm text-green-800 rounded-lg p-4 dark:bg-green-800/10 dark:border-green-900 dark:text-green-500 mx-2 mb-4"
         role="alert" tabindex="-1" aria-labelledby="hs-success-label">
         <div class="flex">
@@ -119,7 +119,7 @@ $action = is_string($uri)
                                     required aria-describedby="password-error">
                             </div>
                             <p class="mt-2 mb-4 text-sm text-gray-500 dark:text-neutral-500" id="hs-input-helper-text">
-                                Votre mot de passe doit contenir au moins 8 caractères, une majuscule et une minuscule.
+                                Votre mot de passe doit contenir au moins 12 caractères, une majuscule et une minuscule.
                             </p>
                         </div>
                         <!-- End Form Group -->
@@ -134,10 +134,4 @@ $action = is_string($uri)
         </div>
     </div>
 </main>
-<script>
-    document.querySelector('form').addEventListener('submit', function () {
-        const btn = document.querySelector('.form-button');
-        btn.innerHTML = '<div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>';
-        btn.disabled = true;
-    });
-</script>
+<script src="/assets/js/auth.js"></script>

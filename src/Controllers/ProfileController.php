@@ -5,10 +5,7 @@
  */
 
 namespace App\Controllers;
-
-use App\Core\Controller;
 use App\Models\UserModel;
-use Exception;
 
 /**
  * Contrôleur ProfileController
@@ -17,17 +14,17 @@ use Exception;
  *
  * @package App\Controllers
  */
-class ProfileController extends Controller {
-    /** @var UserModel Instance du modèle utilisateur */
-    private UserModel $userModel;
+class ProfileController extends \App\Core\Controller {
+    /** @var \App\Models\UserModel Instance du modèle utilisateur */
+    private \App\Models\UserModel $userModel;
 
     /**
      * Constructeur.
      * Initialise la session si nécessaire et le modèle utilisateur.
      */
-    public function __construct(){
+    public function __construct() {
         parent::__construct();
-        $this->userModel = new UserModel();
+        $this->userModel = new \App\Models\UserModel();
     }
 
     /**
@@ -40,6 +37,8 @@ class ProfileController extends Controller {
     public function index(): void {
         $this->requireLogin();
 
+        $this->initCsrf();
+
         /** @var array{id: int|string, role: string, first_name: string, last_name: string, email: string} $user */
         $user = $_SESSION['user'];
 
@@ -51,10 +50,11 @@ class ProfileController extends Controller {
             $viewPath = 'profile/profile';
         }
 
-        $this->render($viewPath, [
+        $this->view->render($viewPath, [
             'title' => 'Mon Profil',
             'user'  => $user,
-            'users' => $users
+            'users' => $users,
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 
@@ -67,19 +67,28 @@ class ProfileController extends Controller {
     public function update(): void {
         
         $this->requireLogin();
-
-        if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+        
+        $userSession = $_SESSION['user'] ?? null;
+        if (!is_array($userSession)) {
             $this->redirect('/login');
             return;
         }
 
-        $userId = $_SESSION['user']['id'] ?? 0;
-        if (!is_numeric($userId)) {
-             $this->flash('error', "ID utilisateur invalide.");
-             $this->redirect('/logout');
-             return;
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
         }
-        $id = (int)$userId;
+
+        $userIdVal = $userSession['id'] ?? null;
+        if (!is_numeric($userIdVal)) {
+            $this->flash('error', "ID utilisateur invalide.");
+            $this->redirect('/logout');
+            return;
+        }
+        $id = (int)$userIdVal;
 
         $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
         
@@ -107,12 +116,14 @@ class ProfileController extends Controller {
                 $password
             );
 
-            $_SESSION['user']['first_name'] = $firstName;
-            $_SESSION['user']['last_name']  = $lastName;
-            $_SESSION['user']['email']      = $email;
+            $userSession['first_name'] = $firstName;
+            $userSession['last_name']  = $lastName;
+            $userSession['email']      = $email;
+
+            $_SESSION['user'] = $userSession;
 
             $this->flash('success', "Profil mis à jour avec succès.");
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->flash('error', "Erreur lors de la mise à jour du profil.");
         }
 
@@ -128,6 +139,14 @@ class ProfileController extends Controller {
      */
     public function updateRole(): void {
         $this->requireAdmin();
+
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
 
         if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
              $this->redirect('/login');
@@ -156,4 +175,108 @@ class ProfileController extends Controller {
 
         $this->redirect('/profile');
     }
+
+    /**
+     * Crée un nouvel utilisateur (Admin seulement).
+     * Route : POST /profile/createUser
+     * 
+     * @return void
+     */
+    public function createUser(): void {
+        $this->requireAdmin();
+
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
+
+        $rawEmail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        if (!$rawEmail) {
+            $this->flash('error', "Adresse email invalide.");
+            $this->redirect('/profile');
+            return;
+        }
+        $email = (string)$rawEmail;
+
+        if($this->userModel->getUserByEmail($email)) {
+            $this->flash('error', "Un compte avec cette adresse e-mail existe déjà.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        $rawFirstName = $_POST['first_name'] ?? '';
+        $rawLastName = $_POST['last_name'] ?? '';
+        $rawPassword = $_POST['password'] ?? '';
+
+        $firstName = $this->sanitize(is_string($rawFirstName) ? $rawFirstName : '');
+        $lastName  = $this->sanitize(is_string($rawLastName) ? $rawLastName : '');
+        $password  = is_string($rawPassword) ? $rawPassword : '';
+
+        if (empty($firstName) || empty($lastName) || empty($password)) {
+            $this->flash('error', "Veuillez remplir tous les champs.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        if (!UserModel::isPasswordStrong($password)) {
+            $this->flash('error', "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        if ($this->userModel->createUser($firstName, $lastName, $email, $password)) {
+            $this->flash('success', "Utilisateur créé avec succès.");
+        } else {
+            $this->flash('error', "Erreur lors de la création de l'utilisateur.");
+        }
+
+        $this->redirect('/profile');
+    }
+
+    /**
+     * Supprime un utilisateur (Admin suelement).
+     * Route : /profile/deleteUser
+     * 
+     * @return void
+     */
+    public function deleteUser(): void {
+        $this->requireAdmin();
+
+        try {
+            $this->validateCsrf();
+        } catch (\Exception $e) {
+            $this->flash('error', $e->getMessage());
+            $this->redirect('/profile');
+            return;
+        }
+
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+
+        if (!$id) {
+            $this->flash('error', "ID utilisateur invalide.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        $userSession = $_SESSION['user'] ?? null;
+        $currentUserId = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
+
+        if ($id === $currentUserId) {
+            $this->flash('error', "Vous ne pouvez pas supprimer votre propre compte.");
+            $this->redirect('/profile');
+            return;
+        }
+
+        if ($this->userModel->deleteUser($id)) {
+            $this->flash('success', "Utilisateur supprimé avec succès.");
+        } else {
+            $this->flash('error', "Erreur lors de la suppression de l'utilisateur.");
+        }
+
+        $this->redirect('/profile');
+    }
+
 }

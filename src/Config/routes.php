@@ -40,8 +40,12 @@ $router->add('GET',  '/mentions',           [App\Controllers\LegalController::cl
 $router->add('GET',  '/profile',            [App\Controllers\ProfileController::class,   'index']);
 $router->add('POST', '/profile/updateRole', [App\Controllers\ProfileController::class,   'updateRole']);
 $router->add('POST', '/profile/update',     [App\Controllers\ProfileController::class,   'update']);
+$router->add('POST', '/profile/deleteUser', [App\Controllers\ProfileController::class,   'deleteUser']);
+$router->add('POST', '/profile/createUser', [App\Controllers\ProfileController::class,   'createUser']);
+
 
 // Energy API & Upload
 $router->add('GET',  '/api/energy',         [App\Controllers\EnergyController::class,   'index']);
 $router->add('POST', '/energy/upload',      [App\Controllers\EnergyController::class,   'upload']);
 $router->add('POST', '/energy/delete',      [App\Controllers\EnergyController::class,   'delete']);
+$router->add('POST', '/energy/setAlgorithm', [App\Controllers\EnergyController::class,   'setAlgorithm']);

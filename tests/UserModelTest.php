@@ -2,22 +2,14 @@
 
 namespace Tests\Models;
 
-use PHPUnit\Framework\TestCase;
-use App\Models\UserModel;
-use PDO;
-use PDOStatement;
-use ReflectionClass;
-
-class UserModelTest extends TestCase
-{
+class UserModelTest extends \PHPUnit\Framework\TestCase {
     private $pdo;
-    private UserModel $userModel;
+    private \App\Models\UserModel $userModel;
 
-    protected function setUp(): void
-    {
-        $this->pdo = $this->createMock(PDO::class);
+    protected function setUp(): void {
+        $this->pdo = $this->createMock(\PDO::class);
 
-        $reflection = new ReflectionClass(UserModel::class);
+        $reflection = new \ReflectionClass(\App\Models\UserModel::class);
         $this->userModel = $reflection->newInstanceWithoutConstructor();
 
         $property = $reflection->getParentClass()->getProperty('db');
@@ -33,9 +25,8 @@ class UserModelTest extends TestCase
     /**
      * Test : emailExists renvoie true si la base trouve une ligne.
      */
-    public function testEmailExistsReturnsTrueIfFound(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testEmailExistsReturnsTrueIfFound(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('fetch')->willReturn(['id' => 1, 'email' => 'test@test.com']);
 
         $this->pdo->method('prepare')->willReturn($stmt);
@@ -48,9 +39,8 @@ class UserModelTest extends TestCase
     /**
      * Test : createUser hash le mot de passe et appelle l'insertion.
      */
-    public function testCreateUserHashesPasswordAndInserts(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testCreateUserHashesPasswordAndInserts(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('execute')->willReturn(true);
         $this->pdo->method('lastInsertId')->willReturn('10');
         $this->pdo->method('prepare')->willReturn($stmt);
@@ -71,8 +61,7 @@ class UserModelTest extends TestCase
     /**
      * Test : verifyLogin renvoie l'utilisateur si le mot de passe est bon.
      */
-    public function testVerifyLoginSuccess(): void
-    {
+    public function testVerifyLoginSuccess(): void {
         $realHash = password_hash('Secret123!', PASSWORD_DEFAULT);
 
         $userData = [
@@ -81,7 +70,7 @@ class UserModelTest extends TestCase
             'password' => $realHash
         ];
 
-        $stmt = $this->createMock(PDOStatement::class);
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('fetch')->willReturn($userData);
         $this->pdo->method('prepare')->willReturn($stmt);
 
@@ -94,11 +83,10 @@ class UserModelTest extends TestCase
     /**
      * Test : verifyLogin échoue avec un mauvais mot de passe.
      */
-    public function testVerifyLoginFailsWithWrongPassword(): void
-    {
+    public function testVerifyLoginFailsWithWrongPassword(): void {
         $realHash = password_hash('BonMotDePasse', PASSWORD_DEFAULT);
         
-        $stmt = $this->createMock(PDOStatement::class);
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('fetch')->willReturn(['password' => $realHash]);
         $this->pdo->method('prepare')->willReturn($stmt);
 
@@ -111,21 +99,19 @@ class UserModelTest extends TestCase
      * Test de la méthode statique isPasswordStrong.
      * Pas besoin de Mock ici car c'est une fonction pure.
      */
-    public function testIsPasswordStrong(): void
-    {
-        $this->assertFalse(UserModel::isPasswordStrong('Short1!'));
-        $this->assertFalse(UserModel::isPasswordStrong('weakpassword1!'));
-        $this->assertFalse(UserModel::isPasswordStrong('NoNumber!'));
-        $this->assertFalse(UserModel::isPasswordStrong('NoSpecialChar1'));
+    public function testIsPasswordStrong(): void {
+        $this->assertFalse(\App\Models\UserModel::isPasswordStrong('Short1!'));
+        $this->assertFalse(\App\Models\UserModel::isPasswordStrong('weakpassword1!'));
+        $this->assertFalse(\App\Models\UserModel::isPasswordStrong('NoNumber!'));
+        $this->assertFalse(\App\Models\UserModel::isPasswordStrong('NoSpecialChar1'));
         
-        $this->assertTrue(UserModel::isPasswordStrong('StrongPass1!'));
+        $this->assertTrue(\App\Models\UserModel::isPasswordStrong('StrongPass1!'));
     }
 
     /**
      * Test : updateUserRole empêche les rôles invalides.
      */
-    public function testUpdateUserRoleRefusesInvalidRole(): void
-    {
+    public function testUpdateUserRoleRefusesInvalidRole(): void {
         $this->pdo->expects($this->never())->method('prepare');
 
         $result = $this->userModel->updateUserRole(1, 'super_hacker');
@@ -136,9 +122,8 @@ class UserModelTest extends TestCase
     /**
      * Test : updateUserRole accepte les rôles valides.
      */
-    public function testUpdateUserRoleAcceptsValidRole(): void
-    {
-        $stmt = $this->createMock(PDOStatement::class);
+    public function testUpdateUserRoleAcceptsValidRole(): void {
+        $stmt = $this->createMock(\PDOStatement::class);
         $stmt->method('execute')->willReturn(true);
         $this->pdo->method('prepare')->willReturn($stmt);
 

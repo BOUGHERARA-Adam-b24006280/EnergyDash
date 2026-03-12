@@ -6,28 +6,43 @@
 
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Services\EnergyCsvService;
+use App\Infrastructure\CsvReader;
+use App\Repositories\EnergyRepository;
 
 /**
  * Classe DashboardController
  * Gère la vue principale de l'application où sont affichés les graphiques et les données.
- * Fait le lien entre le service de données (EnergyCsvService) et la vue.
+ * Fait le lien entre le dépôt de données (EnergyRepository) et la vue.
  *
  * @package App\Controllers
  */
-class DashboardController extends Controller {
+class DashboardController extends \App\Core\Controller {
 
-    /** @var EnergyCsvService Service responsable de la lecture du CSV et des prévisions */
-    private EnergyCsvService $energyService;
+    /** @var EnergyRepository Dépôt responsable des requêtes sur les données énergétiques */
+    private EnergyRepository $energyRepository;
 
     /**
      * Constructeur.
-     * Initialise la session (via le parent) et instancie le service de données.
+     * Initialise la session (via le parent) et instancie l'accès aux données.
      */
     public function __construct() {
         parent::__construct();
-        $this->energyService = new EnergyCsvService();
+        
+        $userSession = $_SESSION['user'] ?? [];
+        $userId = (is_array($userSession) && isset($userSession['id'])) ? $userSession['id'] : null;
+        
+        if (is_numeric($userId)) {
+            $idSuffix = (int)$userId;
+        } else {
+            $idSuffix = 'default';
+        }
+
+        $userFile = __DIR__ . '/../../Storage/energy_user_' . $idSuffix . '.csv';
+        $defaultFile = __DIR__ . '/../../Storage/energyData.csv';
+        $csvPath = ($userId && file_exists($userFile)) ? $userFile : $defaultFile;
+
+        $csvReader = new \App\Infrastructure\CsvReader($csvPath);
+        $this->energyRepository = new \App\Repositories\EnergyRepository($csvReader);
     }
 
     /**
@@ -39,11 +54,16 @@ class DashboardController extends Controller {
     public function index(): void {
         $this->requireLogin();
 
-        $cities = $this->energyService->getAvailableCities();
+        $this->initCsrf();
 
-        $this->render('dashboard/dashboard', [
+        $cities = $this->energyRepository->getAvailableCities();
+        $energyMapping = $this->energyRepository->getCityEnergyMapping();
+
+        $this->view->render('dashboard/dashboard', [
             'title'  => 'Tableau de bord - EnergyDash',
-            'cities' => $cities
+            'cities' => $cities,
+            'energyMapping' => $energyMapping,
+            'csrf_token' => $_SESSION['csrf_token']
         ]);
     }
 }

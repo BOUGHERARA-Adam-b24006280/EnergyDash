@@ -1,34 +1,27 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use App\Models\UserModel;
-use App\Core\Database;
-
-class AuthSystemTest extends TestCase {
-    private UserModel $userModel;
+class AuthSystemTest extends \PHPUnit\Framework\TestCase {
+    private \App\Models\UserModel $userModel;
     private string $testEmail = 'test_auth_sys_verify@example.com';
     private string $testPassword = 'Password123@System';
 
-    public static function setUpBeforeClass(): void
-    {
+    public static function setUpBeforeClass(): void {
         // Load env variables
         $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
     }
 
-    protected function setUp(): void
-    {
-        $this->userModel = new UserModel();
+    protected function setUp(): void {
+        $this->userModel = new \App\Models\UserModel();
         $this->cleanup();
     }
 
-    protected function tearDown(): void
-    {
+    protected function tearDown(): void {
         $this->cleanup();
     }
 
     private function cleanup(): void{
-        $db = (new Database())->getConnection();
+        $db = (new \App\Core\Database())->getConnection();
         try {
             $stmt = $db->prepare("SELECT id FROM users WHERE email = :email");
             $stmt->execute([':email' => $this->testEmail]);
@@ -43,8 +36,7 @@ class AuthSystemTest extends TestCase {
         }
     }
 
-    public function testAuthFlow()
-    {
+    public function testAuthFlow() {
         $firstName = 'Test';
         $lastName = 'User';
         

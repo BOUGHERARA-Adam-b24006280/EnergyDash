@@ -5,14 +5,12 @@ namespace App\Core;
 $mockHeaders = [];
 $mockResponseCode = 200;
 
-function header(string $string): void
-{
+function header(string $string): void {
     global $mockHeaders;
     $mockHeaders[] = $string;
 }
 
-function http_response_code(?int $code = null): int|bool
-{
+function http_response_code(?int $code = null): int|bool {
     global $mockResponseCode;
     if ($code !== null) {
         $mockResponseCode = $code;
@@ -22,29 +20,23 @@ function http_response_code(?int $code = null): int|bool
 
 namespace Tests\Core;
 
-use PHPUnit\Framework\TestCase;
-use App\Core\JsonResponse;
-
-class JsonResponseTest extends TestCase
-{
-    protected function setUp(): void
-    {
+class JsonResponseTest extends \PHPUnit\Framework\TestCase {
+    protected function setUp(): void {
         global $mockHeaders, $mockResponseCode;
         $mockHeaders = [];
         $mockResponseCode = 200;
 
-        JsonResponse::$exitAfterSend = false;
+        \App\Core\JsonResponse::$exitAfterSend = false;
     }
 
     /**
      * Test de la méthode send() : Cas nominal
      */
-    public function testSendOutputsJsonAndSetsHeaders(): void
-    {
+    public function testSendOutputsJsonAndSetsHeaders(): void {
         $data = ['id' => 123, 'name' => 'Test'];
 
         ob_start();
-        JsonResponse::send($data, 201);
+        \App\Core\JsonResponse::send($data, 201);
         $output = ob_get_clean();
 
         global $mockResponseCode;
@@ -59,10 +51,9 @@ class JsonResponseTest extends TestCase
     /**
      * Test de la méthode error()
      */
-    public function testErrorOutputsFormattedJson(): void
-    {
+    public function testErrorOutputsFormattedJson(): void {
         ob_start();
-        JsonResponse::error("Accès interdit", 403);
+        \App\Core\JsonResponse::error("Accès interdit", 403);
         $output = ob_get_clean();
 
         global $mockResponseCode;
@@ -76,12 +67,11 @@ class JsonResponseTest extends TestCase
     /**
      * Test : Vérifie que le tampon de sortie est nettoyé avant l'envoi
      */
-    public function testSendCleansOutputBuffer(): void
-    {
+    public function testSendCleansOutputBuffer(): void {
         ob_start();
         echo "<div>Mauvais HTML qui traîne</div>";
         
-        JsonResponse::send(['status' => 'ok']);
+        \App\Core\JsonResponse::send(['status' => 'ok']);
         
         $output = ob_get_clean();
 

@@ -1,12 +1,9 @@
 <?php
 namespace App\Core;
 
-use PDO;
-
-abstract class Model
-{
-    /** @var PDO Instance de connexion à la base de données via PDO */
-    protected PDO $db;
+abstract class Model {
+    /** @var \PDO Instance de connexion à la base de données via PDO */
+    protected \PDO $db;
     
     /** @var string Nom de la table associée au modèle */
     protected string $table;
@@ -14,10 +11,9 @@ abstract class Model
     /**
      * Constructeur.
      *
-     * @param PDO $db Instance de connexion PDO.
+     * @param \PDO $db Instance de connexion PDO.
      */
-    public function __construct(PDO $db)
-    {
+    public function __construct(\PDO $db) {
         $this->db = $db;
     }
 
@@ -26,8 +22,7 @@ abstract class Model
      *
      * @return array<int, array<string, mixed>> Liste des lignes sous forme de tableaux associatifs.
      */
-    public function findAll(): array
-    {
+    public function findAll(): array {
         $sql = "SELECT * FROM {$this->table}";
         $stmt = $this->db->query($sql);
 
@@ -36,7 +31,7 @@ abstract class Model
         }
 
         /** @var array<int, array<string, mixed>> */
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
@@ -45,14 +40,13 @@ abstract class Model
      * @param int $id
      * @return array<string, mixed>|null
      */
-    public function findById(int $id): ?array
-    {
+    public function findById(int $id): ?array {
         $sql = "SELECT * FROM {$this->table} WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
 
         /** @var array<string, mixed>|false $row */
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return $row ?: null;
     }
@@ -64,14 +58,13 @@ abstract class Model
      * @param mixed $value
      * @return array<string, mixed>|null
      */
-    public function findOneBy(string $column, mixed $value): ?array
-    {
+    public function findOneBy(string $column, mixed $value): ?array {
         $sql = "SELECT * FROM {$this->table} WHERE {$column} = :value LIMIT 1";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['value' => $value]);
 
         /** @var array<string, mixed>|false $row */
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         return $row ?: null;
     }
@@ -82,8 +75,7 @@ abstract class Model
      * @param array<string, mixed> $data
      * @return int|false ID inséré ou false en cas d’échec
      */
-    public function create(array $data): int|false
-    {
+    public function create(array $data): int|false {
         if (empty($data)) {
             return false;
         }
@@ -117,8 +109,7 @@ abstract class Model
      *
      * @param array<string, mixed> $data
      */
-    public function update(int $id, array $data): bool
-    {
+    public function update(int $id, array $data): bool {
         if (empty($data)) {
             return false;
         }
@@ -138,8 +129,7 @@ abstract class Model
         }
     }
 
-    public function delete(int $id): bool
-    {
+    public function delete(int $id): bool {
         $sql = "DELETE FROM {$this->table} WHERE id = :id";
         $stmt = $this->db->prepare($sql);
 
