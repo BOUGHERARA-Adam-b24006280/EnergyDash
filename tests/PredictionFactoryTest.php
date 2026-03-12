@@ -15,8 +15,6 @@ class PredictionFactoryTest extends TestCase {
     private $analyticsMock;
 
     protected function setUp(): void {
-        // CORRECTION : Le chemin doit remonter d'un seul niveau depuis 'tests/' 
-        // pour atteindre la racine du projet où se trouve 'Storage/'
         $this->algoFilePath = dirname(__DIR__) . '/Storage/active_algo.txt';
         
         if (!is_dir(dirname($this->algoFilePath))) {
@@ -37,7 +35,6 @@ class PredictionFactoryTest extends TestCase {
      * Teste que la factory retourne PredictionService par défaut (quand le fichier n'existe pas).
      */
     public function testMakeReturnsStandardServiceByDefault(): void {
-        // On s'assure que le fichier est bien supprimé avant l'appel
         if (file_exists($this->algoFilePath)) {
             unlink($this->algoFilePath);
         }

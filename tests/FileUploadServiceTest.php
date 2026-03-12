@@ -3,7 +3,6 @@
 namespace App\Services;
 
 // On initialise les variables avec des valeurs par défaut au cas où
-// un autre test (comme EnergyControllerTest) chargerait ce fichier.
 $mockMoveUploadedFile = true;
 $mockUnlink = true;
 $mockFileExists = true;
@@ -11,7 +10,7 @@ $mockMimeType = 'text/csv';
 
 function move_uploaded_file(string $from, string $to): bool {
     global $mockMoveUploadedFile;
-    return $mockMoveUploadedFile ?? true; // Default à true
+    return $mockMoveUploadedFile ?? true;
 }
 
 function unlink(string $filename): bool {
@@ -21,7 +20,6 @@ function unlink(string $filename): bool {
 
 function file_exists(string $filename): bool {
     global $mockFileExists;
-    // Si la variable est null, on utilise la vraie fonction PHP native
     if ($mockFileExists === null) {
         return \file_exists($filename);
     }
@@ -50,7 +48,6 @@ class FileUploadServiceTest extends TestCase
     {
         $this->service = new FileUploadService();
         
-        // Réinitialisation des mocks globaux avant chaque test
         global $mockMoveUploadedFile, $mockUnlink, $mockFileExists, $mockMimeType;
         $mockMoveUploadedFile = true;
         $mockUnlink = true;
@@ -69,7 +66,6 @@ class FileUploadServiceTest extends TestCase
             'error' => UPLOAD_ERR_OK
         ];
 
-        // On ne s'attend à aucune exception
         $this->service->handleCsvUpload($file, 42);
         $this->assertTrue(true); 
     }
@@ -82,7 +78,7 @@ class FileUploadServiceTest extends TestCase
         $file = [
             'name' => 'data.csv',
             'tmp_name' => '/tmp/php123',
-            'error' => UPLOAD_ERR_INI_SIZE // Fichier trop gros
+            'error' => UPLOAD_ERR_INI_SIZE
         ];
 
         $this->expectException(\Exception::class);
@@ -114,7 +110,7 @@ class FileUploadServiceTest extends TestCase
     public function testHandleCsvUploadRejectsInvalidMimeType(): void
     {
         global $mockMimeType;
-        $mockMimeType = 'application/pdf'; // Fichier PDF déguisé en .csv
+        $mockMimeType = 'application/pdf';
 
         $file = [
             'name' => 'faux_fichier.csv',

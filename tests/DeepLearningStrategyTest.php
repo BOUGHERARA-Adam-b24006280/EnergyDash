@@ -16,16 +16,12 @@ class DeepLearningStrategyTest extends TestCase
 
     protected function setUp(): void
     {
-        // Mock du dépôt de données
         $this->repositoryMock = $this->createMock(EnergyRepository::class);
         
-        // Mock de l'API Météo
         $this->weatherApiMock = $this->createMock(WeatherApiService::class);
 
-        // Initialisation de la stratégie
         $this->strategy = new DeepLearningStrategy($this->repositoryMock);
 
-        // Injection du mock WeatherApiService via Reflection (car créé par "new" dans le constructeur)
         $reflection = new ReflectionClass($this->strategy);
         $property = $reflection->getProperty('weatherApi');
         $property->setAccessible(true);
@@ -37,10 +33,8 @@ class DeepLearningStrategyTest extends TestCase
      */
     public function testPredictWithNoHistoricalDataReturnsValidStructure(): void
     {
-        // 1. Simulation : Pas de données historiques dans le dépôt
         $this->repositoryMock->method('getHistoricalDataForRatio')->willReturn([]);
 
-        // 2. Simulation : L'API météo retourne une heure de prévision
         $this->weatherApiMock->method('getHourlyWeather')->willReturn([
             [
                 'date' => '2026-01-01 12:00:00',
@@ -53,11 +47,9 @@ class DeepLearningStrategyTest extends TestCase
 
         $result = $this->strategy->predict('solaire', 'Lyon', '2026-01-01', '2026-01-01');
 
-        // Vérifications
         $this->assertEquals('solaire', $result['type']);
         $this->assertEquals('Lyon', $result['city']);
         $this->assertIsArray($result['data']);
-        // Même sans historique, la stratégie utilise des valeurs par défaut pour l'IA
     }
 
     /**
@@ -67,7 +59,6 @@ class DeepLearningStrategyTest extends TestCase
     {
         $this->repositoryMock->method('getHistoricalDataForRatio')->willReturn([]);
         
-        // Simulation : L'API météo échoue ou ne renvoie rien
         $this->weatherApiMock->method('getHourlyWeather')->willReturn([]);
 
         $result = $this->strategy->predict('eolien', 'Paris', '2026-01-01', '2026-01-01');
@@ -81,7 +72,6 @@ class DeepLearningStrategyTest extends TestCase
      */
     public function testPredictProcessesHistoricalDataCorrectly(): void
     {
-        // Données simulées pour l'entraînement de l'IA
         $historical = [
             ['meteo' => 100.0, 'production' => 50.0],
             ['meteo' => 200.0, 'production' => 110.0]

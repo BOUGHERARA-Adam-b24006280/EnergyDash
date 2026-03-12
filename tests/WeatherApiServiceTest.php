@@ -11,7 +11,6 @@ $mockWeatherApiResponse = '';
 function file_get_contents(string $filename, bool $use_include_path = false, $context = null): string|false {
     global $mockWeatherApiResponse;
 
-    // Si l'URL contient l'API Open-Meteo, on renvoie le mock
     if (str_contains($filename, 'open-meteo.com')) {
         return $mockWeatherApiResponse;
     }
@@ -40,7 +39,6 @@ class WeatherApiServiceTest extends TestCase
     {
         global $mockWeatherApiResponse;
 
-        // Simulation d'une réponse JSON valide de l'API
         $mockWeatherApiResponse = json_encode([
             'hourly' => [
                 'time' => ['2026-01-01T12:00', '2026-01-01T13:00'],
@@ -56,7 +54,6 @@ class WeatherApiServiceTest extends TestCase
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
         
-        // Vérification de la structure du premier relevé
         $firstEntry = $result[0];
         $this->assertEquals('2026-01-01 12:00:00', $firstEntry['date']);
         $this->assertEquals(15.5, $firstEntry['temp']);
@@ -69,7 +66,7 @@ class WeatherApiServiceTest extends TestCase
     public function testGetHourlyWeatherHandlesApiFailure(): void
     {
         global $mockWeatherApiResponse;
-        $mockWeatherApiResponse = false; // Simule un échec de connexion
+        $mockWeatherApiResponse = false;
 
         $result = $this->service->getHourlyWeather('lyon', '2026-01-01', '2026-01-01');
 
@@ -84,7 +81,6 @@ class WeatherApiServiceTest extends TestCase
     {
         global $mockWeatherApiResponse;
 
-        // On simule 3 jours, mais on ne demandera que le 2ème jour
         $mockWeatherApiResponse = json_encode([
             'hourly' => [
                 'time' => ['2026-01-01T12:00', '2026-01-02T12:00', '2026-01-03T12:00'],
@@ -95,7 +91,6 @@ class WeatherApiServiceTest extends TestCase
             ]
         ]);
 
-        // On demande uniquement le 02 Janvier
         $result = $this->service->getHourlyWeather('lyon', '2026-01-02', '2026-01-02');
 
         $this->assertCount(1, $result);
@@ -111,10 +106,8 @@ class WeatherApiServiceTest extends TestCase
         global $mockWeatherApiResponse;
         $mockWeatherApiResponse = json_encode(['hourly' => ['time' => []]]);
 
-        // 'VilleFantome' n'est pas dans la liste du service
         $result = $this->service->getHourlyWeather('VilleFantome', '2026-01-01', '2026-01-01');
 
         $this->assertIsArray($result);
-        // Le test passe si aucune exception n'est levée et qu'un tableau est retourné
     }
 }

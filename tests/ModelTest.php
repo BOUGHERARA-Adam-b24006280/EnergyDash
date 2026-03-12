@@ -36,10 +36,8 @@ class ModelTest extends \PHPUnit\Framework\TestCase {
                   ->with("SELECT * FROM users")
                   ->willReturn($stmt);
 
-        // Action
         $result = $this->model->findAll();
 
-        // Assertion
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertEquals('Alice', $result[0]['name']);

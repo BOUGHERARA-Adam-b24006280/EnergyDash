@@ -33,38 +33,30 @@ namespace Tests\Controllers {
 
         protected function setUp(): void
         {
-            // 1. Simulation des variables d'environnement pour Database
             $_ENV['DATABASE_HOST'] = 'localhost';
             $_ENV['DATABASE_NAME'] = 'test';
             $_ENV['DATABASE_USER'] = 'root';
             $_ENV['DATABASE_PASSWORD'] = '';
 
-            // 2. Injection d'un faux PDO dans le Singleton Database pour bloquer la connexion réelle
             $pdoMock = $this->createMock(\PDO::class);
             $dbReflection = new ReflectionClass(Database::class);
             $instanceProperty = $dbReflection->getProperty('instance');
             $instanceProperty->setAccessible(true);
             $instanceProperty->setValue(null, $pdoMock);
 
-            // 3. Création du mock du modèle utilisateur
             $this->userModelMock = $this->createMock(UserModel::class);
 
-            // 4. Création du MOCK PARTIEL du contrôleur pour neutraliser redirect()
-            // On utilise getMockBuilder pour simuler seulement 'redirect' et éviter le 'exit;'
             $this->controller = $this->getMockBuilder(ProfileController::class)
                 ->onlyMethods(['redirect'])
                 ->getMock();
 
-            // On neutralise redirect par défaut pour tous les tests (respecte le type void)
             $this->controller->method('redirect');
 
-            // 5. Injection du mock UserModel dans la propriété privée du contrôleur via Réflexion
             $controllerReflection = new ReflectionClass(ProfileController::class);
             $modelProperty = $controllerReflection->getProperty('userModel');
             $modelProperty->setAccessible(true);
             $modelProperty->setValue($this->controller, $this->userModelMock);
 
-            // Nettoyage des globaux
             $_SESSION = [];
             $_POST = [];
         }
@@ -82,7 +74,6 @@ namespace Tests\Controllers {
                 'email' => 'adam@test.com'
             ];
 
-            // On vérifie que getAllUsers n'est pas appelé (réservé aux admins)
             $this->userModelMock->expects($this->never())->method('getAllUsers');
 
             ob_start();
@@ -99,7 +90,6 @@ namespace Tests\Controllers {
         {
             $_SESSION['user'] = ['id' => 1, 'role' => 'admin', 'first_name' => 'Admin'];
 
-            // Simulation du retour de la liste des utilisateurs
             $this->userModelMock->method('getAllUsers')->willReturn([
                 ['id' => 2, 'first_name' => 'Lucas', 'last_name' => 'D.', 'email' => 'lucas@test.com', 'role' => 'user']
             ]);
@@ -124,19 +114,16 @@ namespace Tests\Controllers {
             $_POST['last_name'] = 'NouveauPrenom';
             $_POST['email'] = 'test@example.com';
 
-            // On s'attend à ce que le modèle soit appelé avec les valeurs du POST
             $this->userModelMock->expects($this->once())
                 ->method('updateUser')
                 ->with(1, 'NouveauNom', 'NouveauPrenom', 'test@example.com', '');
 
-            // On vérifie que la redirection vers /profile est demandée
             $this->controller->expects($this->once())
                 ->method('redirect')
                 ->with('/profile');
 
             $this->controller->update();
 
-            // Vérification du message de succès en session
             $this->assertEquals("Profil mis à jour avec succès.", $_SESSION['success'] ?? '');
         }
 

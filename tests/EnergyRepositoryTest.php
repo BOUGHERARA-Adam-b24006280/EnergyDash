@@ -13,7 +13,6 @@ class EnergyRepositoryTest extends TestCase {
     private EnergyRepository $repository;
 
     protected function setUp(): void {
-        // On crée un mock du CsvReader pour ne pas dépendre du système de fichiers
         $this->csvReaderMock = $this->createMock(CsvReader::class);
         $this->repository = new EnergyRepository($this->csvReaderMock);
     }
@@ -35,9 +34,9 @@ class EnergyRepositoryTest extends TestCase {
     public function testGetAvailableCities(): void {
         $this->mockCsvRows([
             ['ville' => 'Paris'],
-            ['ville' => ' Lyon '], // Teste le trim
-            ['ville' => 'Paris'],   // Teste l'unicité
-            ['ville' => 'Annecy']   // Teste le tri (A avant L et P)
+            ['ville' => ' Lyon '],
+            ['ville' => 'Paris'],
+            ['ville' => 'Annecy']
         ]);
 
         $cities = $this->repository->getAvailableCities();
@@ -59,7 +58,7 @@ class EnergyRepositoryTest extends TestCase {
 
         $this->assertArrayHasKey('Paris', $mapping);
         $this->assertCount(2, $mapping['Paris']);
-        $this->assertContains('solaire', $mapping['Paris']); // Vérifie la mise en minuscule
+        $this->assertContains('solaire', $mapping['Paris']);
         $this->assertEquals(['solaire'], $mapping['Lyon']);
     }
 
@@ -77,19 +76,19 @@ class EnergyRepositoryTest extends TestCase {
                 'temperature_c' => '15'
             ],
             [
-                'type' => 'eolien', // Mauvais type
+                'type' => 'eolien',
                 'ville' => 'Paris',
                 'date_heure' => '2023/01/01 13:00'
             ],
             [
                 'type' => 'solaire',
-                'ville' => 'Lyon', // Mauvaise ville
+                'ville' => 'Lyon',
                 'date_heure' => '2023/01/01 14:00'
             ],
             [
                 'type' => 'solaire',
                 'ville' => 'Paris',
-                'date_heure' => '2024/01/01 12:00' // Hors période
+                'date_heure' => '2024/01/01 12:00'
             ]
         ]);
 
@@ -111,7 +110,6 @@ class EnergyRepositoryTest extends TestCase {
             ['type' => 'solaire', 'ville' => 'Nice', 'date_heure' => '2023/01/01 12:00']
         ]);
 
-        // On demande Paris, mais on ajoute Lyon en comparaison
         $results = $this->repository->getEnergyData('solaire', 'Paris', '2023-01-01', '2023-01-01', 'Lyon');
 
         $this->assertCount(2, $results);
@@ -125,8 +123,8 @@ class EnergyRepositoryTest extends TestCase {
     public function testGetHistoricalDataForRatio(): void {
         $this->mockCsvRows([
             ['type' => 'solaire', 'ville' => 'Paris', 'production_kw' => '10', 'valeur_meteo' => '0.5'],
-            ['type' => 'solaire', 'ville' => 'Paris', 'production_kw' => '20', 'valeur_meteo' => '0.05'], // Météo trop faible (< 0.1)
-            ['type' => 'eolien', 'ville' => 'Paris', 'production_kw' => '30', 'valeur_meteo' => '0.8']    // Mauvais type
+            ['type' => 'solaire', 'ville' => 'Paris', 'production_kw' => '20', 'valeur_meteo' => '0.05'],
+            ['type' => 'eolien', 'ville' => 'Paris', 'production_kw' => '30', 'valeur_meteo' => '0.8']
         ]);
 
         $ratios = $this->repository->getHistoricalDataForRatio('solaire', 'Paris');

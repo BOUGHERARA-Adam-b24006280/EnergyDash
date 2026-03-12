@@ -6,11 +6,9 @@ use PHPUnit\Framework\TestCase;
 use App\Infrastructure\CsvReader;
 
 class CsvReaderTest extends TestCase {
-    // On peut rendre la propriété nullable ou simplement vérifier son initialisation
     private string $tempFile;
 
     protected function tearDown(): void {
-        // Correction : On vérifie si la propriété a été initialisée avant d'y accéder
         if (isset($this->tempFile) && file_exists($this->tempFile)) {
             unlink($this->tempFile);
         }
@@ -29,9 +27,8 @@ class CsvReaderTest extends TestCase {
 
         $this->assertCount(2, $rows);
         
-        // Correction des colonnes :
         $this->assertEquals('2023-01-01', $rows[0]['date']); 
-        $this->assertEquals('100', $rows[0]['value']); // La valeur 100 est dans 'value'
+        $this->assertEquals('100', $rows[0]['value']);
     }
 
     /**

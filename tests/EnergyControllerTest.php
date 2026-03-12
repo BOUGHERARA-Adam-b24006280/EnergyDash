@@ -24,10 +24,8 @@ class EnergyControllerTest extends TestCase {
         $_FILES = [];
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
-        // Chemin vers le stockage pour vérifier les fichiers créés (ex: active_algo.txt)
         $this->storagePath = __DIR__ . '/../src/Storage';
 
-        // On mocke le contrôleur pour intercepter les redirections et les messages flash
         $this->controller = $this->getMockBuilder(EnergyController::class)
             ->onlyMethods(['redirect', 'flash', 'requireLogin', 'validateCsrf'])
             ->getMock();
@@ -41,23 +39,19 @@ class EnergyControllerTest extends TestCase {
         $_POST['algo'] = 'lstm';
         $_SESSION['user'] = ['id' => 1, 'role' => 'admin'];
 
-        // On s'attend à ce que la sécurité soit vérifiée
         $this->controller->expects($this->once())->method('requireLogin');
         $this->controller->expects($this->once())->method('validateCsrf');
         
-        // On s'attend à un message de succès
         $this->controller->expects($this->once())
             ->method('flash')
             ->with('success', $this->stringContains('mis à jour'));
 
-        // On s'attend à une redirection vers le dashboard
         $this->controller->expects($this->once())
             ->method('redirect')
             ->with('/dashboard');
 
         $this->controller->setAlgorithm();
         
-        // Vérification physique du fichier (si les permissions le permettent dans l'environnement de test)
         $algoFile = __DIR__ . '/../src/Storage/active_algo.txt';
         if (file_exists($algoFile)) {
             $this->assertEquals('lstm', trim((string)file_get_contents($algoFile)));
@@ -83,7 +77,7 @@ class EnergyControllerTest extends TestCase {
      */
     public function testUploadFailsWhenNoUserIdInSession(): void {
         $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_SESSION['user'] = ['role' => 'editor']; // Pas d'ID
+        $_SESSION['user'] = ['role' => 'editor'];
         $_FILES['csv_file'] = [
             'name' => 'test.csv',
             'type' => 'text/csv',
@@ -104,7 +98,7 @@ class EnergyControllerTest extends TestCase {
      */
     public function testDeleteFailsIfNoFileExists(): void {
         $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_SESSION['user'] = ['id' => 9999, 'role' => 'user']; // ID inexistant
+        $_SESSION['user'] = ['id' => 9999, 'role' => 'user'];
 
         $this->controller->expects($this->once())
             ->method('flash')
