@@ -41,12 +41,22 @@ EnergyDash/
 ├── public/              # Racine Web (Assets, index.php)
 │   ├── assets/          # CSS, JS, Images (Preline, Tailwind)
 │   └── index.php        # Point d'entrée
-├── src/                 # Code Source (MVC)
+├── src/                 # Code Source (Architecture SRP + Pattern Strategy)
 │   ├── Config/          # Routes et configuration DB
-│   ├── Controllers/     # Logique de contrôle
-│   ├── Core/            # Noyau (Router, Database, Model)
-│   ├── Models/          # Accès aux données (SQL)
-│   ├── Services/        # Services (Parser CSV, API Météo)
+│   ├── Contracts/       # Interfaces et contrats (PredictionStrategyInterface)
+│   ├── Controllers/     # Couche présentation (logique des requêtes)
+│   ├── Core/            # Noyau (Router, Database, Model, View)
+│   ├── Factories/       # Factories (PredictionFactory pour l'instanciation)
+│   ├── Infrastructure/  # Couche technique (CsvReader)
+│   ├── Models/          # Modèles de données (UserModel)
+│   ├── Repositories/    # Couche accès données (EnergyRepository)
+│   ├── Services/        # Couche métier
+│   │   ├── DeepLearningPredictionService.php
+│   │   ├── EnergyAnalyticsService.php
+│   │   ├── FileUploadService.php
+│   │   ├── PredictionService.php
+│   │   └── WeatherApiService.php
+│   ├── Strategies/      # Implémentations du pattern Strategy (DeepLearningStrategy)
 │   └── Views/           # Templates HTML/PHP
 ├── Storage/             # Stockage des fichiers CSV utilisateurs
 ├── tests/               # Tests unitaires (PHPUnit)
