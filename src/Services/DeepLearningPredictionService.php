@@ -103,6 +103,10 @@ class DeepLearningPredictionService
      */
     public function predict(array $meteoType, array $temp, array $meteoData, array $dateString, string $city) : array
     {
+        if (empty($meteoType)) {
+            return [];
+        }
+
         /*
          * Formatage des donné pour la prévision
          */

@@ -47,12 +47,12 @@ class FileUploadService
             throw new \Exception("Format incorrect. Veuillez envoyer un fichier .csv");
         }
 
-        $finfo = \finfo_open(FILEINFO_MIME_TYPE);
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
         if ($finfo === false) {
             throw new \Exception("Erreur interne lors de l'analyse du fichier.");
         }
 
-        $mimeType = \finfo_file($finfo, $tmpName);
+        $mimeType = finfo_file($finfo, $tmpName);
         $allowedMimes = [
             'text/csv', 'text/plain', 'application/vnd.ms-excel', 
             'application/csv', 'text/x-csv', 'application/x-csv', 
