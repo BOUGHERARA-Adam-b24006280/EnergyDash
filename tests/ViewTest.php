@@ -26,7 +26,6 @@ class ViewTest extends \PHPUnit\Framework\TestCase {
      * Test : render() affiche bien la vue et passe les données.
      */
     public function testRenderDisplaysContentWithData(): void {
-        // Crée un fichier vue temporaire
         $tempViewContent = '<div>Contenu de la vue : <?= $message ?></div>';
         $viewName = 'test_view_' . uniqid();
         $viewDir = __DIR__ . '/../src/Views/';
@@ -59,8 +58,6 @@ class ViewTest extends \PHPUnit\Framework\TestCase {
 
         $msg = $view->publicGetFlash('success');
         $this->assertEquals('Bravo !', $msg);
-
-        // Le message doit être supprimé après lecture
         $this->assertNull($view->publicGetFlash('success'));
     }
 

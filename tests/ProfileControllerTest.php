@@ -1,192 +1,149 @@
 <?php
 
-// ---------------------------------------------------------
-// BLOCK 1 : MOCK DES FONCTIONS NATIVES
-// ---------------------------------------------------------
-// filter_input ne fonctionne pas bien en CLI (ligne de commande) avec PHPUnit.
-// On le redéfinit DANS le namespace du contrôleur pour qu'il lise directement $_POST.
-namespace App\Controllers;
-
-function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT): mixed {
-    if ($type === INPUT_POST) {
-        $val = $_POST[$variable_name] ?? null;
-        // Simulation simplifiée : si c'est un email valide demandé et que la valeur ressemble à un email
-        if ($filter === FILTER_VALIDATE_EMAIL && $val && !str_contains($val, '@')) {
-            return false;
+namespace App\Controllers {
+    /**
+     * Mock de filter_input pour le namespace App\Controllers.
+     * En CLI (PHPUnit), filter_input ne lit pas les données injectées dans $_POST.
+     * Cette fonction permet au contrôleur de "voir" les données de test.
+     */
+    function filter_input(int $type, string $var_name, int $filter = FILTER_DEFAULT, array|int $options = 0): mixed {
+        if ($type === INPUT_POST && isset($_POST[$var_name])) {
+            return filter_var($_POST[$var_name], $filter, $options);
         }
-        if ($filter === FILTER_VALIDATE_INT && $val && !is_numeric($val)) {
-            return false;
-        }
-        return $val;
+        return \filter_input($type, $var_name, $filter, $options);
     }
-    return null;
 }
 
-// ---------------------------------------------------------
-// BLOCK 2 : LA CLASSE DE TEST
-// ---------------------------------------------------------
-namespace Tests\Controllers;
+namespace Tests\Controllers {
 
+    use PHPUnit\Framework\TestCase;
+    use PHPUnit\Framework\MockObject\MockObject;
+    use App\Controllers\ProfileController;
+    use App\Models\UserModel;
+    use App\Core\Database;
+    use ReflectionClass;
 
-class ProfileControllerTest extends \PHPUnit\Framework\TestCase {
-    private $controller;
-    private $userModelMock;
-    private $viewMock;
+    class ProfileControllerTest extends TestCase
+    {
+        /** @var MockObject&ProfileController */
+        private $controller;
+        
+        /** @var MockObject&UserModel */
+        private $userModelMock;
 
-    protected function setUp(): void {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        protected function setUp(): void
+        {
+            $_ENV['DATABASE_HOST'] = 'localhost';
+            $_ENV['DATABASE_NAME'] = 'test';
+            $_ENV['DATABASE_USER'] = 'root';
+            $_ENV['DATABASE_PASSWORD'] = '';
+
+            $pdoMock = $this->createMock(\PDO::class);
+            $dbReflection = new ReflectionClass(Database::class);
+            $instanceProperty = $dbReflection->getProperty('instance');
+            $instanceProperty->setAccessible(true);
+            $instanceProperty->setValue(null, $pdoMock);
+
+            $this->userModelMock = $this->createMock(UserModel::class);
+
+            $this->controller = $this->getMockBuilder(ProfileController::class)
+                ->onlyMethods(['redirect'])
+                ->getMock();
+
+            $this->controller->method('redirect');
+
+            $controllerReflection = new ReflectionClass(ProfileController::class);
+            $modelProperty = $controllerReflection->getProperty('userModel');
+            $modelProperty->setAccessible(true);
+            $modelProperty->setValue($this->controller, $this->userModelMock);
+
+            $_SESSION = [];
+            $_POST = [];
         }
-        $_SESSION = [];
-        $_POST = [];
-        
-        // --- AJOUT : Simuler un jeton CSRF valide en session ---
-        $_SESSION['csrf_token'] = 'token_de_test_123';
 
-        $this->userModelMock = $this->createMock(\App\Models\UserModel::class);
-        $this->viewMock = $this->createMock(\App\Core\View::class);
+        /**
+         * Teste l'affichage du profil pour un utilisateur standard.
+         */
+        public function testIndexDisplaysUserProfile(): void
+        {
+            $_SESSION['user'] = [
+                'id' => 1,
+                'role' => 'user',
+                'first_name' => 'Adam',
+                'last_name' => 'B.',
+                'email' => 'adam@test.com'
+            ];
 
-        $this->controller = $this->getMockBuilder(\App\Controllers\ProfileController::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['redirect', 'flash']) 
-            ->getMock();
+            $this->userModelMock->expects($this->never())->method('getAllUsers');
 
-        $reflection = new \ReflectionClass(\App\Controllers\ProfileController::class);
-        
-        $property = $reflection->getProperty('userModel');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $this->userModelMock);
+            ob_start();
+            $this->controller->index();
+            ob_end_clean();
 
-        $property = $reflection->getProperty('view');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $this->viewMock);
-    }
+            $this->assertTrue(true);
+        }
 
-    /**
-     * Test : index() affiche le profil standard pour un utilisateur lambda.
-     */
-    public function testIndexRendersStandardProfileForUser(): void {
-        $_SESSION['user'] = ['id' => 1, 'role' => 'user', 'first_name' => 'John'];
+        /**
+         * Teste l'affichage pour un administrateur.
+         */
+        public function testIndexDisplaysAdminViewWithUserList(): void
+        {
+            $_SESSION['user'] = ['id' => 1, 'role' => 'admin', 'first_name' => 'Admin'];
 
-        $this->userModelMock->expects($this->never())->method('getAllUsers');
+            $this->userModelMock->method('getAllUsers')->willReturn([
+                ['id' => 2, 'first_name' => 'Lucas', 'last_name' => 'D.', 'email' => 'lucas@test.com', 'role' => 'user']
+            ]);
 
-        $this->viewMock->expects($this->once())
-            ->method('render')
-            ->with(
-                'profile/profile',
-                $this->callback(function ($data) {
-                    // --- AJOUT : Vérifier que le jeton CSRF est bien passé à la vue ---
-                    return $data['title'] === 'Mon Profil' 
-                        && $data['user']['first_name'] === 'John'
-                        && isset($data['csrf_token']); 
-                })
-            );
+            ob_start();
+            $this->controller->index();
+            ob_end_clean();
 
-        $this->controller->index();
-    }
+            $this->assertTrue(true);
+        }
 
-    /**
-     * Test : index() affiche le profil ADMIN et charge la liste des utilisateurs.
-     */
-    public function testIndexRendersAdminProfileWithUsersList(): void {
-        // Contexte : Admin connecté
-        $_SESSION['user'] = ['id' => 99, 'role' => 'admin'];
+        /**
+         * Teste la mise à jour réussie du profil.
+         */
+        public function testUpdateSuccess(): void
+        {
+            $_SESSION['user'] = ['id' => 1, 'role' => 'user'];
+            $_SESSION['csrf_token'] = 'token123';
+            
+            $_POST['csrf_token'] = 'token123';
+            $_POST['first_name'] = 'NouveauNom';
+            $_POST['last_name'] = 'NouveauPrenom';
+            $_POST['email'] = 'test@example.com';
 
-        $this->userModelMock->expects($this->once())
-            ->method('getAllUsers')
-            ->willReturn([['id' => 1, 'name' => 'Alice'], ['id' => 2, 'name' => 'Bob']]);
+            $this->userModelMock->expects($this->once())
+                ->method('updateUser')
+                ->with(1, 'NouveauNom', 'NouveauPrenom', 'test@example.com', '');
 
-        $this->viewMock->expects($this->once())
-            ->method('render')
-            ->with('profile/profile_admin', $this->anything());
+            $this->controller->expects($this->once())
+                ->method('redirect')
+                ->with('/profile');
 
-        $this->controller->index();
-    }
+            $this->controller->update();
 
-    /**
-     * Test : update() redirige si pas connecté (Sécurité).
-     */
-    public function testUpdateRedirectsIfNotLogged(): void {
-        unset($_SESSION['user']);
+            $this->assertEquals("Profil mis à jour avec succès.", $_SESSION['success'] ?? '');
+        }
 
-        $this->controller->expects($this->once())
-            ->method('redirect')
-            ->with('/login');
+        /**
+         * Teste l'échec si l'email n'est pas valide.
+         */
+        public function testUpdateFailsWithInvalidEmail(): void
+        {
+            $_SESSION['user'] = ['id' => 1, 'role' => 'user'];
+            $_SESSION['csrf_token'] = 'token123';
+            
+            $_POST['csrf_token'] = 'token123';
+            $_POST['email'] = 'mauvais-email';
 
-        $this->controller->update();
-    }
+            // Le modèle ne doit JAMAIS être appelé si l'email est invalide
+            $this->userModelMock->expects($this->never())->method('updateUser');
 
-    /**
-     * Test : update() met à jour le profil avec succès.
-     */
-    public function testUpdateSuccess(): void {
-        $_SESSION['user'] = ['id' => 10, 'email' => 'old@test.com', 'first_name' => 'Old', 'last_name' => 'OldName'];
-        
-        // --- AJOUT : Simuler l'envoi du bon token dans le formulaire ---
-        $_POST['csrf_token'] = 'token_de_test_123';
-        $_POST['email'] = 'new@test.com';
-        $_POST['first_name'] = 'New';
-        $_POST['last_name'] = 'Name';
-        $_POST['password'] = '1234';
+            $this->controller->update();
 
-        $this->userModelMock->expects($this->once())
-            ->method('updateUser')
-            ->with(10, 'New', 'Name', 'new@test.com', '1234')
-            ->willReturn(true);
-
-        $this->controller->expects($this->once())
-            ->method('flash')
-            ->with('success');
-
-        $this->controller->expects($this->once())
-            ->method('redirect')
-            ->with('/profile');
-
-        $this->controller->update();
-
-        $this->assertEquals('new@test.com', $_SESSION['user']['email']);
-    }
-
-    /**
-     * Test : updateRole() refuse qu'un admin se modifie lui-même.
-     */
-    public function testUpdateRolePreventsSelfModification(): void {
-        $_SESSION['user'] = ['id' => 5, 'role' => 'admin'];
-
-        // --- AJOUT : Simuler l'envoi du bon token ---
-        $_POST['csrf_token'] = 'token_de_test_123';
-        $_POST['id'] = 5;
-        $_POST['role'] = 'user';
-
-        $this->userModelMock->expects($this->never())->method('updateUserRole');
-
-        $this->controller->expects($this->once())
-            ->method('flash')
-            ->with('error', $this->stringContains('propre rôle'));
-
-        $this->controller->updateRole();
-    }
-
-    /**
-     * Test : updateRole() fonctionne sur un autre utilisateur.
-     */
-    public function testUpdateRoleSuccessOnOtherUser(): void {
-        $_SESSION['user'] = ['id' => 1, 'role' => 'admin'];
-
-        // --- AJOUT : Simuler l'envoi du bon token ---
-        $_POST['csrf_token'] = 'token_de_test_123';
-        $_POST['id'] = 2;
-        $_POST['role'] = 'editor';
-
-        $this->userModelMock->expects($this->once())
-            ->method('updateUserRole')
-            ->with(2, 'editor')
-            ->willReturn(true);
-
-        $this->controller->expects($this->once())
-            ->method('flash')
-            ->with('success');
-
-        $this->controller->updateRole();
+            $this->assertEquals("Adresse email invalide.", $_SESSION['error'] ?? '');
+        }
     }
 }

@@ -2,9 +2,15 @@
 
 namespace Tests\Controllers;
 
-class DashboardControllerTest extends \PHPUnit\Framework\TestCase {
+use App\Controllers\DashboardController;
+use App\Repositories\EnergyRepository;
+use App\Core\View;
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+
+class DashboardControllerTest extends TestCase {
     private $controller;
-    private $energyServiceMock;
+    private $energyRepoMock;
     private $viewMock;
 
     protected function setUp(): void {
@@ -12,48 +18,57 @@ class DashboardControllerTest extends \PHPUnit\Framework\TestCase {
             session_start();
         }
         $_SESSION = [];
+        $_SESSION['csrf_token'] = 'test_token_123';
 
-        $this->energyServiceMock = $this->createMock(\App\Services\EnergyCsvService::class);
-        $this->viewMock = $this->createMock(\App\Core\View::class);
+        $this->energyRepoMock = $this->createMock(EnergyRepository::class);
+        $this->viewMock = $this->createMock(View::class);
 
-        $this->controller = $this->getMockBuilder(\App\Controllers\DashboardController::class)
+        $this->controller = $this->getMockBuilder(DashboardController::class)
             ->disableOriginalConstructor()
-            ->onlyMethods(['requireLogin'])
+            ->onlyMethods(['requireLogin', 'initCsrf'])
             ->getMock();
 
-        $reflection = new \ReflectionClass(\App\Controllers\DashboardController::class);
+        $reflection = new ReflectionClass(DashboardController::class);
 
-        $property = $reflection->getProperty('energyService');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $this->energyServiceMock);
+        $repoProp = $reflection->getProperty('energyRepository');
+        $repoProp->setAccessible(true);
+        $repoProp->setValue($this->controller, $this->energyRepoMock);
 
-        $property = $reflection->getProperty('view');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $this->viewMock);
+        $viewProp = $reflection->getProperty('view');
+        $viewProp->setAccessible(true);
+        $viewProp->setValue($this->controller, $this->viewMock);
     }
 
     /**
-     * Test : index() récupère les villes et affiche la vue dashboard.
+     * Test : index() récupère les données et affiche la vue dashboard avec les bons paramètres.
      */
-    public function testIndexLoadsCitiesAndRendersView(): void {
-        $fakeCities = ['Paris', 'Lyon', 'Marseille'];
+    public function testIndexLoadsDataAndRendersView(): void {
+        $fakeCities = ['Paris', 'Lyon', 'Bordeaux'];
+        $fakeMapping = [
+            'Paris' => ['solaire', 'eolien'],
+            'Lyon'  => ['solaire']
+        ];
 
-        $this->energyServiceMock->expects($this->once())
+        $this->energyRepoMock->expects($this->once())
             ->method('getAvailableCities')
             ->willReturn($fakeCities);
 
-        $this->controller->expects($this->once())
-            ->method('requireLogin');
+        $this->energyRepoMock->expects($this->once())
+            ->method('getCityEnergyMapping')
+            ->willReturn($fakeMapping);
+
+        $this->controller->expects($this->once())->method('requireLogin');
+        $this->controller->expects($this->once())->method('initCsrf');
 
         $this->viewMock->expects($this->once())
             ->method('render')
             ->with(
                 'dashboard/dashboard',
-                $this->callback(function ($data) use ($fakeCities) {
-                    return isset($data['cities']) 
+                $this->callback(function ($data) use ($fakeCities, $fakeMapping) {
+                    return $data['title'] === 'Tableau de bord - EnergyDash'
                         && $data['cities'] === $fakeCities
-                        && $data['title'] === 'Tableau de bord - EnergyDash'
-                        && isset($data['csrf_token']); // <-- AJOUT : On vérifie que le token est bien présent
+                        && $data['energyMapping'] === $fakeMapping
+                        && $data['csrf_token'] === 'test_token_123';
                 })
             );
 
